@@ -43,7 +43,6 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     private fun showProView() {
         with(binding.mainViewPro) {
-            showWithAnimation()
             setListener {
                 setListener { action ->
                     when (action) {
@@ -142,6 +141,11 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     override fun onRationaleDenied(requestCode: Int) {
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.mainViewPro.showWithAnimation()
     }
 
     object Permission {

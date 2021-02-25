@@ -1,16 +1,27 @@
 package id.co.rolllpdf.presentation.camera
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Build
 import android.util.DisplayMetrics
 import android.view.ScaleGestureDetector
+import android.webkit.MimeTypeMap
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
 import androidx.core.view.isGone
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.databinding.ActivityCameraBinding
 import id.co.rolllpdf.util.LuminosityAnalyzer
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
@@ -34,6 +45,7 @@ class CameraActivity : BaseActivity() {
 
     private var lensFacing = CameraSelector.LENS_FACING_BACK
     private var counter: Int = 0
+    private lateinit var outputDirectory: File
 
     private val cameraExecutor by lazy {
         Executors.newSingleThreadExecutor()
@@ -51,7 +63,7 @@ class CameraActivity : BaseActivity() {
         binding.cameraPreviewFinder.post {
             bindCameraUseCases()
         }
-        setupFlashListener()
+        setupCameraListener()
     }
 
     override fun onViewModelObserver() {
@@ -63,14 +75,20 @@ class CameraActivity : BaseActivity() {
         }
     }
 
-    private fun setupFlashListener() {
+    private fun setupCameraListener() {
         binding.cameraImageviewFlash.setOnClickListener {
             toggleFlash()
+        }
+
+        binding.cameraImageviewCapture.setOnClickListener {
+            takePicture()
         }
     }
 
     private fun bindCameraUseCases() {
         binding.cameraTextviewCounter.text = counter.toString()
+        outputDirectory = getOutputFileDirectory()
+
         val metrics =
             DisplayMetrics().also { binding.cameraPreviewFinder.display.getRealMetrics(it) }
         val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
@@ -100,8 +118,7 @@ class CameraActivity : BaseActivity() {
                 .setTargetAspectRatio(screenAspectRatio)
                 .setTargetRotation(rotation)
                 .build()
-                .also {
-                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
+                .also { it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
 
                     })
                 }
@@ -156,6 +173,95 @@ class CameraActivity : BaseActivity() {
         camera?.cameraControl?.enableTorch(enable)
     }
 
+    private fun takePicture() {
+        // Get a stable reference of the modifiable image capture use case
+        imageCapture?.let { imageCapture ->
+
+            // Create output file to hold the image
+            val photoFile = createFile(
+                outputDirectory,
+                FILENAME,
+                PHOTO_EXTENSION
+            )
+
+            // Setup image capture metadata
+            val metadata = ImageCapture.Metadata().apply {
+
+                // Mirror image when using the front camera
+                isReversedHorizontal = lensFacing == CameraSelector.LENS_FACING_FRONT
+            }
+
+            // Create output options object which contains file + metadata
+            val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile)
+                .setMetadata(metadata)
+                .build()
+
+            // Setup image capture listener which is triggered after photo has been taken
+            imageCapture.takePicture(
+                outputOptions,
+                cameraExecutor,
+                object : ImageCapture.OnImageSavedCallback {
+                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                        val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
+
+                        counter += 1
+                        binding.cameraTextviewCounter.text = counter.toString()
+                        // We can only change the foreground Drawable using API level 23+ API
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            // Update the gallery thumbnail with latest picture taken
+
+                        }
+
+                        // Implicit broadcasts will be ignored for devices running API level >= 24
+                        // so if you only target API level 24+ you can remove this statement
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                            sendBroadcast(
+                                Intent(android.hardware.Camera.ACTION_NEW_PICTURE, savedUri)
+                            )
+                        }
+
+                        // If the folder selected is an external media directory, this is
+                        // unnecessary but otherwise other apps will not be able to access our
+                        // images unless we scan them using [MediaScannerConnection]
+                        val mimeType = MimeTypeMap.getSingleton()
+                            .getMimeTypeFromExtension(savedUri.toFile().extension)
+                        MediaScannerConnection.scanFile(
+                            this@CameraActivity,
+                            arrayOf(savedUri.toString()),
+                            arrayOf(mimeType)
+                        ) { _, uri ->
+                        }
+                    }
+
+                    override fun onError(exception: ImageCaptureException) {
+                    }
+                })
+
+            // We can only change the foreground Drawable using API level 23+ API
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                // Display flash animation to indicate that photo was captured
+                binding.root.postDelayed({
+                    binding.root.foreground = ColorDrawable(Color.WHITE)
+                    binding.root.postDelayed({  binding.root.foreground = null }, ANIMATION_FAST_MILLIS)
+                }, ANIMATION_SLOW_MILLIS)
+            }
+        }
+    }
+
+    private fun createFile(baseFolder: File, format: String, extension: String) = File(
+        baseFolder,
+        SimpleDateFormat(format, Locale.US).format(System.currentTimeMillis()) + extension
+    )
+
+    private fun getOutputFileDirectory(): File {
+        val appContext = applicationContext
+        val mediaDir = externalMediaDirs.firstOrNull()?.let {
+            File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() }
+        }
+        return if (mediaDir != null && mediaDir.exists()) mediaDir else appContext.filesDir
+    }
+
     override fun finish() {
         super.finish()
         overridePendingTransition(R.anim.anim_slide_up, R.anim.anim_slide_bottom)
@@ -164,5 +270,11 @@ class CameraActivity : BaseActivity() {
     companion object {
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
+
+        private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
+        private const val PHOTO_EXTENSION = ".jpg"
+
+        private const val ANIMATION_FAST_MILLIS = 50L
+        private const val ANIMATION_SLOW_MILLIS = 100L
     }
 }
