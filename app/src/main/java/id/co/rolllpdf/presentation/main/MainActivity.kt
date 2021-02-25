@@ -59,12 +59,16 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }
     }
 
+    private fun goToCamera() {
+        val intent = Intent(this, CameraActivity::class.java)
+        startActivity(intent)
+        overridePendingTransition(R.anim.anim_slide_up, R.anim.anim_slide_bottom)
+    }
+
     private fun floatingActionButtonListener() {
         binding.mainFabAdd.setOnClickListener {
             checkStoragePermission {
-                val intent = Intent(this, CameraActivity::class.java)
-                startActivity(intent)
-                overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
+                goToCamera()
             }
         }
     }
@@ -119,9 +123,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        val intent = Intent(this, CameraActivity::class.java)
-        startActivity(intent)
-        overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
+        goToCamera()
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {

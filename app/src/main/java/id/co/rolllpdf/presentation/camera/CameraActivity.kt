@@ -6,6 +6,8 @@ import android.view.ScaleGestureDetector
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.databinding.ActivityCameraBinding
 import id.co.rolllpdf.util.LuminosityAnalyzer
@@ -13,7 +15,6 @@ import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import id.co.rolllpdf.R
 
 /**
  * Created by pertadima on 25,February,2021
@@ -32,6 +33,7 @@ class CameraActivity : BaseActivity() {
     private var imageAnalyzer: ImageAnalysis? = null
 
     private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var counter: Int = 0
 
     private val cameraExecutor by lazy {
         Executors.newSingleThreadExecutor()
@@ -49,18 +51,26 @@ class CameraActivity : BaseActivity() {
         binding.cameraPreviewFinder.post {
             bindCameraUseCases()
         }
+        setupFlashListener()
     }
 
     override fun onViewModelObserver() {
     }
 
     private fun setupToolbar() {
-        binding.cameraToolbar.setOnClickListener {
+        binding.cameraToolbar.setNavigationOnClickListener {
             finish()
         }
     }
 
+    private fun setupFlashListener() {
+        binding.cameraImageviewFlash.setOnClickListener {
+            toggleFlash()
+        }
+    }
+
     private fun bindCameraUseCases() {
+        binding.cameraTextviewCounter.text = counter.toString()
         val metrics =
             DisplayMetrics().also { binding.cameraPreviewFinder.display.getRealMetrics(it) }
         val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
@@ -135,14 +145,20 @@ class CameraActivity : BaseActivity() {
     private fun checkForFlashAvailability() {
         try {
             val isFlashAvailable = camera?.cameraInfo?.hasFlashUnit() ?: false
+            binding.cameraImageviewFlash.isGone = isFlashAvailable.not()
         } catch (e: CameraInfoUnavailableException) {
 
         }
     }
 
+    private fun toggleFlash() {
+        val enable = camera?.cameraInfo?.torchState?.value == TorchState.OFF
+        camera?.cameraControl?.enableTorch(enable)
+    }
+
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
+        overridePendingTransition(R.anim.anim_slide_up, R.anim.anim_slide_bottom)
     }
 
     companion object {

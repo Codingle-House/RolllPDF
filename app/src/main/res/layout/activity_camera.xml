@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,13 +18,78 @@
             android:background="@android:color/white"
             app:navigationIcon="@drawable/general_ic_chevron_left"
             app:title="@string/camera_title_page"
-            app:titleTextAppearance="@style/ToolbarTextAppearance" />
+            app:titleTextAppearance="@style/ToolbarTextAppearance">
+
+            <ImageView
+                android:id="@+id/camera_imageview_flash"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/_16sdp"
+                android:background="@drawable/general_text_circle_dark"
+                android:padding="@dimen/_6sdp"
+                android:src="@drawable/general_ic_flash"
+                tools:ignore="ContentDescription" />
+        </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.camera.view.PreviewView
         android:id="@+id/camera_preview_finder"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/camera_linear_control"
         app:layout_constraintTop_toBottomOf="@id/camera_appbar" />
+
+    <LinearLayout
+        android:id="@+id/camera_linear_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="@dimen/_16sdp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/camera_imageview_gallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/general_text_circle_dark"
+            android:padding="@dimen/_10sdp"
+            android:src="@drawable/general_ic_gallery"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/camera_imageview_capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_30sdp"
+            android:src="@drawable/general_ic_capture"
+            tools:ignore="ContentDescription" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/camera_imageview_done"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:background="@drawable/general_text_circle_dark"
+                android:padding="@dimen/_10sdp"
+                android:src="@drawable/general_ic_check"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:layout_width="@dimen/_16sdp"
+                android:layout_height="@dimen/_16sdp"
+                android:background="@drawable/general_shape_circleborder_white"
+                android:gravity="center"
+                android:id="@+id/camera_textview_counter"
+                android:padding="@dimen/_3sdp"
+                android:textSize="@dimen/_8ssp"
+                tools:text="20" />
+
+        </FrameLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
