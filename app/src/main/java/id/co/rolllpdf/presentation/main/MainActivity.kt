@@ -1,8 +1,11 @@
 package id.co.rolllpdf.presentation.main
 
 import android.Manifest
+import android.content.Intent
+import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.databinding.ActivityMainBinding
+import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
 import id.co.rolllpdf.util.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
@@ -59,7 +62,9 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     private fun floatingActionButtonListener() {
         binding.mainFabAdd.setOnClickListener {
             checkStoragePermission {
-
+                val intent = Intent(this, CameraActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
             }
         }
     }
@@ -114,7 +119,9 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        //TODO: GO TO CAMERA SCREEN
+        val intent = Intent(this, CameraActivity::class.java)
+        startActivity(intent)
+        overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
