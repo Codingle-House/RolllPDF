@@ -1,13 +1,16 @@
 package id.co.rolllpdf.presentation.splashscreen
 
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.view.animation.Interpolator
 import androidx.core.view.isGone
+import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.databinding.ActivitySplashScreenBinding
+import id.co.rolllpdf.presentation.main.MainActivity
 import kotlin.math.pow
 
 /**
@@ -16,10 +19,11 @@ import kotlin.math.pow
 
 
 class SplashScreenActivity : BaseActivity() {
-    private lateinit var binding: ActivitySplashScreenBinding
+    private val binding by lazy {
+        ActivitySplashScreenBinding.inflate(layoutInflater)
+    }
 
     override fun setupViewBinding() {
-        binding = ActivitySplashScreenBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
     }
@@ -39,7 +43,10 @@ class SplashScreenActivity : BaseActivity() {
             binding.splashscreenTextviewTitle.isGone = false
             binding.splashscreenTextviewDesc.isGone = false
             Handler(Looper.getMainLooper()).postDelayed({
-
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
+                finish()
             }, ACTIVITY_TRANSITION_DELAY)
         }
     }
