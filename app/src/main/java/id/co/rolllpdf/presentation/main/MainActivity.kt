@@ -2,6 +2,9 @@ package id.co.rolllpdf.presentation.main
 
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.databinding.ActivityMainBinding
+import id.co.rolllpdf.presentation.customview.DialogProFeatureView
+import id.co.rolllpdf.util.NestedScrollViewOverScrollDecorAdapter
+import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
 
 class MainActivity : BaseActivity() {
     private val binding by lazy {
@@ -16,8 +19,34 @@ class MainActivity : BaseActivity() {
     override fun setupUi() {
         changeStatusBarTextColor(true)
         changeStatusBarColor(android.R.color.white)
+        initOverScroll()
+        showProView()
     }
 
     override fun onViewModelObserver() {
+    }
+
+    private fun initOverScroll() {
+        VerticalOverScrollBounceEffectDecorator(
+            NestedScrollViewOverScrollDecorAdapter(binding.mainNestedscroll)
+        )
+    }
+
+    private fun showProView() {
+        with(binding.mainViewPro) {
+            showWithAnimation()
+            setListener {
+                setListener { action ->
+                    when (action) {
+                        DialogProFeatureView.Action.Click -> {
+
+                        }
+                        DialogProFeatureView.Action.Close -> {
+
+                        }
+                    }
+                }
+            }
+        }
     }
 }

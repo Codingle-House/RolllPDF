@@ -49,13 +49,36 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <ViewFlipper
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/main_nestedscroll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <include layout="@layout/view_main_empty" />
-    </ViewFlipper>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:orientation="vertical">
+
+            <id.co.rolllpdf.presentation.customview.DialogProFeatureView
+                android:id="@+id/main_view_pro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_16sdp" />
+
+            <ViewFlipper
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <include
+                    layout="@layout/view_main_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_80sdp" />
+            </ViewFlipper>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"

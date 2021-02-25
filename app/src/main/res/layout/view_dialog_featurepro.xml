@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/pro_cardview_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="@color/app_primary"
+    app:cardElevation="@dimen/_1sdp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/_10sdp">
+
+        <ImageView
+            android:id="@+id/pro_imageview_crown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            app:srcCompat="@drawable/general_ic_pro" />
+
+        <id.co.rolllpdf.uikit.UiKitTextview
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:layout_toStartOf="@id/pro_imageview_close"
+            android:layout_toEndOf="@id/pro_imageview_crown"
+            android:text="@string/pro_text_message"
+            app:rolll_text_code="h7_S"
+            app:rolll_text_color="light" />
+
+        <ImageView
+            android:id="@+id/pro_imageview_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/general_shape_circle_white"
+            android:padding="@dimen/_6sdp"
+            android:src="@drawable/general_ic_close" />
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

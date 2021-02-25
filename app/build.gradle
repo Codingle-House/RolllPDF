@@ -74,10 +74,15 @@ dependencies {
     implementation 'com.intuit.sdp:sdp-android:1.0.6'
     implementation 'com.intuit.ssp:ssp-android:1.0.6'
 
+    // Others
+    implementation 'me.everything:overscroll-decor-android:1.1.0'
+    implementation 'pub.devrel:easypermissions:3.0.0'
+
     // Internal Library
     implementation project(":core")
     implementation project(":uikit")
     implementation project(":scan")
+
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
