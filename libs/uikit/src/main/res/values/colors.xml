@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Convention: color code is in uppercase-->
+
+    <color name="light_textview">#FFFFFF</color>
+    <color name="dark_textview">#2E2F30</color>
+    <color name="error_textview">#E05D5C</color>
+    <color name="hint_textview">#B5B5B5</color>
+    <color name="form_gray">#E8E8E8</color>
+</resources>

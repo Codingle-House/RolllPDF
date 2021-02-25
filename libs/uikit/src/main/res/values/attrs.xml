@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="UiKitTextview">
+        <attr name="rolll_text_color" format="enum">
+            <enum name="light" value="0" />
+            <enum name="dark" value="1" />
+            <enum name="error" value="2" />
+        </attr>
+
+        <attr name="rolll_text_code" format="enum">
+            <enum name="h1" value="0" />
+            <enum name="h2" value="1" />
+            <enum name="h3" value="2" />
+
+            <enum name="h4_B" value="3" />
+            <enum name="h4_M" value="4" />
+
+            <enum name="h5_B" value="5" />
+            <enum name="h5_M" value="6" />
+
+            <enum name="h6_B" value="7" />
+            <enum name="h6_M" value="8" />
+
+            <enum name="h7_B" value="9" />
+            <enum name="h7_S" value="10" />
+            <enum name="h7_R" value="11" />
+
+            <enum name="p_w_i" value="12" />
+            <enum name="p_w_r" value="13" />
+            <enum name="p_w_s" value="14" />
+            <enum name="p_w_b" value="15" />
+
+            <enum name="p_a_i" value="16" />
+            <enum name="p_a_r" value="17" />
+            <enum name="p_a_s" value="18" />
+            <enum name="p_a_b" value="19" />
+        </attr>
+
+    </declare-styleable>
+</resources>

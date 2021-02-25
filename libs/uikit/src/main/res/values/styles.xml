@@ -1,0 +1,150 @@
+<resources>
+
+    <style name="RolllTextView" parent="TextAppearance.AppCompat">
+        <!-- keep it for future if any additional customize -->
+    </style>
+
+    <!-- Dark -->
+    <style name="RolllTextView.Dark">
+        <item name="android:textColor">@color/dark_textview</item>
+    </style>
+
+    <!-- Light -->
+    <style name="RolllTextView.Light">
+        <item name="android:textColor">@color/light_textview</item>
+    </style>
+
+    <style name="RolllTextView.H1">
+        <item name="android:textSize">32sp</item>
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="RolllTextView.H2">
+        <item name="android:textSize">28sp</item>
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="RolllTextView.H3">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="RolllTextView.H4">
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+
+    <style name="RolllTextView.H4.B">
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="RolllTextView.H4.M">
+        <item name="android:fontFamily">@font/montserrat_medium</item>
+    </style>
+
+    <style name="RolllTextView.H5">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+
+    <style name="RolllTextView.H5.B">
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="RolllTextView.H5.M">
+        <item name="android:fontFamily">@font/montserrat_medium</item>
+    </style>
+
+    <style name="RolllTextView.H6">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+
+    <style name="RolllTextView.H6.B">
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="RolllTextView.H6.M">
+        <item name="android:fontFamily">@font/montserrat_medium</item>
+    </style>
+
+    <style name="RolllTextView.H7">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+
+    <style name="RolllTextView.H7.B">
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="RolllTextView.H7.S">
+        <item name="android:fontFamily">@font/montserrat_semi_bold</item>
+    </style>
+
+    <style name="RolllTextView.H7.R">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+
+    <style name="RolllTextView.PA">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="RolllTextView.PA.I">
+        <item name="android:fontFamily">@font/montserrat_regular_italic</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="RolllTextView.PA.R">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+    </style>
+
+    <style name="RolllTextView.PA.S">
+        <item name="android:fontFamily">@font/montserrat_semi_bold</item>
+    </style>
+
+    <style name="RolllTextView.PA.B">
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_up_animation</item>
+        <item name="android:windowExitAnimation">@anim/slide_down_animation</item>
+    </style>
+
+    <style name="DialogTextAppearance">
+        <item name="android:textSize">@dimen/_11ssp</item>
+        <item name="fontFamily">@font/montserrat_medium</item>
+    </style>
+
+    <style name="DialogSlideAnim">
+        <item name="dialogCornerRadius">10dp</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+        <item name="android:windowBackground">@drawable/uikit_bg_dialog</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:textColor">@color/dark_textview</item>
+        <item name="android:textAppearance">@style/DialogTextAppearance</item>
+    </style>
+
+    <style name="BaseDialogSlideAnim">
+        <item name="dialogCornerRadius">10dp</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+        <item name="android:windowBackground">@drawable/uikit_bg_dialog</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+    </style>
+
+    <style name="Widget.BottomNavigationView" parent="Widget.Design.BottomNavigationView">
+        <item name="fontFamily">@font/montserrat_medium</item>
+        <item name="android:textSize">@dimen/_8ssp</item>
+    </style>
+
+    <style name="MenuTextAppreance">
+        <item name="fontFamily">@font/montserrat_bold</item>
+        <item name="android:textSize">@dimen/_9ssp</item>
+    </style>
+</resources>
