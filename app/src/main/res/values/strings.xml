@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Rolll Scanner</string>
 
-
     <string name="splashscreen_text_desc">Easily Scan Your Document</string>
+
+    <string name="main_title_empty">Empty Document</string>
+    <string name="main_text_empty">You haven’t add any document to scan yet. Please add using
+        <b>(+)</b> button on bottom right corner.
+    </string>
 </resources>
