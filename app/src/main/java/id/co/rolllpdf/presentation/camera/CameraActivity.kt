@@ -1,6 +1,7 @@
 package id.co.rolllpdf.presentation.camera
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -10,6 +11,8 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.view.ScaleGestureDetector
 import android.webkit.MimeTypeMap
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -17,6 +20,7 @@ import androidx.core.net.toFile
 import androidx.core.view.isGone
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityCameraBinding
 import id.co.rolllpdf.presentation.photopicker.PhotoPickerActivity
 import id.co.rolllpdf.util.imagemanupulation.LuminosityAnalyzer
@@ -37,6 +41,20 @@ class CameraActivity : BaseActivity() {
         ActivityCameraBinding.inflate(layoutInflater)
     }
 
+    private val cameraExecutor by lazy {
+        Executors.newSingleThreadExecutor()
+    }
+
+    private val startForResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data?.getStringArrayListExtra(IntentArguments.PHOTO_PICKER_IMAGES).orEmpty()
+            listOfFile.addAll(data)
+            binding.cameraTextviewCounter.text = listOfFile.size.toString()
+        }
+    }
+
     private var camera: Camera? = null
     private var previewBuilder: Preview.Builder? = null
     private var preview: Preview? = null
@@ -45,12 +63,8 @@ class CameraActivity : BaseActivity() {
     private var imageAnalyzer: ImageAnalysis? = null
 
     private var lensFacing = CameraSelector.LENS_FACING_BACK
-    private var counter: Int = 0
+    private val listOfFile = mutableListOf<String>()
     private lateinit var outputDirectory: File
-
-    private val cameraExecutor by lazy {
-        Executors.newSingleThreadExecutor()
-    }
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -87,7 +101,7 @@ class CameraActivity : BaseActivity() {
 
         binding.cameraImageviewGallery.setOnClickListener {
             val intent = Intent(this, PhotoPickerActivity::class.java)
-            startActivity(intent)
+            startForResult.launch(intent)
             overridePendingTransition(
                 R.anim.transition_anim_slide_in_right,
                 R.anim.transition_anim_slide_out_left
@@ -96,7 +110,7 @@ class CameraActivity : BaseActivity() {
     }
 
     private fun bindCameraUseCases() {
-        binding.cameraTextviewCounter.text = counter.toString()
+        binding.cameraTextviewCounter.text = listOfFile.size.toString()
         outputDirectory = getOutputFileDirectory()
 
         val metrics =
@@ -215,8 +229,8 @@ class CameraActivity : BaseActivity() {
                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                         val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
 
-                        counter += 1
-                        binding.cameraTextviewCounter.text = counter.toString()
+                        listOfFile.add(savedUri.path.orEmpty())
+                        binding.cameraTextviewCounter.text = listOfFile.size.toString()
                         // We can only change the foreground Drawable using API level 23+ API
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             // Update the gallery thumbnail with latest picture taken

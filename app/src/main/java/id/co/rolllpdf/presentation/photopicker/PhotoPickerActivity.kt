@@ -1,5 +1,7 @@
 package id.co.rolllpdf.presentation.photopicker
 
+import android.app.Activity
+import android.content.Intent
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -8,6 +10,7 @@ import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.GalleryPicture
+import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityPhotoPickerBinding
 import id.co.rolllpdf.presentation.photopicker.adapter.PhotoPickerAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
@@ -68,6 +71,16 @@ class PhotoPickerActivity : BaseActivity() {
             R.string.general_placeholder_selected,
             listGallery.filter { it.isSelected }.size.toString()
         )
+
+        binding.photopickerTextviewNext.setOnClickListener {
+            val listPath = listGallery.filter { it.isSelected }.map {
+                it.path
+            }
+            val resultIntent = Intent()
+            resultIntent.putStringArrayListExtra(IntentArguments.PHOTO_PICKER_IMAGES, ArrayList(listPath))
+            setResult(Activity.RESULT_OK, resultIntent)
+            finish()
+        }
     }
 
     private fun setupRecyclerView() {
