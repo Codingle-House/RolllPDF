@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/app_text_dark">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/imageprocessing_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/imageprocessing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            app:contentInsetStartWithNavigation="0dp"
+            app:navigationIcon="@drawable/general_ic_chevron_left"
+            app:title="@string/imageprocessing_title_page"
+            app:titleTextAppearance="@style/ToolbarTextAppearance" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/imageprocessing_recyclerview_item"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/imageprocessing_linear_container"
+        app:layout_constraintTop_toBottomOf="@id/imageprocessing_appbar" />
+
+    <id.co.rolllpdf.uikit.UiKitTextview
+        android:id="@+id/imageprocessing_textview_page"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_10sdp"
+        android:background="@drawable/general_shape_rounded_black"
+        android:paddingHorizontal="@dimen/_20sdp"
+        android:paddingVertical="@dimen/_5sdp"
+        app:layout_constraintBottom_toTopOf="@id/imageprocessing_linear_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:rolll_text_color="light"
+        tools:text="Page 1/9" />
+
+    <LinearLayout
+        android:id="@+id/imageprocessing_linear_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <RelativeLayout
+            android:id="@+id/imageprocessing_relative_crop"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingVertical="@dimen/_16sdp">
+
+            <id.co.rolllpdf.uikit.UiKitTextview
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/general_ic_crop"
+                android:drawablePadding="@dimen/_10sdp"
+                android:text="@string/imageprocessing_text_crop" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/imageprocessing_relative_filter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingVertical="@dimen/_16sdp">
+
+            <id.co.rolllpdf.uikit.UiKitTextview
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/general_ic_filter"
+                android:drawablePadding="@dimen/_10sdp"
+                android:text="@string/imageprocessing_text_filter" />
+        </RelativeLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,12 +22,14 @@ import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityCameraBinding
+import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
 import id.co.rolllpdf.presentation.photopicker.PhotoPickerActivity
 import id.co.rolllpdf.util.imagemanupulation.LuminosityAnalyzer
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -49,7 +51,8 @@ class CameraActivity : BaseActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data?.getStringArrayListExtra(IntentArguments.PHOTO_PICKER_IMAGES).orEmpty()
+            val data =
+                result.data?.getStringArrayListExtra(IntentArguments.PHOTO_PICKER_IMAGES).orEmpty()
             listOfFile.addAll(data)
             binding.cameraTextviewCounter.text = listOfFile.size.toString()
         }
@@ -106,6 +109,19 @@ class CameraActivity : BaseActivity() {
                 R.anim.transition_anim_slide_in_right,
                 R.anim.transition_anim_slide_out_left
             )
+        }
+
+        binding.cameraImageviewDone.setOnClickListener {
+            if (listOfFile.isNotEmpty()) {
+                val intent = Intent(this, ImageProcessingActivity::class.java).apply {
+                    putStringArrayListExtra(IntentArguments.CAMERA_IMAGES, ArrayList(listOfFile))
+                }
+                startActivity(intent)
+                overridePendingTransition(
+                    R.anim.transition_anim_slide_in_right,
+                    R.anim.transition_anim_slide_out_left
+                )
+            }
         }
     }
 
