@@ -7,6 +7,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.data.GalleryPicture
 import id.co.rolllpdf.databinding.ActivityPhotoPickerBinding
 import id.co.rolllpdf.presentation.photopicker.adapter.PhotoPickerAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
@@ -29,8 +30,12 @@ class PhotoPickerActivity : BaseActivity() {
     }
 
     private val photoPickerAdapter by lazy {
-        PhotoPickerAdapter(this, diffCallback)
+        PhotoPickerAdapter(this, diffCallback).apply {
+            setListener { pos, item -> handleOnItemSelected(pos, item) }
+        }
     }
+
+    private var listGallery = mutableListOf<GalleryPicture>()
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -48,6 +53,7 @@ class PhotoPickerActivity : BaseActivity() {
     override fun onViewModelObserver() {
         with(photoPickerViewModel) {
             observeGalleryPicture().onResult {
+                listGallery.addAll(it)
                 photoPickerAdapter.addData(it)
             }
         }
@@ -57,6 +63,11 @@ class PhotoPickerActivity : BaseActivity() {
         binding.photopickerToolbar.setOnClickListener {
             finish()
         }
+
+        binding.photopickerTextviewSelected.text = getString(
+            R.string.general_placeholder_selected,
+            listGallery.filter { it.isSelected }.size.toString()
+        )
     }
 
     private fun setupRecyclerView() {
@@ -80,6 +91,17 @@ class PhotoPickerActivity : BaseActivity() {
         photoPickerViewModel.getImagesFromGallery(this, PAGE_SIZE)
     }
 
+    private fun handleOnItemSelected(pos: Int, item: GalleryPicture) {
+        listGallery[pos].isSelected = item.isSelected.not()
+
+        binding.photopickerTextviewSelected.text = getString(
+            R.string.general_placeholder_selected,
+            listGallery.filter { it.isSelected }.size.toString()
+        )
+
+        photoPickerAdapter.setData(listGallery)
+    }
+
     override fun finish() {
         super.finish()
         overridePendingTransition(
@@ -89,6 +111,6 @@ class PhotoPickerActivity : BaseActivity() {
     }
 
     companion object {
-        private const val PAGE_SIZE = 60
+        private const val PAGE_SIZE = 30
     }
 }

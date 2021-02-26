@@ -2,6 +2,8 @@
     <string name="app_name">Rolll Scanner</string>
 
     <string name="general_text_back">Back</string>
+    <string name="general_placeholder_selected">%s items selected</string>
+    <string name="general_text_next">Next</string>
 
     <string name="splashscreen_text_desc">Easily Scan Your Document</string>
 

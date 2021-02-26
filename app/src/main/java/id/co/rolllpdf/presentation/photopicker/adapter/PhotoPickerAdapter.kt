@@ -3,6 +3,7 @@ package id.co.rolllpdf.presentation.photopicker.adapter
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -19,6 +20,7 @@ class PhotoPickerAdapter(
 ) : RecyclerView.Adapter<PhotoPickerAdapter.ItemViewHolder>() {
 
     private val dataSet: MutableList<GalleryPicture> = mutableListOf()
+    private var onSelected: (pos: Int, item: GalleryPicture) -> Unit = { _, _ -> kotlin.run { } }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val itemView = RecyclerItemGalleryBinding
@@ -43,6 +45,10 @@ class PhotoPickerAdapter(
         calculateDiff(list)
     }
 
+    fun setListener(onSelected: (pos: Int, item: GalleryPicture) -> Unit) {
+        this.onSelected = onSelected
+    }
+
     private fun calculateDiff(newDataSet: List<GalleryPicture>) {
         diffCallback.setList(dataSet, newDataSet)
         val result = DiffUtil.calculateDiff(diffCallback)
@@ -57,6 +63,11 @@ class PhotoPickerAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bindView(data: GalleryPicture) {
             Glide.with(context).load(data.path).into(binding.recyclerImageviewThumbnail)
+            binding.recyclerviewImageviewChecked.isGone = data.isSelected.not()
+            binding.root.setOnClickListener {
+                binding.recyclerviewImageviewChecked.isGone = data.isSelected
+                onSelected.invoke(adapterPosition, data)
+            }
         }
     }
 }

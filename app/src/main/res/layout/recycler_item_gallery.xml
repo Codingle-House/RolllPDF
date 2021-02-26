@@ -13,4 +13,16 @@
         android:scaleType="centerCrop"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/recyclerview_imageview_checked"
+        android:layout_width="@dimen/_18ssp"
+        android:layout_height="@dimen/_18ssp"
+        android:layout_margin="@dimen/_10sdp"
+        android:background="@drawable/general_shape_circle_green"
+        android:padding="@dimen/_5sdp"
+        android:src="@drawable/general_ic_check"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

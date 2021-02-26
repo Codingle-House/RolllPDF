@@ -18,6 +18,7 @@
             android:background="@android:color/white"
             app:navigationIcon="@drawable/general_ic_chevron_left"
             app:title="@string/camera_title_page"
+            app:contentInsetStartWithNavigation="0dp"
             app:titleTextAppearance="@style/ToolbarTextAppearance">
 
             <ImageView
