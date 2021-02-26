@@ -1,5 +1,3 @@
-include ':scan'
-project(':scan').projectDir = new File('libs/scan')
 include ':uikit'
 project(':uikit').projectDir = new File('libs/uikit')
 include ':core'
