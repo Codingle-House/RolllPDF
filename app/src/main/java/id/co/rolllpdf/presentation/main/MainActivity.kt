@@ -61,7 +61,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     private fun goToCamera() {
         val intent = Intent(this, CameraActivity::class.java)
         startActivity(intent)
-        overridePendingTransition(R.anim.anim_slide_up, R.anim.anim_slide_bottom)
+        overridePendingTransition(R.anim.transition_anim_slide_up, R.anim.transition_anim_slide_bottom)
     }
 
     private fun floatingActionButtonListener() {

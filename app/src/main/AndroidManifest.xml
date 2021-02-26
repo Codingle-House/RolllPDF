@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".MainApplication"
@@ -32,6 +32,10 @@
 
         <activity
             android:name=".presentation.camera.CameraActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".presentation.photopicker.ActivityPhotoPicker"
             android:screenOrientation="portrait" />
     </application>
 

@@ -18,6 +18,7 @@ import androidx.core.view.isGone
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.databinding.ActivityCameraBinding
+import id.co.rolllpdf.presentation.photopicker.ActivityPhotoPicker
 import id.co.rolllpdf.util.LuminosityAnalyzer
 import java.io.File
 import java.text.SimpleDateFormat
@@ -63,7 +64,7 @@ class CameraActivity : BaseActivity() {
         binding.cameraPreviewFinder.post {
             bindCameraUseCases()
         }
-        setupCameraListener()
+        setupCameraControlListener()
     }
 
     override fun onViewModelObserver() {
@@ -75,13 +76,22 @@ class CameraActivity : BaseActivity() {
         }
     }
 
-    private fun setupCameraListener() {
+    private fun setupCameraControlListener() {
         binding.cameraImageviewFlash.setOnClickListener {
             toggleFlash()
         }
 
         binding.cameraImageviewCapture.setOnClickListener {
             takePicture()
+        }
+
+        binding.cameraImageviewGallery.setOnClickListener {
+            val intent = Intent(this, ActivityPhotoPicker::class.java)
+            startActivity(intent)
+            overridePendingTransition(
+                R.anim.transition_anim_slide_in_right,
+                R.anim.transition_anim_slide_out_left
+            )
         }
     }
 
@@ -118,7 +128,8 @@ class CameraActivity : BaseActivity() {
                 .setTargetAspectRatio(screenAspectRatio)
                 .setTargetRotation(rotation)
                 .build()
-                .also { it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
+                .also {
+                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
 
                     })
                 }
@@ -243,7 +254,10 @@ class CameraActivity : BaseActivity() {
                 // Display flash animation to indicate that photo was captured
                 binding.root.postDelayed({
                     binding.root.foreground = ColorDrawable(Color.WHITE)
-                    binding.root.postDelayed({  binding.root.foreground = null }, ANIMATION_FAST_MILLIS)
+                    binding.root.postDelayed(
+                        { binding.root.foreground = null },
+                        ANIMATION_FAST_MILLIS
+                    )
                 }, ANIMATION_SLOW_MILLIS)
             }
         }
@@ -264,7 +278,10 @@ class CameraActivity : BaseActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.anim_slide_up, R.anim.anim_slide_bottom)
+        overridePendingTransition(
+            R.anim.transition_anim_slide_up,
+            R.anim.transition_anim_slide_bottom
+        )
     }
 
     companion object {
