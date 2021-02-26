@@ -6,6 +6,8 @@ import android.view.View
 import android.view.WindowInsetsController
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import id.co.rolllpdf.core.getColorCompat
 
 /**
@@ -59,5 +61,9 @@ abstract class BaseActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    protected fun <T> LiveData<T>.onResult(action: (T) -> Unit) {
+        observe(this@BaseActivity, Observer { data -> data?.let(action) })
     }
 }

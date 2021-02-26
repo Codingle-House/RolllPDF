@@ -18,8 +18,8 @@ import androidx.core.view.isGone
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.databinding.ActivityCameraBinding
-import id.co.rolllpdf.presentation.photopicker.ActivityPhotoPicker
-import id.co.rolllpdf.util.LuminosityAnalyzer
+import id.co.rolllpdf.presentation.photopicker.PhotoPickerActivity
+import id.co.rolllpdf.util.imagemanupulation.LuminosityAnalyzer
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -86,7 +86,7 @@ class CameraActivity : BaseActivity() {
         }
 
         binding.cameraImageviewGallery.setOnClickListener {
-            val intent = Intent(this, ActivityPhotoPicker::class.java)
+            val intent = Intent(this, PhotoPickerActivity::class.java)
             startActivity(intent)
             overridePendingTransition(
                 R.anim.transition_anim_slide_in_right,

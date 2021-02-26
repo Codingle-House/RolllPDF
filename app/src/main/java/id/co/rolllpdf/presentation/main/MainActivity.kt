@@ -7,7 +7,7 @@ import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.databinding.ActivityMainBinding
 import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
-import id.co.rolllpdf.util.NestedScrollViewOverScrollDecorAdapter
+import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog

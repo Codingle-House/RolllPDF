@@ -35,7 +35,7 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".presentation.photopicker.ActivityPhotoPicker"
+            android:name=".presentation.photopicker.PhotoPickerActivity"
             android:screenOrientation="portrait" />
     </application>
 
