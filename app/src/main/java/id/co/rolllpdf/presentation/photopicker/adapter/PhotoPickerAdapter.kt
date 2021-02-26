@@ -37,6 +37,12 @@ class PhotoPickerAdapter(
         calculateDiff(newDataSet)
     }
 
+    fun addData(newDatas: List<GalleryPicture>) {
+        val list = ArrayList(this.dataSet)
+        list.addAll(newDatas)
+        calculateDiff(list)
+    }
+
     private fun calculateDiff(newDataSet: List<GalleryPicture>) {
         diffCallback.setList(dataSet, newDataSet)
         val result = DiffUtil.calculateDiff(diffCallback)

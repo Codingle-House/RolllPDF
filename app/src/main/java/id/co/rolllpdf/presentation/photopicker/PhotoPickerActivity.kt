@@ -2,6 +2,7 @@ package id.co.rolllpdf.presentation.photopicker
 
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
@@ -47,7 +48,7 @@ class PhotoPickerActivity : BaseActivity() {
     override fun onViewModelObserver() {
         with(photoPickerViewModel) {
             observeGalleryPicture().onResult {
-                photoPickerAdapter.setData(it)
+                photoPickerAdapter.addData(it)
             }
         }
     }
@@ -60,9 +61,18 @@ class PhotoPickerActivity : BaseActivity() {
 
     private fun setupRecyclerView() {
         with(binding.photopickerRecyclerviewThumbnail) {
-            layoutManager = GridLayoutManager(this@PhotoPickerActivity, 3)
+            val gridLayoutManager = GridLayoutManager(this@PhotoPickerActivity, 3)
+            layoutManager = gridLayoutManager
             adapter = photoPickerAdapter
             addItemDecoration(SpaceItemDecoration(8))
+
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (gridLayoutManager.findLastVisibleItemPosition() == photoPickerAdapter.itemCount - 1) {
+                        loadPictures()
+                    }
+                }
+            })
         }
     }
 
@@ -79,6 +89,6 @@ class PhotoPickerActivity : BaseActivity() {
     }
 
     companion object {
-        private const val PAGE_SIZE = 21
+        private const val PAGE_SIZE = 60
     }
 }
