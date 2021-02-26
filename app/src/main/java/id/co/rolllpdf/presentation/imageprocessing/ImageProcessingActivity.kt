@@ -1,5 +1,9 @@
 package id.co.rolllpdf.presentation.imageprocessing
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -11,6 +15,7 @@ import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityImageProcessingBinding
+import id.co.rolllpdf.presentation.crop.CropActivity
 import id.co.rolllpdf.presentation.imageprocessing.adapter.ImageProcessingAdapter
 import me.everything.android.ui.overscroll.HorizontalOverScrollBounceEffectDecorator
 import me.everything.android.ui.overscroll.adapters.RecyclerViewOverScrollDecorAdapter
@@ -39,7 +44,16 @@ class ImageProcessingActivity : BaseActivity() {
         ImageProcessingAdapter(this, diffCallback)
     }
 
+    private val startCropForResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+
+        }
+    }
+
     private val listOfFile = mutableListOf<String>()
+    private var selectedPosition: Int = 0
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -52,9 +66,11 @@ class ImageProcessingActivity : BaseActivity() {
         initData()
         setupToolbar()
         setupRecyclerView()
+        setupViewListener()
     }
 
     override fun onViewModelObserver() {
+
     }
 
     private fun initData() {
@@ -65,6 +81,20 @@ class ImageProcessingActivity : BaseActivity() {
 
     private fun setupToolbar() {
         binding.imageprocessingToolbar.setNavigationOnClickListener { finish() }
+    }
+
+    private fun setupViewListener() {
+        binding.imageprocessingRelativeCrop.setOnClickListener {
+            val intent = Intent(this, CropActivity::class.java).apply {
+                putExtra(IntentArguments.CROP_IMAGES, listOfFile[selectedPosition])
+            }
+            startCropForResult.launch(intent)
+            overridePendingTransition(R.anim.transition_anim_slide_up, R.anim.transition_anim_slide_bottom)
+        }
+
+        binding.imageprocessingRelativeFilter.setOnClickListener {
+
+        }
     }
 
     private fun setupRecyclerView() {
@@ -88,11 +118,11 @@ class ImageProcessingActivity : BaseActivity() {
                         binding.imageprocessingTextviewPage.isGone = true
                     } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         binding.imageprocessingTextviewPage.isGone = false
-                        val position: Int = linearLayoutManager.findFirstVisibleItemPosition()
+                        selectedPosition = linearLayoutManager.findFirstVisibleItemPosition()
                         binding.imageprocessingTextviewPage.text =
                             getString(
                                 R.string.general_placeholder_page,
-                                position.inc().toString(),
+                                selectedPosition.inc().toString(),
                                 listOfFile.size.toString()
                             )
                     }

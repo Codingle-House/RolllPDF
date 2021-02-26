@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/general_ic_crop"
                 android:drawablePadding="@dimen/_10sdp"
-                android:text="@string/imageprocessing_text_crop" />
+                android:text="@string/general_text_crop" />
         </RelativeLayout>
 
         <RelativeLayout

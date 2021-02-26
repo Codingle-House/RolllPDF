@@ -5,6 +5,7 @@
     <string name="general_placeholder_selected">%s items selected</string>
     <string name="general_text_next">Next</string>
     <string name="general_placeholder_page">Page %1$s/%2$s</string>
+    <string name="general_text_crop">Crop</string>
 
     <string name="splashscreen_text_desc">Easily Scan Your Document</string>
 
@@ -20,6 +21,7 @@
     <string name="camera_title_page">Camera</string>
 
     <string name="imageprocessing_title_page">Image Processing</string>
-    <string name="imageprocessing_text_crop">Crop</string>
     <string name="imageprocessing_text_filter">Filter</string>
+
+    <string name="imagecropping_title_page">Image Cropping</string>
 </resources>

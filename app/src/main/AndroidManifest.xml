@@ -41,6 +41,10 @@
         <activity
             android:name=".presentation.imageprocessing.ImageProcessingActivity"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".presentation.crop.CropActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

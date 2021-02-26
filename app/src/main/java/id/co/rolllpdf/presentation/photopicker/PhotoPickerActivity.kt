@@ -63,7 +63,7 @@ class PhotoPickerActivity : BaseActivity() {
     }
 
     private fun setupToolbar() {
-        binding.photopickerToolbar.setOnClickListener {
+        binding.photopickerToolbar.setNavigationOnClickListener {
             finish()
         }
 
@@ -77,7 +77,10 @@ class PhotoPickerActivity : BaseActivity() {
                 it.path
             }
             val resultIntent = Intent()
-            resultIntent.putStringArrayListExtra(IntentArguments.PHOTO_PICKER_IMAGES, ArrayList(listPath))
+            resultIntent.putStringArrayListExtra(
+                IntentArguments.PHOTO_PICKER_IMAGES,
+                ArrayList(listPath)
+            )
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
