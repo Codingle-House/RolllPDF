@@ -12,6 +12,8 @@ import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityImageProcessingBinding
 import id.co.rolllpdf.presentation.imageprocessing.adapter.ImageProcessingAdapter
+import me.everything.android.ui.overscroll.HorizontalOverScrollBounceEffectDecorator
+import me.everything.android.ui.overscroll.adapters.RecyclerViewOverScrollDecorAdapter
 import javax.inject.Inject
 
 
@@ -96,6 +98,9 @@ class ImageProcessingActivity : BaseActivity() {
                     }
                 }
             })
+            HorizontalOverScrollBounceEffectDecorator(
+                RecyclerViewOverScrollDecorAdapter(this)
+            )
         }
     }
 
