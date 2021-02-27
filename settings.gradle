@@ -1,3 +1,5 @@
+include ':photocropper'
+project(':photocropper').projectDir = new File('libs/photocropper')
 include ':uikit'
 project(':uikit').projectDir = new File('libs/uikit')
 include ':core'

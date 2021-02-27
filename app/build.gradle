@@ -92,6 +92,7 @@ dependencies {
     // Internal Library
     implementation project(":core")
     implementation project(":uikit")
+    implementation project(":photocropper")
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
