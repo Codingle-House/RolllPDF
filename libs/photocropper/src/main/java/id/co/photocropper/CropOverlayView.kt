@@ -407,7 +407,8 @@ class CropOverlayView : View {
         // 2. draw original bitmap
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
         bitmap?.let {
-            canvas.drawBitmap(it, 0f, 0f, paint)
+            val copyBitmap = it.copy(Bitmap.Config.ARGB_8888, true)
+            canvas.drawBitmap(copyBitmap, 0f, 0f, paint)
         }
 
         // 3. cut

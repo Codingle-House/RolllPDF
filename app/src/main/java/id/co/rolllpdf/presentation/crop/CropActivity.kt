@@ -8,6 +8,8 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
+import id.co.photocropper.CropListener
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.data.constant.IntentArguments
@@ -18,7 +20,7 @@ import java.io.File
 /**
  * Created by pertadima on 26,February,2021
  */
-class CropActivity : BaseActivity() {
+class CropActivity : BaseActivity(), CropListener {
     private val binding by lazy {
         ActivityCropBinding.inflate(layoutInflater)
     }
@@ -57,6 +59,10 @@ class CropActivity : BaseActivity() {
             val imageBitmap = getBitmap(this, uri)
             binding.imagecroppingImageviewCrop.setImageBitmap(imageBitmap)
         }
+
+        binding.imagecroppingTextviewCrop.setOnClickListener {
+            binding.imagecroppingImageviewCrop.crop(this, true)
+        }
     }
 
     private fun getBitmap(context: Context, imageUri: Uri): Bitmap? {
@@ -82,6 +88,10 @@ class CropActivity : BaseActivity() {
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         path.toLong()
     )
+
+    override fun onFinish(bitmap: Bitmap?) {
+        //TODO: SAVE BITMAP TO FILE
+    }
 
     override fun finish() {
         super.finish()
