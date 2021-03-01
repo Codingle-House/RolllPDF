@@ -4,5 +4,7 @@ include ':uikit'
 project(':uikit').projectDir = new File('libs/uikit')
 include ':core'
 project(':core').projectDir = new File('libs/core')
+include ':scanlibrary'
+project(':scanlibrary').projectDir = new File(rootDir, 'libs/scanlibrary')
 include ':app'
 rootProject.name = "Rolll PDF"
