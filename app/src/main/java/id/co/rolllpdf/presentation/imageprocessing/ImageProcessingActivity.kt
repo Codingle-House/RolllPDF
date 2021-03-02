@@ -13,6 +13,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityImageProcessingBinding
 import id.co.rolllpdf.presentation.crop.CropActivity
@@ -47,19 +48,11 @@ class ImageProcessingActivity : BaseActivity() {
 
     private val startCropForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK) {
-
-        }
-    }
+    ) { result: ActivityResult -> replaceImage(result) }
 
     private val startFilterForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK) {
-
-        }
-    }
+    ) { result: ActivityResult -> replaceImage(result) }
 
     private val listOfFile = mutableListOf<String>()
     private var selectedPosition: Int = 0
@@ -96,6 +89,7 @@ class ImageProcessingActivity : BaseActivity() {
         binding.imageprocessingRelativeCrop.setOnClickListener {
             val intent = Intent(this, CropActivity::class.java).apply {
                 putExtra(IntentArguments.PROCESSING_IMAGES, listOfFile[selectedPosition])
+                putExtra(IntentArguments.PROCESSING_POSITION, selectedPosition)
             }
             startCropForResult.launch(intent)
             overridePendingTransition(
@@ -107,6 +101,7 @@ class ImageProcessingActivity : BaseActivity() {
         binding.imageprocessingRelativeFilter.setOnClickListener {
             val intent = Intent(this, PhotoFilterActivity::class.java).apply {
                 putExtra(IntentArguments.PROCESSING_IMAGES, listOfFile[selectedPosition])
+                putExtra(IntentArguments.PROCESSING_POSITION, selectedPosition)
             }
             startFilterForResult.launch(intent)
             overridePendingTransition(
@@ -150,6 +145,16 @@ class ImageProcessingActivity : BaseActivity() {
             HorizontalOverScrollBounceEffectDecorator(
                 RecyclerViewOverScrollDecorAdapter(this)
             )
+        }
+    }
+
+    private fun replaceImage(result: ActivityResult) {
+        if (result.resultCode == Activity.RESULT_OK) {
+            val imagePath = result.data?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
+            val selectedPosition =
+                result.data?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0).orZero()
+            listOfFile[selectedPosition] = imagePath
+            imageProcessingAdapter.setData(listOfFile)
         }
     }
 

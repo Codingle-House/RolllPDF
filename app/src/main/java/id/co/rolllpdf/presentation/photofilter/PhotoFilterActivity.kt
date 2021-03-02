@@ -1,7 +1,9 @@
 package id.co.rolllpdf.presentation.photofilter
 
+import android.app.Activity
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
@@ -18,6 +20,9 @@ import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityPhotofilterBinding
+import id.co.rolllpdf.util.image.convertBitmapToFile
+import id.co.rolllpdf.util.image.createFile
+import id.co.rolllpdf.util.image.getOutputFileDirectory
 import java.io.File
 
 /**
@@ -32,7 +37,12 @@ class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
         intent?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
     }
 
+    private val selectedPosition by lazy {
+        intent?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0)
+    }
+
     private var photoFilter: PhotoFilter? = null
+    private var filterBitmap: Bitmap? = null
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -59,6 +69,10 @@ class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
     private fun setupView() {
         photoFilter = PhotoFilter(binding.photofilterSurfaceEffect, this)
         getImageBitmap()?.let { photoFilter?.applyEffect(it, None()) }
+
+        binding.photofilterTextviewDone.setOnClickListener {
+            onFilterDone()
+        }
     }
 
     private fun setupActionListener() {
@@ -116,7 +130,6 @@ class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
             context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
                 BitmapFactory.decodeStream(inputStream)
             }
-
         }
     }
 
@@ -124,14 +137,6 @@ class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         path.toLong()
     )
-
-    override fun finish() {
-        super.finish()
-        overridePendingTransition(
-            R.anim.transition_anim_slide_up,
-            R.anim.transition_anim_slide_bottom
-        )
-    }
 
     object PhotoFilterAction {
         const val ORIGINAL = 0
@@ -141,6 +146,34 @@ class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
     }
 
     override fun onProcessingComplete(bitmap: Bitmap) {
+        filterBitmap = bitmap
+    }
 
+    private fun onFilterDone() {
+        val outputDirectory = getOutputFileDirectory()
+        val photoFile = createFile(outputDirectory, FILENAME, PHOTO_EXTENSION)
+        filterBitmap?.let {
+            convertBitmapToFile(bitmap = it, destinationFile = photoFile)
+        }
+        val savedUri = Uri.fromFile(photoFile)
+        val resultIntent = Intent().apply {
+            putExtra(IntentArguments.PROCESSING_IMAGES, savedUri.path)
+            putExtra(IntentArguments.PROCESSING_POSITION, selectedPosition)
+        }
+        setResult(Activity.RESULT_OK, resultIntent)
+        finish()
+    }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(
+            R.anim.transition_anim_slide_up,
+            R.anim.transition_anim_slide_bottom
+        )
+    }
+
+    companion object {
+        private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
+        private const val PHOTO_EXTENSION = ".jpg"
     }
 }

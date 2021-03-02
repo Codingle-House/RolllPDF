@@ -6,5 +6,7 @@ package id.co.rolllpdf.data.constant
 object IntentArguments {
     const val PHOTO_PICKER_IMAGES = "PHOTO_PICKER_IMAGES"
     const val CAMERA_IMAGES = "CAMERA_IMAGES"
+
     const val PROCESSING_IMAGES = "PROCESSING_IMAGES"
+    const val PROCESSING_POSITION = "PROCESSING_POSITION"
 }

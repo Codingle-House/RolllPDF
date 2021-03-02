@@ -1,4 +1,4 @@
-package id.co.rolllpdf.util.imagemanupulation
+package id.co.rolllpdf.util.image
 
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy

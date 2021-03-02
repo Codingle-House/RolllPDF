@@ -24,7 +24,7 @@ import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityCameraBinding
 import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
 import id.co.rolllpdf.presentation.photopicker.PhotoPickerActivity
-import id.co.rolllpdf.util.imagemanupulation.LuminosityAnalyzer
+import id.co.rolllpdf.util.image.LuminosityAnalyzer
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*

@@ -1,7 +1,9 @@
 package id.co.rolllpdf.presentation.crop
 
+import android.app.Activity
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
@@ -13,6 +15,10 @@ import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityCropBinding
+import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity
+import id.co.rolllpdf.util.image.convertBitmapToFile
+import id.co.rolllpdf.util.image.createFile
+import id.co.rolllpdf.util.image.getOutputFileDirectory
 import java.io.File
 
 
@@ -26,6 +32,10 @@ class CropActivity : BaseActivity(), CropListener {
 
     private val imagePath by lazy {
         intent?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
+    }
+
+    private val selectedPosition by lazy {
+        intent?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0)
     }
 
     override fun setupViewBinding() {
@@ -87,7 +97,18 @@ class CropActivity : BaseActivity(), CropListener {
     )
 
     override fun onFinish(bitmap: Bitmap?) {
-        //TODO: SAVE BITMAP TO FILE
+        val outputDirectory = getOutputFileDirectory()
+        val photoFile = createFile(outputDirectory, FILENAME, PHOTO_EXTENSION)
+        bitmap?.let {
+            convertBitmapToFile(bitmap = it, destinationFile = photoFile)
+        }
+        val savedUri = Uri.fromFile(photoFile)
+        val resultIntent = Intent().apply {
+            putExtra(IntentArguments.PROCESSING_IMAGES, savedUri.path)
+            putExtra(IntentArguments.PROCESSING_POSITION, selectedPosition)
+        }
+        setResult(Activity.RESULT_OK, resultIntent)
+        finish()
     }
 
     override fun finish() {
@@ -96,5 +117,10 @@ class CropActivity : BaseActivity(), CropListener {
             R.anim.transition_anim_slide_up,
             R.anim.transition_anim_slide_bottom
         )
+    }
+
+    companion object {
+        private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
+        private const val PHOTO_EXTENSION = ".jpg"
     }
 }

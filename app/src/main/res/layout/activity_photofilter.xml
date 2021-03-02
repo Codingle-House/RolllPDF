@@ -20,7 +20,18 @@
             app:contentInsetStartWithNavigation="0dp"
             app:navigationIcon="@drawable/general_ic_chevron_left"
             app:title="@string/photofilter_title_page"
-            app:titleTextAppearance="@style/ToolbarTextAppearance" />
+            app:titleTextAppearance="@style/ToolbarTextAppearance">
+
+            <id.co.rolllpdf.uikit.UiKitTextview
+                android:id="@+id/photofilter_textview_done"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/_16sdp"
+                android:gravity="center"
+                android:text="@string/general_text_done"
+                app:textAllCaps="true" />
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
