@@ -88,6 +88,7 @@ dependencies {
     // Others
     implementation 'me.everything:overscroll-decor-android:1.1.0'
     implementation 'pub.devrel:easypermissions:3.0.0'
+    implementation 'com.github.mukeshsolanki:photofilter:2.0.2'
 
     // Internal Library
     implementation project(":core")

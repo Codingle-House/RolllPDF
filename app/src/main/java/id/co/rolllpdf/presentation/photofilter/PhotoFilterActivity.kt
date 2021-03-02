@@ -8,6 +8,12 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import com.mukesh.imageproccessing.OnProcessingCompletionListener
+import com.mukesh.imageproccessing.PhotoFilter
+import com.mukesh.imageproccessing.filters.AutoFix
+import com.mukesh.imageproccessing.filters.Documentary
+import com.mukesh.imageproccessing.filters.Grayscale
+import com.mukesh.imageproccessing.filters.None
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.data.constant.IntentArguments
@@ -17,7 +23,7 @@ import java.io.File
 /**
  * Created by pertadima on 01,March,2021
  */
-class PhotoFilterActivity : BaseActivity() {
+class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
     private val binding by lazy {
         ActivityPhotofilterBinding.inflate(layoutInflater)
     }
@@ -26,11 +32,7 @@ class PhotoFilterActivity : BaseActivity() {
         intent?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
     }
 
-    private val originalBitmap by lazy {
-        getImageBitmap()
-    }
-
-    private var transformedBitmap: Bitmap? = null
+    private var photoFilter: PhotoFilter? = null
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -42,6 +44,7 @@ class PhotoFilterActivity : BaseActivity() {
         changeStatusBarColor(android.R.color.white)
         setupToolbar()
         setupActionListener()
+        setupView()
     }
 
     override fun onViewModelObserver() {
@@ -53,9 +56,12 @@ class PhotoFilterActivity : BaseActivity() {
         }
     }
 
-    private fun setupActionListener() {
-        binding.photofilterImageviewItem.setImageBitmap(originalBitmap)
+    private fun setupView() {
+        photoFilter = PhotoFilter(binding.photofilterSurfaceEffect, this)
+        getImageBitmap()?.let { photoFilter?.applyEffect(it, None()) }
+    }
 
+    private fun setupActionListener() {
         binding.photofilerLinearOriginal.setOnClickListener {
             changeImageFilter(PhotoFilterAction.ORIGINAL)
         }
@@ -75,7 +81,20 @@ class PhotoFilterActivity : BaseActivity() {
 
 
     private fun changeImageFilter(filter: Int) {
-     
+        when (filter) {
+            PhotoFilterAction.ORIGINAL -> getImageBitmap()?.let {
+                photoFilter?.applyEffect(it, None())
+            }
+            PhotoFilterAction.MAGIC -> getImageBitmap()?.let {
+                photoFilter?.applyEffect(it, AutoFix())
+            }
+            PhotoFilterAction.BW -> getImageBitmap()?.let {
+                photoFilter?.applyEffect(it, Documentary())
+            }
+            else -> getImageBitmap()?.let {
+                photoFilter?.applyEffect(it, Grayscale())
+            }
+        }
     }
 
     private fun getImageBitmap() = try {
@@ -119,5 +138,9 @@ class PhotoFilterActivity : BaseActivity() {
         const val MAGIC = 1
         const val BW = 2
         const val GRAYSCALE = 3
+    }
+
+    override fun onProcessingComplete(bitmap: Bitmap) {
+
     }
 }

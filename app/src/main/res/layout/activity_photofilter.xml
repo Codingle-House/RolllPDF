@@ -24,13 +24,12 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ImageView
-        android:id="@+id/photofilter_imageview_item"
+    <android.opengl.GLSurfaceView
+        android:id="@+id/photofilter_surface_effect"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/photofilter_linear_container"
         app:layout_constraintTop_toBottomOf="@id/photofilter_appbar" />
-
 
     <LinearLayout
         android:id="@+id/photofilter_linear_container"
