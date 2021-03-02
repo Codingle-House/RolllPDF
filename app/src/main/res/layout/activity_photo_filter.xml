@@ -130,7 +130,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/photofilter_ic_original" />
+                android:src="@drawable/photofilter_ic_grayscale" />
 
             <id.co.rolllpdf.uikit.UiKitTextview
                 android:layout_width="wrap_content"

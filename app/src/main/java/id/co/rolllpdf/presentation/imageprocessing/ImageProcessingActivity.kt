@@ -151,10 +151,10 @@ class ImageProcessingActivity : BaseActivity() {
     private fun replaceImage(result: ActivityResult) {
         if (result.resultCode == Activity.RESULT_OK) {
             val imagePath = result.data?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
-            val selectedPosition =
-                result.data?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0).orZero()
-            listOfFile[selectedPosition] = imagePath
+            val pos = result.data?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0).orZero()
+            listOfFile[pos] = imagePath
             imageProcessingAdapter.setData(listOfFile)
+            binding.imageprocessingRecyclerviewItem.smoothScrollToPosition(pos)
         }
     }
 
