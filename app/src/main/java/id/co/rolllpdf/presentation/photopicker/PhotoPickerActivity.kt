@@ -9,7 +9,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
-import id.co.rolllpdf.data.GalleryPicture
+import id.co.rolllpdf.data.dto.GalleryPictureDto
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityPhotoPickerBinding
 import id.co.rolllpdf.presentation.photopicker.adapter.PhotoPickerAdapter
@@ -38,7 +38,7 @@ class PhotoPickerActivity : BaseActivity() {
         }
     }
 
-    private var listGallery = mutableListOf<GalleryPicture>()
+    private var listGallery = mutableListOf<GalleryPictureDto>()
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -107,7 +107,7 @@ class PhotoPickerActivity : BaseActivity() {
         photoPickerViewModel.getImagesFromGallery(this, PAGE_SIZE)
     }
 
-    private fun handleOnItemSelected(pos: Int, item: GalleryPicture) {
+    private fun handleOnItemSelected(pos: Int, item: GalleryPictureDto) {
         listGallery[pos].isSelected = item.isSelected.not()
 
         binding.photopickerTextviewSelected.text = getString(

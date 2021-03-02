@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import id.co.rolllpdf.core.DiffCallback
-import id.co.rolllpdf.data.GalleryPicture
+import id.co.rolllpdf.data.dto.GalleryPictureDto
 import id.co.rolllpdf.databinding.RecyclerItemGalleryBinding
 
 /**
@@ -19,8 +19,8 @@ class PhotoPickerAdapter(
     private val diffCallback: DiffCallback
 ) : RecyclerView.Adapter<PhotoPickerAdapter.ItemViewHolder>() {
 
-    private val dataSet: MutableList<GalleryPicture> = mutableListOf()
-    private var onSelected: (pos: Int, item: GalleryPicture) -> Unit = { _, _ -> kotlin.run { } }
+    private val dataSet: MutableList<GalleryPictureDto> = mutableListOf()
+    private var onSelected: (pos: Int, item: GalleryPictureDto) -> Unit = { _, _ -> kotlin.run { } }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val itemView = RecyclerItemGalleryBinding
@@ -35,21 +35,21 @@ class PhotoPickerAdapter(
 
     override fun getItemCount(): Int = dataSet.size
 
-    fun setData(newDataSet: List<GalleryPicture>) {
+    fun setData(newDataSet: List<GalleryPictureDto>) {
         calculateDiff(newDataSet)
     }
 
-    fun addData(newDatas: List<GalleryPicture>) {
+    fun addData(newDatas: List<GalleryPictureDto>) {
         val list = ArrayList(this.dataSet)
         list.addAll(newDatas)
         calculateDiff(list)
     }
 
-    fun setListener(onSelected: (pos: Int, item: GalleryPicture) -> Unit) {
+    fun setListener(onSelected: (pos: Int, item: GalleryPictureDto) -> Unit) {
         this.onSelected = onSelected
     }
 
-    private fun calculateDiff(newDataSet: List<GalleryPicture>) {
+    private fun calculateDiff(newDataSet: List<GalleryPictureDto>) {
         diffCallback.setList(dataSet, newDataSet)
         val result = DiffUtil.calculateDiff(diffCallback)
         with(dataSet) {
@@ -61,7 +61,7 @@ class PhotoPickerAdapter(
 
     inner class ItemViewHolder(private val binding: RecyclerItemGalleryBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bindView(data: GalleryPicture) {
+        fun bindView(data: GalleryPictureDto) {
             Glide.with(context).load(data.path).into(binding.recyclerImageviewThumbnail)
             binding.recyclerviewImageviewChecked.isGone = data.isSelected.not()
             binding.root.setOnClickListener {

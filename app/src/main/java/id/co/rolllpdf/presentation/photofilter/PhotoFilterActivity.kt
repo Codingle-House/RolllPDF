@@ -19,7 +19,7 @@ import com.mukesh.imageproccessing.filters.None
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.data.constant.IntentArguments
-import id.co.rolllpdf.databinding.ActivityPhotofilterBinding
+import id.co.rolllpdf.databinding.ActivityPhotoFilterBinding
 import id.co.rolllpdf.util.image.convertBitmapToFile
 import id.co.rolllpdf.util.image.createFile
 import id.co.rolllpdf.util.image.getOutputFileDirectory
@@ -30,7 +30,7 @@ import java.io.File
  */
 class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
     private val binding by lazy {
-        ActivityPhotofilterBinding.inflate(layoutInflater)
+        ActivityPhotoFilterBinding.inflate(layoutInflater)
     }
 
     private val imagePath by lazy {

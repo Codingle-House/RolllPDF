@@ -4,13 +4,12 @@ import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.co.rolllpdf.core.orZero
-import id.co.rolllpdf.data.GalleryPicture
+import id.co.rolllpdf.data.dto.GalleryPictureDto
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -28,8 +27,8 @@ class PhotoPickerViewModel @Inject constructor() : ViewModel() {
     private var allLoaded = false
 
 
-    private val galleryPicture = SingleLiveEvent<List<GalleryPicture>>()
-    fun observeGalleryPicture(): LiveData<List<GalleryPicture>> = galleryPicture
+    private val galleryPicture = SingleLiveEvent<List<GalleryPictureDto>>()
+    fun observeGalleryPicture(): LiveData<List<GalleryPictureDto>> = galleryPicture
 
     fun getImagesFromGallery(context: Context, pageSize: Int) {
         viewModelScope.launch {
@@ -51,12 +50,12 @@ class PhotoPickerViewModel @Inject constructor() : ViewModel() {
         return rows
     }
 
-    private fun fetchGalleryImages(context: Context, rowsPerLoad: Int): List<GalleryPicture> {
+    private fun fetchGalleryImages(context: Context, rowsPerLoad: Int): List<GalleryPictureDto> {
         val cursor = getGalleryCursor(context)
 
         if (cursor != null && !allLoaded) {
             val totalRows = cursor.count
-            val galleryImageUrls = ArrayList<GalleryPicture>(totalRows)
+            val galleryImageUrls = ArrayList<GalleryPictureDto>(totalRows)
             allLoaded = rowsToLoad == totalRows
             if (rowsToLoad < rowsPerLoad) {
                 rowsToLoad = rowsPerLoad
@@ -66,7 +65,7 @@ class PhotoPickerViewModel @Inject constructor() : ViewModel() {
                 cursor.moveToPosition(i)
                 val dataColumnIndex =
                     cursor.getColumnIndex(MediaStore.MediaColumns._ID) //get column index
-                galleryImageUrls.add(GalleryPicture(getImageUri(cursor.getString(dataColumnIndex)).toString())) //get Image path from column index
+                galleryImageUrls.add(GalleryPictureDto(getImageUri(cursor.getString(dataColumnIndex)).toString())) //get Image path from column index
 
             }
             startingRow = rowsToLoad

@@ -1,10 +1,15 @@
 package id.co.rolllpdf.di
 
+import android.content.Context
+import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.data.AppDatabase
+import id.co.rolllpdf.domain.datasource.AppLocalDataSource
 import javax.inject.Singleton
 
 /**
@@ -16,4 +21,15 @@ object AppModule {
     @Singleton
     @Provides
     fun providesDiffCallback() = DiffCallback()
+
+    @Singleton
+    @Provides
+    fun providesRoomDatabase(@ApplicationContext appContext: Context) =
+        Room.databaseBuilder(appContext, AppDatabase::class.java, "roll_db")
+            .fallbackToDestructiveMigration()
+            .build()
+
+    @Singleton
+    @Provides
+    fun providesLocalDataBase(appDatabase: AppDatabase) = AppLocalDataSource(appDatabase)
 }

@@ -1,9 +1,9 @@
-package id.co.rolllpdf.data
+package id.co.rolllpdf.data.dto
 
 /**
  * Created by pertadima on 26,February,2021
  */
 
-data class GalleryPicture(val path: String) {
+data class GalleryPictureDto(val path: String) {
     var isSelected = false
 }

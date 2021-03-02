@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import id.co.rolllpdf.core.DiffCallback
-import id.co.rolllpdf.data.GalleryPicture
+import id.co.rolllpdf.data.dto.GalleryPictureDto
 import id.co.rolllpdf.databinding.RecyclerviewItemImageprocessingBinding
 
 /**
@@ -19,7 +19,7 @@ class ImageProcessingAdapter(
 ) : RecyclerView.Adapter<ImageProcessingAdapter.ItemViewHolder>() {
 
     private val dataSet: MutableList<String> = mutableListOf()
-    private var onSelected: (pos: Int, item: GalleryPicture) -> Unit = { _, _ -> kotlin.run { } }
+    private var onSelected: (pos: Int, item: GalleryPictureDto) -> Unit = { _, _ -> kotlin.run { } }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val itemView = RecyclerviewItemImageprocessingBinding
@@ -44,7 +44,7 @@ class ImageProcessingAdapter(
         calculateDiff(list)
     }
 
-    fun setListener(onSelected: (pos: Int, item: GalleryPicture) -> Unit) {
+    fun setListener(onSelected: (pos: Int, item: GalleryPictureDto) -> Unit) {
         this.onSelected = onSelected
     }
 
