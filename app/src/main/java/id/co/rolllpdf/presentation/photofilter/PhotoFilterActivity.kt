@@ -1,4 +1,4 @@
-package id.co.rolllpdf.presentation.crop
+package id.co.rolllpdf.presentation.photofilter
 
 import android.content.ContentUris
 import android.content.Context
@@ -8,25 +8,29 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import id.co.photocropper.CropListener
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.data.constant.IntentArguments
-import id.co.rolllpdf.databinding.ActivityCropBinding
+import id.co.rolllpdf.databinding.ActivityPhotofilterBinding
 import java.io.File
 
-
 /**
- * Created by pertadima on 26,February,2021
+ * Created by pertadima on 01,March,2021
  */
-class CropActivity : BaseActivity(), CropListener {
+class PhotoFilterActivity : BaseActivity() {
     private val binding by lazy {
-        ActivityCropBinding.inflate(layoutInflater)
+        ActivityPhotofilterBinding.inflate(layoutInflater)
     }
 
     private val imagePath by lazy {
         intent?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
     }
+
+    private val originalBitmap by lazy {
+        getImageBitmap()
+    }
+
+    private var transformedBitmap: Bitmap? = null
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -37,31 +41,48 @@ class CropActivity : BaseActivity(), CropListener {
         changeStatusBarTextColor(true)
         changeStatusBarColor(android.R.color.white)
         setupToolbar()
-        setupView()
+        setupActionListener()
     }
 
     override fun onViewModelObserver() {
     }
 
     private fun setupToolbar() {
-        binding.imagecroppingToolbar.setNavigationOnClickListener {
+        binding.photofilterToolbar.setNavigationOnClickListener {
             finish()
         }
     }
 
-    private fun setupView() {
-        try {
-            val imageBitmap = getBitmap(this, Uri.fromFile(File(imagePath)))
-            binding.imagecroppingImageviewCrop.setImageBitmap(imageBitmap)
-        } catch (ex: Exception) {
-            val uri = getImageUri(imagePath.substringAfterLast("/"))
-            val imageBitmap = getBitmap(this, uri)
-            binding.imagecroppingImageviewCrop.setImageBitmap(imageBitmap)
+    private fun setupActionListener() {
+        binding.photofilterImageviewItem.setImageBitmap(originalBitmap)
+
+        binding.photofilerLinearOriginal.setOnClickListener {
+            changeImageFilter(PhotoFilterAction.ORIGINAL)
         }
 
-        binding.imagecroppingTextviewCrop.setOnClickListener {
-            binding.imagecroppingImageviewCrop.crop(this, true)
+        binding.photofilerLinearMagic.setOnClickListener {
+            changeImageFilter(PhotoFilterAction.MAGIC)
         }
+
+        binding.photofilerLinearBw.setOnClickListener {
+            changeImageFilter(PhotoFilterAction.BW)
+        }
+
+        binding.photofilerLinearGrayscale.setOnClickListener {
+            changeImageFilter(PhotoFilterAction.GRAYSCALE)
+        }
+    }
+
+
+    private fun changeImageFilter(filter: Int) {
+     
+    }
+
+    private fun getImageBitmap() = try {
+        getBitmap(this, Uri.fromFile(File(imagePath)))
+    } catch (ex: Exception) {
+        val uri = getImageUri(imagePath.substringAfterLast("/"))
+        getBitmap(this, uri)
     }
 
     private fun getBitmap(context: Context, imageUri: Uri): Bitmap? {
@@ -72,7 +93,6 @@ class CropActivity : BaseActivity(), CropListener {
                     imageUri
                 )
             )
-
         } else {
             context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
                 BitmapFactory.decodeStream(inputStream)
@@ -86,15 +106,18 @@ class CropActivity : BaseActivity(), CropListener {
         path.toLong()
     )
 
-    override fun onFinish(bitmap: Bitmap?) {
-        //TODO: SAVE BITMAP TO FILE
-    }
-
     override fun finish() {
         super.finish()
         overridePendingTransition(
             R.anim.transition_anim_slide_up,
             R.anim.transition_anim_slide_bottom
         )
+    }
+
+    object PhotoFilterAction {
+        const val ORIGINAL = 0
+        const val MAGIC = 1
+        const val BW = 2
+        const val GRAYSCALE = 3
     }
 }

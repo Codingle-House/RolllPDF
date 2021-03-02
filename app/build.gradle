@@ -93,7 +93,6 @@ dependencies {
     implementation project(":core")
     implementation project(":uikit")
     implementation project(":photocropper")
-    implementation project(":scanlibrary")
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

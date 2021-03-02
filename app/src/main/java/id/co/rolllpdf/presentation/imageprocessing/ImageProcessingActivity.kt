@@ -17,6 +17,7 @@ import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityImageProcessingBinding
 import id.co.rolllpdf.presentation.crop.CropActivity
 import id.co.rolllpdf.presentation.imageprocessing.adapter.ImageProcessingAdapter
+import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity
 import me.everything.android.ui.overscroll.HorizontalOverScrollBounceEffectDecorator
 import me.everything.android.ui.overscroll.adapters.RecyclerViewOverScrollDecorAdapter
 import javax.inject.Inject
@@ -45,6 +46,14 @@ class ImageProcessingActivity : BaseActivity() {
     }
 
     private val startCropForResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+
+        }
+    }
+
+    private val startFilterForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -86,14 +95,24 @@ class ImageProcessingActivity : BaseActivity() {
     private fun setupViewListener() {
         binding.imageprocessingRelativeCrop.setOnClickListener {
             val intent = Intent(this, CropActivity::class.java).apply {
-                putExtra(IntentArguments.CROP_IMAGES, listOfFile[selectedPosition])
+                putExtra(IntentArguments.PROCESSING_IMAGES, listOfFile[selectedPosition])
             }
             startCropForResult.launch(intent)
-            overridePendingTransition(R.anim.transition_anim_slide_up, R.anim.transition_anim_slide_bottom)
+            overridePendingTransition(
+                R.anim.transition_anim_slide_up,
+                R.anim.transition_anim_slide_bottom
+            )
         }
 
         binding.imageprocessingRelativeFilter.setOnClickListener {
-
+            val intent = Intent(this, PhotoFilterActivity::class.java).apply {
+                putExtra(IntentArguments.PROCESSING_IMAGES, listOfFile[selectedPosition])
+            }
+            startFilterForResult.launch(intent)
+            overridePendingTransition(
+                R.anim.transition_anim_slide_up,
+                R.anim.transition_anim_slide_bottom
+            )
         }
     }
 
