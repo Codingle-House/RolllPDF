@@ -3,6 +3,8 @@ package id.co.rolllpdf.data.local.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import id.co.rolllpdf.data.local.entity.DocumentDetailEntity
 import id.co.rolllpdf.data.local.entity.DocumentEntity
 
 /**
@@ -12,4 +14,7 @@ import id.co.rolllpdf.data.local.entity.DocumentEntity
 interface DocumentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDocument(documentEntity: DocumentEntity)
+
+    @Query("SELECT * FROM tbl_document_detail WHERE id_doc = :id")
+    suspend fun getDocument(id: Long): List<DocumentDetailEntity>
 }

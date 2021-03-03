@@ -21,6 +21,7 @@ import id.co.rolllpdf.presentation.imageprocessing.adapter.ImageProcessingAdapte
 import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity
 import me.everything.android.ui.overscroll.HorizontalOverScrollBounceEffectDecorator
 import me.everything.android.ui.overscroll.adapters.RecyclerViewOverScrollDecorAdapter
+import java.io.File
 import javax.inject.Inject
 
 
@@ -152,6 +153,12 @@ class ImageProcessingActivity : BaseActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
             val imagePath = result.data?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
             val pos = result.data?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0).orZero()
+            try {
+                val deletedImage = listOfFile[pos]
+                File(deletedImage).delete()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
             listOfFile[pos] = imagePath
             imageProcessingAdapter.setData(listOfFile)
             binding.imageprocessingRecyclerviewItem.smoothScrollToPosition(pos)
