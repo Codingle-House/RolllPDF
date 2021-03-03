@@ -9,7 +9,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.AppDatabase
+import id.co.rolllpdf.data.mapper.AppDataMapperDto
+import id.co.rolllpdf.data.mapper.AppDataMapperEntity
 import id.co.rolllpdf.domain.datasource.AppLocalDataSource
+import id.co.rolllpdf.domain.repository.AppRepository
 import javax.inject.Singleton
 
 /**
@@ -32,4 +35,20 @@ object AppModule {
     @Singleton
     @Provides
     fun providesLocalDataBase(appDatabase: AppDatabase) = AppLocalDataSource(appDatabase)
+
+    @Singleton
+    @Provides
+    fun providesDataMapperDto() = AppDataMapperDto
+
+    @Singleton
+    @Provides
+    fun providesDataMapperEntity() = AppDataMapperEntity
+
+    @Singleton
+    @Provides
+    fun providesAppRepository(
+        appLocalDataSource: AppLocalDataSource,
+        appDataMapperDto: AppDataMapperDto,
+        appDataMapperEntity: AppDataMapperEntity
+    ) = AppRepository(appLocalDataSource, appDataMapperDto, appDataMapperEntity)
 }

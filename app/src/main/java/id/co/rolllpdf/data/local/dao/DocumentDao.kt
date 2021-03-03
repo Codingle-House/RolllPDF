@@ -15,6 +15,9 @@ interface DocumentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDocument(documentEntity: DocumentEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDocumentDetail(documentDetailEntity: DocumentDetailEntity)
+
     @Query("SELECT * FROM tbl_document_detail WHERE id_doc = :id")
     suspend fun getDocument(id: Long): List<DocumentDetailEntity>
 }
