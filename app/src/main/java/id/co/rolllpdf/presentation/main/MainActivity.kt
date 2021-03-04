@@ -10,6 +10,7 @@ import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.getDrawableCompat
+import id.co.rolllpdf.core.showToast
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.databinding.ActivityMainBinding
@@ -61,6 +62,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         showProView()
         floatingActionButtonListener()
         setupRecyclerView()
+        editModeListener()
     }
 
     override fun onViewModelObserver() {
@@ -75,12 +77,43 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                 toggleEditMode(false)
             }
         }
+
+        with(binding.mainImageviewChecked) {
+            setOnClickListener {
+                val allSelected =
+                    documentData.filter { it.document.isSelected }.size == documentData.size
+                bulkUpdateDocumentSelected(allSelected.not())
+
+                setBackgroundResource(if (allSelected) R.drawable.general_ic_checkedall else R.drawable.general_shape_circle_green)
+                setImageDrawable(if (allSelected) null else getDrawableCompat(R.drawable.general_ic_check))
+            }
+        }
     }
 
     private fun initOverScroll() {
         VerticalOverScrollBounceEffectDecorator(
             NestedScrollViewOverScrollDecorAdapter(binding.mainNestedscroll)
         )
+    }
+
+    private fun editModeListener() {
+        binding.mainRelativelayoutCopy.setOnClickListener {
+            val isSelected = documentData.any { it.document.isSelected }
+            if (isSelected) {
+
+            } else {
+                showToast(R.string.general_error_selected)
+            }
+        }
+
+        binding.mainRelativelayoutDelete.setOnClickListener {
+            val isSelected = documentData.any { it.document.isSelected }
+            if (isSelected) {
+
+            } else {
+                showToast(R.string.general_error_selected)
+            }
+        }
     }
 
     private fun showProView() {
@@ -213,6 +246,12 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                     it.document.isSelected
                 }.size.toString())
             } else getString(R.string.app_name)
+            val allSelected =
+                documentData.filter { it.document.isSelected }.size == documentData.size
+            with(binding.mainImageviewChecked) {
+                setBackgroundResource(if (allSelected) R.drawable.general_shape_circle_green else R.drawable.general_ic_checkedall)
+                setImageDrawable(if (allSelected) getDrawableCompat(R.drawable.general_ic_check) else null)
+            }
             mainAdapter.setData(documentData)
         }
     }
@@ -233,26 +272,17 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     private fun toggleEditMode(editMode: Boolean) {
         isEditMode = editMode
         if (isEditMode.not()) {
-            documentData.forEachIndexed { pos, data ->
-                val newDocument = data.document.copy(isSelected = false)
-                val newData = documentData[pos].copy(document = newDocument)
-                documentData[pos] = newData
-            }
-            with(mainAdapter) {
-                setData(documentData)
-                setEditModen(isEditMode)
-                notifyDataSetChanged()
-            }
+            bulkUpdateDocumentSelected(false)
         }
         with(binding.mainToolbar) {
-            navigationIcon = if (editMode) {
+            navigationIcon = if (isEditMode) {
                 getDrawableCompat(R.drawable.general_ic_chevron_left)
             } else null
 
-            title = if (editMode) {
-                getString(
-                    R.string.general_placeholder_selected, "0"
-                )
+            title = if (isEditMode) {
+                getString(R.string.general_placeholder_selected, documentData.filter {
+                    it.document.isSelected
+                }.size.toString())
             } else getString(R.string.app_name)
         }
 
@@ -288,6 +318,24 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     override fun onRationaleDenied(requestCode: Int) {
+
+    }
+
+    private fun bulkUpdateDocumentSelected(isSelected: Boolean) {
+        documentData.forEachIndexed { pos, data ->
+            val newDocument = data.document.copy(isSelected = isSelected)
+            val newData = documentData[pos].copy(document = newDocument)
+            documentData[pos] = newData
+        }
+        with(mainAdapter) {
+            setData(documentData)
+            setEditModen(isEditMode)
+            notifyDataSetChanged()
+        }
+        binding.mainToolbar.title =
+            getString(R.string.general_placeholder_selected, documentData.filter {
+                it.document.isSelected
+            }.size.toString())
 
     }
 
