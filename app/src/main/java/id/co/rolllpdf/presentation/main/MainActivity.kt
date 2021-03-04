@@ -98,9 +98,9 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     private fun editModeListener() {
         binding.mainRelativelayoutCopy.setOnClickListener {
-            val isSelected = documentData.any { it.document.isSelected }
-            if (isSelected) {
-
+            val duplicateDocument = documentData.filter { it.document.isSelected }
+            if (duplicateDocument.isNotEmpty()) {
+                mainViewModel.doInsertDocument(duplicateDocument)
             } else {
                 showToast(R.string.general_error_selected)
             }
