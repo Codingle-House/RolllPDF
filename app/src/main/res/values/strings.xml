@@ -8,6 +8,7 @@
     <string name="general_text_crop">Crop</string>
     <string name="general_text_done">Done</string>
     <string name="general_text_save">Save</string>
+    <string name="general_placeholder_number">Number %s</string>
 
     <string name="splashscreen_text_desc">Easily Scan Your Document</string>
 

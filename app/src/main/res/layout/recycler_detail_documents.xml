@@ -12,7 +12,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/recyclermain_imageview_thumbnail"
+            android:id="@+id/recyclerdetail_imageview_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_90sdp"
             android:background="@color/app_shadow"
@@ -20,39 +20,25 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <id.co.rolllpdf.uikit.UiKitTextview
-            android:id="@+id/recyclermain_textview_title"
+            android:id="@+id/recyclerdetail_textview_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_5sdp"
-            app:layout_constraintTop_toBottomOf="@+id/recyclermain_imageview_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/recyclerdetail_imageview_thumbnail"
             app:rolll_text_code="h7_B"
             tools:text="Document 1" />
 
         <id.co.rolllpdf.uikit.UiKitTextview
-            android:id="@+id/recyclermain_textview_date"
+            android:id="@+id/recyclerdetail_textview_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_2sdp"
             android:paddingBottom="@dimen/_5sdp"
-            app:layout_constraintTop_toBottomOf="@+id/recyclermain_textview_title"
+            app:layout_constraintTop_toBottomOf="@+id/recyclerdetail_textview_title"
             app:rolll_text_code="h7_R"
             tools:text="Feb 23 19:50" />
-
-
-        <id.co.rolllpdf.uikit.UiKitTextview
-            android:id="@+id/recyclermain_textview_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="@dimen/_5sdp"
-            android:background="@drawable/main_shape_rounded_black"
-            android:padding="@dimen/_5sdp"
-            app:layout_constraintBottom_toBottomOf="@id/recyclermain_imageview_thumbnail"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:rolll_text_code="h7_B"
-            app:rolll_text_color="light"
-            tools:text="10" />
+        
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

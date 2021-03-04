@@ -7,3 +7,4 @@ package id.co.rolllpdf.core
 fun Float?.orZero() = this ?: 0F
 fun Int?.orZero() = this ?: 0
 fun Double?.orZero() = this ?: 0.0
+fun Long?.orZero() = this ?: 0L

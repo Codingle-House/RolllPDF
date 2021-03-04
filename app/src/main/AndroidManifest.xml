@@ -52,6 +52,10 @@
             android:name=".presentation.photofilter.PhotoFilterActivity"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".presentation.detail.DocumentDetailActivity"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="id.co.rolllpdf.provider"

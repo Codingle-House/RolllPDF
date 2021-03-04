@@ -8,10 +8,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.databinding.ActivityMainBinding
 import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
+import id.co.rolllpdf.presentation.detail.DocumentDetailActivity
 import id.co.rolllpdf.presentation.main.adapter.MainAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
@@ -35,7 +37,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     private val mainAdapter by lazy {
-        MainAdapter(this, diffCallback)
+        MainAdapter(
+            this, diffCallback, ::handleOnAdapterClickListener,
+            ::handleOnAdapterLongClickListener
+        )
     }
 
     override fun setupViewBinding() {
@@ -164,6 +169,22 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     private fun handleDocumentsLiveData(data: List<DocumentRelationDto>) {
         binding.mainFlipperData.displayedChild = if (data.isEmpty()) State.EMPTY else State.DATA
         mainAdapter.setData(data)
+    }
+
+    private fun handleOnAdapterClickListener(data: DocumentRelationDto) {
+        val intent = Intent(this, DocumentDetailActivity::class.java).apply {
+            putExtra(IntentArguments.DOCUMENT_TITLE, data.document.title)
+            putExtra(IntentArguments.DOCUMENT_ID, data.document.id)
+        }
+        startActivity(intent)
+        overridePendingTransition(
+            R.anim.transition_anim_slide_in_right,
+            R.anim.transition_anim_slide_out_left
+        )
+    }
+
+    private fun handleOnAdapterLongClickListener(pos: Int, data: DocumentRelationDto) {
+
     }
 
     override fun onRequestPermissionsResult(

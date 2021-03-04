@@ -9,4 +9,7 @@ object IntentArguments {
 
     const val PROCESSING_IMAGES = "PROCESSING_IMAGES"
     const val PROCESSING_POSITION = "PROCESSING_POSITION"
+
+    const val DOCUMENT_TITLE = "DOCUMENT_TITLE"
+    const val DOCUMENT_ID = "DOCUMENT_ID"
 }
