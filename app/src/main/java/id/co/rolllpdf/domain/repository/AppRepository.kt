@@ -31,4 +31,8 @@ class AppRepository @Inject constructor(
 
     suspend fun getDocumentDetailCount(idDoc: Long) =
         appLocalDataSource.getDocumentDetailCount(idDoc)
+
+    suspend fun getAllDocsWithDetails() = appLocalDataSource.getAllDocsWithDetails().map {
+        appDataMapperDto.convertDocumentRelationDto(it)
+    }
 }

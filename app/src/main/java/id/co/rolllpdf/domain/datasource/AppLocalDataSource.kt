@@ -22,4 +22,6 @@ class AppLocalDataSource @Inject constructor(
 
     suspend fun getDocumentDetailCount(idDoc: Long) =
         appDatabase.documentDao().getDocumentDetailCount(idDoc)
+
+    suspend fun getAllDocsWithDetails() = appDatabase.documentDao().getAllDocsWithDetails()
 }
