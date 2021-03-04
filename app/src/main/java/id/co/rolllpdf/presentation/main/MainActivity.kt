@@ -101,6 +101,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             val duplicateDocument = documentData.filter { it.document.isSelected }
             if (duplicateDocument.isNotEmpty()) {
                 mainViewModel.doInsertDocument(duplicateDocument)
+                toggleEditMode(false)
             } else {
                 showToast(R.string.general_error_selected)
             }
