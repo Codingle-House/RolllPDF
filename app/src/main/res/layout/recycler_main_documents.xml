@@ -54,5 +54,17 @@
             app:rolll_text_code="h7_B"
             app:rolll_text_color="light"
             tools:text="10" />
+
+        <ImageView
+            android:id="@+id/recyclermain_imageview_checked"
+            android:layout_width="@dimen/_18ssp"
+            android:layout_height="@dimen/_18ssp"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@drawable/general_shape_circle_green"
+            android:padding="@dimen/_5sdp"
+            android:src="@drawable/general_ic_check"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

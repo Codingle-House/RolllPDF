@@ -6,5 +6,6 @@ package id.co.rolllpdf.data.local.dto
 data class DocumentDto(
     val id: Long = 0,
     val title: String = "",
-    val dateTime: String = ""
+    val dateTime: String = "",
+    val isSelected: Boolean = false
 )

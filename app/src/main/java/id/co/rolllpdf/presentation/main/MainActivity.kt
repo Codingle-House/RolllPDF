@@ -40,12 +40,13 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     private val mainAdapter by lazy {
         MainAdapter(
-            this, diffCallback, ::handleOnAdapterClickListener,
-            ::handleOnAdapterLongClickListener
+            this, diffCallback,
+            ::handleOnAdapterClickListener, ::handleOnAdapterLongClickListener
         )
     }
 
     private var isEditMode: Boolean = false
+    private val documentData: MutableList<DocumentRelationDto> = mutableListOf()
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -70,7 +71,9 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     private fun setupToolbar() {
         binding.mainToolbar.setNavigationOnClickListener {
-            if (isEditMode) toggleEditMode(false)
+            if (isEditMode) {
+                toggleEditMode(false)
+            }
         }
     }
 
@@ -101,7 +104,9 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         with(binding.mainRecyclerviewDocument) {
             val gridLayoutManager = GridLayoutManager(this@MainActivity, 3)
             layoutManager = gridLayoutManager
-            adapter = mainAdapter
+            adapter = mainAdapter.apply {
+                setHasStableIds(true)
+            }
             addItemDecoration(SpaceItemDecoration(10, 3))
         }
     }
@@ -180,11 +185,15 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     private fun handleDocumentsLiveData(data: List<DocumentRelationDto>) {
+        with(documentData) {
+            clear()
+            addAll(data)
+        }
         binding.mainFlipperData.displayedChild = if (data.isEmpty()) State.EMPTY else State.DATA
         mainAdapter.setData(data)
     }
 
-    private fun handleOnAdapterClickListener(data: DocumentRelationDto) {
+    private fun handleOnAdapterClickListener(pos: Int, data: DocumentRelationDto) {
         if (isEditMode.not()) {
             val intent = Intent(this, DocumentDetailActivity::class.java).apply {
                 putExtra(IntentArguments.DOCUMENT_TITLE, data.document.title)
@@ -195,15 +204,46 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                 R.anim.transition_anim_slide_in_right,
                 R.anim.transition_anim_slide_out_left
             )
+        } else {
+            val newDocument = data.document.copy(isSelected = data.document.isSelected.not())
+            val newData = documentData[pos].copy(document = newDocument)
+            documentData[pos] = newData
+            binding.mainToolbar.title = if (isEditMode) {
+                getString(R.string.general_placeholder_selected, documentData.filter {
+                    it.document.isSelected
+                }.size.toString())
+            } else getString(R.string.app_name)
+            mainAdapter.setData(documentData)
         }
     }
 
     private fun handleOnAdapterLongClickListener(pos: Int, data: DocumentRelationDto) {
         toggleEditMode(true)
+        val newDocument = data.document.copy(isSelected = data.document.isSelected.not())
+        val newData = documentData[pos].copy(document = newDocument)
+        documentData[pos] = newData
+        binding.mainToolbar.title = if (isEditMode) {
+            getString(R.string.general_placeholder_selected, documentData.filter {
+                it.document.isSelected
+            }.size.toString())
+        } else getString(R.string.app_name)
+        mainAdapter.setData(documentData)
     }
 
     private fun toggleEditMode(editMode: Boolean) {
         isEditMode = editMode
+        if (isEditMode.not()) {
+            documentData.forEachIndexed { pos, data ->
+                val newDocument = data.document.copy(isSelected = false)
+                val newData = documentData[pos].copy(document = newDocument)
+                documentData[pos] = newData
+            }
+            with(mainAdapter) {
+                setData(documentData)
+                setEditModen(isEditMode)
+                notifyDataSetChanged()
+            }
+        }
         with(binding.mainToolbar) {
             navigationIcon = if (editMode) {
                 getDrawableCompat(R.drawable.general_ic_chevron_left)
@@ -249,6 +289,14 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     override fun onRationaleDenied(requestCode: Int) {
 
+    }
+
+    override fun onBackPressed() {
+        if (isEditMode) {
+            toggleEditMode(false)
+        } else {
+            finish()
+        }
     }
 
     private object Permission {
