@@ -30,18 +30,20 @@ class ImageProcessingViewModel @Inject constructor(
         insertDone.postValue(false)
         files.forEach {
             val dateTime = DateTimeUtils.getCurrentDateString()
-            val documentDetailDto = DocumentDetailDto(
-                filePath = it, dateTime = dateTime, idDoc = documentId
-            )
-            val docs = appRepository.getDocumentDetailCount(documentDetailDto.idDoc)
+            val docs = appRepository.getDocumentCount()
+
             val documentDto = DocumentDto(
                 id = documentId,
                 title = String.format(FILE_NAME, docs.inc()),
                 dateTime = dateTime
             )
 
+            val documentDetailDto = DocumentDetailDto(
+                filePath = it, dateTime = dateTime, idDoc = documentId
+            )
+            val details = appRepository.getDocumentDetailCount(documentDetailDto.idDoc)
             with(appRepository) {
-                if (docs == 0) insertDocument(documentDto)
+                if (details == 0) insertDocument(documentDto)
                 insertDocumentDetail(documentDetailDto)
             }
         }

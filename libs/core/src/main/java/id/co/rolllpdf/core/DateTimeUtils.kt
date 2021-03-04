@@ -43,8 +43,8 @@ object DateTimeUtils {
 
     fun changeDateTimeFormat(
         value: String,
-        currentDateFormat: String,
-        targetDateFormat: String
+        currentDateFormat: String = DEFAULT_DATE,
+        targetDateFormat: String = DEFAULT_TARGET_TIME
     ): String {
         val parser = SimpleDateFormat(currentDateFormat, Locale.getDefault())
         val formatter = SimpleDateFormat(targetDateFormat, Locale.getDefault())
@@ -53,10 +53,5 @@ object DateTimeUtils {
 
     const val DEFAULT_DATE = "yyyy-MM-dd HH:mm"
     const val DEFAULT_TIME = "HH:mm"
-    const val DEFAULT_TIME_FULL = "HH:mm aaa"
-    const val SEVEN_DAYS = 7
-    const val THIRTY_DAYS = 30
-
-    const val BACKUP_DATE = "yyyy-MM-dd|HH:mm aaa"
-    const val FULL_DATE_FORMAT = "EEEE, dd MMMM yyyy"
+    const val DEFAULT_TARGET_TIME = "MMM dd HH:mm"
 }

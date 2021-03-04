@@ -1,6 +1,5 @@
 package id.co.rolllpdf.data.local.dao
 
-import androidx.paging.DataSource
 import androidx.room.*
 import id.co.rolllpdf.data.local.entity.DocumentDetailEntity
 import id.co.rolllpdf.data.local.entity.DocumentEntity
@@ -20,10 +19,13 @@ interface DocumentDao {
     @Query("SELECT * FROM tbl_document_detail WHERE id_doc = :id")
     suspend fun getDocumentDetail(id: Long): List<DocumentDetailEntity>
 
+    @Query("SELECT COUNT(id) FROM tbl_document")
+    suspend fun getDocumentCount(): Int
+
     @Query("SELECT COUNT(id_doc) FROM tbl_document_detail WHERE id_doc = :id")
     suspend fun getDocumentDetailCount(id: Long): Int
 
     @Transaction
     @Query("SELECT * FROM tbl_document")
-    suspend fun getAllDocsWithDetails(): DataSource.Factory<Int, DocumentRelationEntity>
+    suspend fun getAllDocsWithDetails(): List<DocumentRelationEntity>
 }

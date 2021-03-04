@@ -12,4 +12,5 @@
     <color name="default_background">#fafafa</color>
     <color name="app_green">#27C18A</color>
     <color name="app_text_dark">#2E2F30</color>
+    <color name="app_shadow">#C1C1C1</color>
 </resources>

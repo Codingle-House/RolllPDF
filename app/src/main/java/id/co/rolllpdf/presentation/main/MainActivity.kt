@@ -2,21 +2,40 @@ package id.co.rolllpdf.presentation.main
 
 import android.Manifest
 import android.content.Intent
+import androidx.activity.viewModels
+import androidx.recyclerview.widget.GridLayoutManager
+import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.databinding.ActivityMainBinding
 import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
+import id.co.rolllpdf.presentation.main.adapter.MainAdapter
+import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     EasyPermissions.RationaleCallbacks {
+
+    private val mainViewModel: MainViewModel by viewModels()
+
+    @Inject
+    lateinit var diffCallback: DiffCallback
+
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
+    }
+
+    private val mainAdapter by lazy {
+        MainAdapter(this, diffCallback)
     }
 
     override fun setupViewBinding() {
@@ -30,9 +49,14 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         initOverScroll()
         showProView()
         floatingActionButtonListener()
+        loadData()
+        setupRecyclerView()
     }
 
     override fun onViewModelObserver() {
+        with(mainViewModel) {
+            observeDocuments().onResult { handleDocumentsLiveData(it) }
+        }
     }
 
     private fun initOverScroll() {
@@ -58,10 +82,22 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }
     }
 
+    private fun setupRecyclerView() {
+        with(binding.mainRecyclerviewDocument) {
+            val gridLayoutManager = GridLayoutManager(this@MainActivity, 3)
+            layoutManager = gridLayoutManager
+            adapter = mainAdapter
+            addItemDecoration(SpaceItemDecoration(8))
+        }
+    }
+
     private fun goToCamera() {
         val intent = Intent(this, CameraActivity::class.java)
         startActivity(intent)
-        overridePendingTransition(R.anim.transition_anim_slide_up, R.anim.transition_anim_slide_bottom)
+        overridePendingTransition(
+            R.anim.transition_anim_slide_up,
+            R.anim.transition_anim_slide_bottom
+        )
     }
 
     private fun floatingActionButtonListener() {
@@ -116,6 +152,20 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }
     }
 
+    private fun loadData() {
+        mainViewModel.getDocuments()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.mainViewPro.showWithAnimation()
+    }
+
+    private fun handleDocumentsLiveData(data: List<DocumentRelationDto>) {
+        binding.mainFlipperData.displayedChild = if (data.isEmpty()) State.EMPTY else State.DATA
+        mainAdapter.setData(data)
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -143,12 +193,12 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        binding.mainViewPro.showWithAnimation()
-    }
-
     object Permission {
         const val MEDIA = 101
+    }
+
+    private object State {
+        const val EMPTY = 0
+        const val DATA = 1
     }
 }

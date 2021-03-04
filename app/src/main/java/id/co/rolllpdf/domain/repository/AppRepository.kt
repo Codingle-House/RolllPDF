@@ -29,6 +29,8 @@ class AppRepository @Inject constructor(
             appDataMapperDto.convertDocumentDetailToDto(it)
         }
 
+    suspend fun getDocumentCount() = appLocalDataSource.getDocumentCount()
+
     suspend fun getDocumentDetailCount(idDoc: Long) =
         appLocalDataSource.getDocumentDetailCount(idDoc)
 

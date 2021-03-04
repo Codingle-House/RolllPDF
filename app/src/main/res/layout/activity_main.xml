@@ -65,27 +65,37 @@
                 android:id="@+id/main_view_pro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_16sdp" />
+                android:layout_marginHorizontal="@dimen/_16sdp"
+                android:layout_marginTop="@dimen/_16sdp" />
 
             <ViewFlipper
+                android:id="@+id/main_flipper_data"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_16sdp">
 
                 <include
                     layout="@layout/view_main_empty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_80sdp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/main_recyclerview_document"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="@dimen/_16sdp" />
             </ViewFlipper>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/main_fab_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/_16sdp"
-        android:id="@+id/main_fab_add"
         android:gravity="center"
         android:src="@drawable/general_ic_add"
         app:backgroundTint="@color/app_green"
