@@ -5,7 +5,7 @@ package id.co.rolllpdf.data.local.dto
  */
 
 data class DocumentDetailDto(
-    val dateTime: String,
-    val filePath: String,
-    val idNote: Long
+    val dateTime: String = "",
+    val filePath: String = "",
+    val idDoc: Long = 0
 )

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -18,10 +19,12 @@ import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityImageProcessingBinding
 import id.co.rolllpdf.presentation.crop.CropActivity
 import id.co.rolllpdf.presentation.imageprocessing.adapter.ImageProcessingAdapter
+import id.co.rolllpdf.presentation.main.MainActivity
 import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity
 import me.everything.android.ui.overscroll.HorizontalOverScrollBounceEffectDecorator
 import me.everything.android.ui.overscroll.adapters.RecyclerViewOverScrollDecorAdapter
 import java.io.File
+import java.util.*
 import javax.inject.Inject
 
 
@@ -31,6 +34,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ImageProcessingActivity : BaseActivity() {
+
+    private val imageProcessingViewModel: ImageProcessingViewModel by viewModels()
 
     @Inject
     lateinit var diffCallback: DiffCallback
@@ -46,6 +51,11 @@ class ImageProcessingActivity : BaseActivity() {
     private val imageProcessingAdapter by lazy {
         ImageProcessingAdapter(this, diffCallback)
     }
+
+    private val documentId by lazy {
+        Calendar.getInstance().timeInMillis
+    }
+
 
     private val startCropForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -73,7 +83,17 @@ class ImageProcessingActivity : BaseActivity() {
     }
 
     override fun onViewModelObserver() {
-
+        imageProcessingViewModel.observeInsertDone().onResult {
+            if (it) {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(
+                    R.anim.transition_anim_fade_in,
+                    R.anim.transition_anim_fade_out
+                )
+                finishAffinity()
+            }
+        }
     }
 
     private fun initData() {
@@ -84,6 +104,9 @@ class ImageProcessingActivity : BaseActivity() {
 
     private fun setupToolbar() {
         binding.imageprocessingToolbar.setNavigationOnClickListener { finish() }
+        binding.imageprocessingTextviewSave.setOnClickListener {
+            imageProcessingViewModel.doInsertDocument(documentId, listOfFile)
+        }
     }
 
     private fun setupViewListener() {

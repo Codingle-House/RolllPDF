@@ -21,7 +21,17 @@
             app:contentInsetStartWithNavigation="0dp"
             app:navigationIcon="@drawable/general_ic_chevron_left"
             app:title="@string/imageprocessing_title_page"
-            app:titleTextAppearance="@style/ToolbarTextAppearance" />
+            app:titleTextAppearance="@style/ToolbarTextAppearance">
+            <id.co.rolllpdf.uikit.UiKitTextview
+                android:id="@+id/imageprocessing_textview_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/_16sdp"
+                android:gravity="center"
+                android:text="@string/general_text_save"
+                app:textAllCaps="true" />
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 

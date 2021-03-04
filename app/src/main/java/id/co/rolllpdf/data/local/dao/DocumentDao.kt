@@ -19,5 +19,8 @@ interface DocumentDao {
     suspend fun insertDocumentDetail(documentDetailEntity: DocumentDetailEntity)
 
     @Query("SELECT * FROM tbl_document_detail WHERE id_doc = :id")
-    suspend fun getDocument(id: Long): List<DocumentDetailEntity>
+    suspend fun getDocumentDetail(id: Long): List<DocumentDetailEntity>
+
+    @Query("SELECT COUNT(id_doc) FROM tbl_document_detail WHERE id_doc = :id")
+    suspend fun getDocumentDetailCount(id: Long): Int
 }
