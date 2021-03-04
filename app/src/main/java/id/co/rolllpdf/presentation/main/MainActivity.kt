@@ -3,6 +3,7 @@ package id.co.rolllpdf.presentation.main
 import android.Manifest
 import android.content.Intent
 import androidx.activity.viewModels
+import androidx.core.view.isGone
 import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
@@ -42,6 +43,8 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             ::handleOnAdapterLongClickListener
         )
     }
+
+    private var isEditMode: Boolean = false
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -162,8 +165,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     override fun onResume() {
         super.onResume()
-        loadData()
-        binding.mainViewPro.showWithAnimation()
+        if (isEditMode.not()) {
+            loadData()
+            binding.mainViewPro.showWithAnimation()
+        }
     }
 
     private fun handleDocumentsLiveData(data: List<DocumentRelationDto>) {
@@ -172,19 +177,24 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     private fun handleOnAdapterClickListener(data: DocumentRelationDto) {
-        val intent = Intent(this, DocumentDetailActivity::class.java).apply {
-            putExtra(IntentArguments.DOCUMENT_TITLE, data.document.title)
-            putExtra(IntentArguments.DOCUMENT_ID, data.document.id)
+        if (isEditMode.not()) {
+            val intent = Intent(this, DocumentDetailActivity::class.java).apply {
+                putExtra(IntentArguments.DOCUMENT_TITLE, data.document.title)
+                putExtra(IntentArguments.DOCUMENT_ID, data.document.id)
+            }
+            startActivity(intent)
+            overridePendingTransition(
+                R.anim.transition_anim_slide_in_right,
+                R.anim.transition_anim_slide_out_left
+            )
         }
-        startActivity(intent)
-        overridePendingTransition(
-            R.anim.transition_anim_slide_in_right,
-            R.anim.transition_anim_slide_out_left
-        )
     }
 
     private fun handleOnAdapterLongClickListener(pos: Int, data: DocumentRelationDto) {
-
+        isEditMode = true
+        binding.mainViewPro.isGone = true
+        binding.mainFabAdd.isGone = true
+        binding.mainLinearlayoutAction.isGone = false
     }
 
     override fun onRequestPermissionsResult(

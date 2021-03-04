@@ -48,7 +48,7 @@ class DialogProFeatureView @JvmOverloads constructor(
         }
     }
 
-    private fun hideWithAnimation() {
+    fun hideWithAnimation() {
         binding.proImageviewClose.setOnClickListener {
             isGone = true
             action.invoke(Action.Close)
