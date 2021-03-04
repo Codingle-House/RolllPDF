@@ -9,8 +9,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
-import id.co.rolllpdf.data.dto.GalleryPictureDto
 import id.co.rolllpdf.data.constant.IntentArguments
+import id.co.rolllpdf.data.dto.GalleryPictureDto
 import id.co.rolllpdf.databinding.ActivityPhotoPickerBinding
 import id.co.rolllpdf.presentation.photopicker.adapter.PhotoPickerAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration

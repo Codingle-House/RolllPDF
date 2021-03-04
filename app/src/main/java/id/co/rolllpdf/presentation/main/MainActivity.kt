@@ -214,7 +214,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     }
 
-    object Permission {
+    private object Permission {
         const val MEDIA = 101
     }
 

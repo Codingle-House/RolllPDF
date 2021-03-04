@@ -15,7 +15,6 @@ import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityCropBinding
-import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity
 import id.co.rolllpdf.util.image.convertBitmapToFile
 import id.co.rolllpdf.util.image.createFile
 import id.co.rolllpdf.util.image.getOutputFileDirectory

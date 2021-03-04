@@ -52,9 +52,9 @@ class ImageProcessingActivity : BaseActivity() {
     }
 
     private val documentId by lazy {
-        Calendar.getInstance().timeInMillis
+        val id = intent?.getLongExtra(IntentArguments.DOCUMENT_ID, 0).orZero()
+        if (id != 0L) id else Calendar.getInstance().timeInMillis
     }
-
 
     private val startCropForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()

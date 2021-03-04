@@ -1,5 +1,7 @@
 package id.co.rolllpdf.presentation.detail
 
+import android.Manifest
+import android.content.Intent
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -10,11 +12,15 @@ import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.databinding.ActivityDocumentDetailsBinding
+import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
 import id.co.rolllpdf.presentation.detail.adapter.DocumentDetailAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
+import pub.devrel.easypermissions.AfterPermissionGranted
+import pub.devrel.easypermissions.AppSettingsDialog
+import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 
 /**
@@ -22,7 +28,8 @@ import javax.inject.Inject
  */
 
 @AndroidEntryPoint
-class DocumentDetailActivity : BaseActivity() {
+class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
+    EasyPermissions.RationaleCallbacks {
 
     private val documentDetailViewModel: DocumentDetailViewModel by viewModels()
 
@@ -60,6 +67,7 @@ class DocumentDetailActivity : BaseActivity() {
         initOverScroll()
         showProView()
         setupRecyclerView()
+        floatingActionButtonListener()
     }
 
     override fun onViewModelObserver() {
@@ -119,12 +127,101 @@ class DocumentDetailActivity : BaseActivity() {
 
     }
 
+    private fun goToCamera() {
+        val intent = Intent(this, CameraActivity::class.java).apply {
+            putExtra(IntentArguments.DOCUMENT_ID, documentId)
+        }
+        startActivity(intent)
+        overridePendingTransition(
+            R.anim.transition_anim_slide_up,
+            R.anim.transition_anim_slide_bottom
+        )
+    }
+
     override fun onResume() {
         super.onResume()
         binding.documentdetailsViewPro.showWithAnimation()
         documentDetailViewModel.getDocuments(documentId)
     }
 
+    private fun floatingActionButtonListener() {
+        binding.documentdetailsFabAdd.setOnClickListener {
+            checkStoragePermission {
+                goToCamera()
+            }
+        }
+    }
+
+    @AfterPermissionGranted(Permission.MEDIA)
+    private fun checkStoragePermission(onHasPermission: () -> Unit) {
+        val perms = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            arrayOf(
+                Manifest.permission.ACCESS_MEDIA_LOCATION,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+            )
+        }
+
+        if (EasyPermissions.hasPermissions(this, *perms)) {
+            onHasPermission.invoke()
+        } else {
+            // Do not have permissions, request them now
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                EasyPermissions.requestPermissions(
+                    this,
+                    "",
+                    Permission.MEDIA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.ACCESS_MEDIA_LOCATION,
+                )
+            } else {
+                EasyPermissions.requestPermissions(
+                    this,
+                    "",
+                    Permission.MEDIA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA
+                )
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        goToCamera()
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            AppSettingsDialog.Builder(this).build().show()
+        }
+    }
+
+    override fun onRationaleAccepted(requestCode: Int) {
+
+    }
+
+    override fun onRationaleDenied(requestCode: Int) {
+
+    }
 
     override fun finish() {
         super.finish()
@@ -132,6 +229,10 @@ class DocumentDetailActivity : BaseActivity() {
             R.anim.transition_anim_slide_in_left,
             R.anim.transition_anim_slide_out_right
         )
+    }
+
+    private object Permission {
+        const val MEDIA = 101
     }
 
     private object State {

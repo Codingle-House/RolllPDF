@@ -45,7 +45,10 @@ class SplashScreenActivity : BaseActivity() {
             Handler(Looper.getMainLooper()).postDelayed({
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
-                overridePendingTransition(R.anim.transition_anim_fade_in, R.anim.transition_anim_fade_out)
+                overridePendingTransition(
+                    R.anim.transition_anim_fade_in,
+                    R.anim.transition_anim_fade_out
+                )
                 finish()
             }, ACTIVITY_TRANSITION_DELAY)
         }

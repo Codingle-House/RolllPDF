@@ -20,6 +20,7 @@ import androidx.core.net.toFile
 import androidx.core.view.isGone
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityCameraBinding
 import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
@@ -45,6 +46,10 @@ class CameraActivity : BaseActivity() {
 
     private val cameraExecutor by lazy {
         Executors.newSingleThreadExecutor()
+    }
+
+    private val documentId by lazy {
+        intent?.getLongExtra(IntentArguments.DOCUMENT_ID, 0).orZero()
     }
 
     private val startForResult = registerForActivityResult(
@@ -116,6 +121,7 @@ class CameraActivity : BaseActivity() {
             if (listOfFile.isNotEmpty()) {
                 val intent = Intent(this, ImageProcessingActivity::class.java).apply {
                     putStringArrayListExtra(IntentArguments.CAMERA_IMAGES, ArrayList(listOfFile))
+                    putExtra(IntentArguments.DOCUMENT_ID, documentId)
                 }
                 startActivity(intent)
                 overridePendingTransition(
