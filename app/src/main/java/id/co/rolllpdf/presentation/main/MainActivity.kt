@@ -49,7 +49,6 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         initOverScroll()
         showProView()
         floatingActionButtonListener()
-        loadData()
         setupRecyclerView()
     }
 
@@ -158,6 +157,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     override fun onResume() {
         super.onResume()
+        loadData()
         binding.mainViewPro.showWithAnimation()
     }
 

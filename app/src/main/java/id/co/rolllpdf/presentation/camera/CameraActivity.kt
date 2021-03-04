@@ -89,6 +89,7 @@ class CameraActivity : BaseActivity() {
 
     private fun setupToolbar() {
         binding.cameraToolbar.setNavigationOnClickListener {
+            deleteFiles()
             finish()
         }
     }
@@ -121,6 +122,7 @@ class CameraActivity : BaseActivity() {
                     R.anim.transition_anim_slide_in_right,
                     R.anim.transition_anim_slide_out_left
                 )
+                finish()
             }
         }
     }
@@ -304,6 +306,17 @@ class CameraActivity : BaseActivity() {
             File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() }
         }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else appContext.filesDir
+    }
+
+    private fun deleteFiles() {
+        listOfFile.forEach {
+            File(it).delete()
+        }
+    }
+
+    override fun onBackPressed() {
+        deleteFiles()
+        finish()
     }
 
     override fun finish() {

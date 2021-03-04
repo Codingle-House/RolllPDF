@@ -87,6 +87,10 @@
                     android:nestedScrollingEnabled="false"
                     android:paddingHorizontal="@dimen/_16sdp" />
             </ViewFlipper>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_20sdp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

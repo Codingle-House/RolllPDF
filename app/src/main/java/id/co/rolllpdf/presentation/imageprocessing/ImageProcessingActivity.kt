@@ -19,7 +19,6 @@ import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityImageProcessingBinding
 import id.co.rolllpdf.presentation.crop.CropActivity
 import id.co.rolllpdf.presentation.imageprocessing.adapter.ImageProcessingAdapter
-import id.co.rolllpdf.presentation.main.MainActivity
 import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity
 import me.everything.android.ui.overscroll.HorizontalOverScrollBounceEffectDecorator
 import me.everything.android.ui.overscroll.adapters.RecyclerViewOverScrollDecorAdapter
@@ -85,13 +84,7 @@ class ImageProcessingActivity : BaseActivity() {
     override fun onViewModelObserver() {
         imageProcessingViewModel.observeInsertDone().onResult {
             if (it) {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                overridePendingTransition(
-                    R.anim.transition_anim_fade_in,
-                    R.anim.transition_anim_fade_out
-                )
-                finishAffinity()
+                finish()
             }
         }
     }
@@ -103,7 +96,10 @@ class ImageProcessingActivity : BaseActivity() {
     }
 
     private fun setupToolbar() {
-        binding.imageprocessingToolbar.setNavigationOnClickListener { finish() }
+        binding.imageprocessingToolbar.setNavigationOnClickListener {
+            deleteFiles()
+            finish()
+        }
         binding.imageprocessingTextviewSave.setOnClickListener {
             imageProcessingViewModel.doInsertDocument(documentId, listOfFile)
         }
@@ -186,6 +182,17 @@ class ImageProcessingActivity : BaseActivity() {
             imageProcessingAdapter.setData(listOfFile)
             binding.imageprocessingRecyclerviewItem.smoothScrollToPosition(pos)
         }
+    }
+
+    private fun deleteFiles() {
+        listOfFile.forEach {
+            File(it).delete()
+        }
+    }
+
+    override fun onBackPressed() {
+        deleteFiles()
+        finish()
     }
 
     override fun finish() {
