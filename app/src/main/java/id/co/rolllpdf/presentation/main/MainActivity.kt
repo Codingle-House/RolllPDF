@@ -9,6 +9,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.databinding.ActivityMainBinding
@@ -54,6 +55,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     override fun setupUi() {
         changeStatusBarTextColor(true)
         changeStatusBarColor(android.R.color.white)
+        setupToolbar()
         initOverScroll()
         showProView()
         floatingActionButtonListener()
@@ -63,6 +65,12 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     override fun onViewModelObserver() {
         with(mainViewModel) {
             observeDocuments().onResult { handleDocumentsLiveData(it) }
+        }
+    }
+
+    private fun setupToolbar() {
+        binding.mainToolbar.setNavigationOnClickListener {
+            if (isEditMode) toggleEditMode(false)
         }
     }
 
@@ -191,10 +199,29 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     private fun handleOnAdapterLongClickListener(pos: Int, data: DocumentRelationDto) {
-        isEditMode = true
-        binding.mainViewPro.isGone = true
-        binding.mainFabAdd.isGone = true
-        binding.mainLinearlayoutAction.isGone = false
+        toggleEditMode(true)
+    }
+
+    private fun toggleEditMode(editMode: Boolean) {
+        isEditMode = editMode
+        with(binding.mainToolbar) {
+            navigationIcon = if (editMode) {
+                getDrawableCompat(R.drawable.general_ic_chevron_left)
+            } else null
+
+            title = if (editMode) {
+                getString(
+                    R.string.general_placeholder_selected, "0"
+                )
+            } else getString(R.string.app_name)
+        }
+
+        binding.mainViewPro.isGone = editMode
+        binding.mainFabAdd.isGone = editMode
+        binding.mainImageviewSearch.isGone = editMode
+        binding.mainImageviewMore.isGone = editMode
+        binding.mainLinearlayoutAction.isGone = editMode.not()
+        binding.mainImageviewChecked.isGone = editMode.not()
     }
 
     override fun onRequestPermissionsResult(
