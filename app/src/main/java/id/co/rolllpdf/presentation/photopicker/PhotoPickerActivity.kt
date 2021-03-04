@@ -91,7 +91,7 @@ class PhotoPickerActivity : BaseActivity() {
             val gridLayoutManager = GridLayoutManager(this@PhotoPickerActivity, 3)
             layoutManager = gridLayoutManager
             adapter = photoPickerAdapter
-            addItemDecoration(SpaceItemDecoration(8, 3))
+            addItemDecoration(SpaceItemDecoration(4, 3))
 
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

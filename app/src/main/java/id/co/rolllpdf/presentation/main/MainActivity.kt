@@ -87,7 +87,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             val gridLayoutManager = GridLayoutManager(this@MainActivity, 3)
             layoutManager = gridLayoutManager
             adapter = mainAdapter
-            addItemDecoration(SpaceItemDecoration(16, 3))
+            addItemDecoration(SpaceItemDecoration(10, 3))
         }
     }
 
