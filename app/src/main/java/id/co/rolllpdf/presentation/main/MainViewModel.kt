@@ -5,11 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.co.rolllpdf.core.DateTimeUtils
-import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.domain.repository.AppRepository
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -30,20 +30,20 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
         files: List<DocumentRelationDto>
     ) = viewModelScope.launch {
         files.forEach { docs ->
-            val docCount = appRepository.getDocumentCount()
             val dateTime = DateTimeUtils.getCurrentDateString()
-
+            val randomNumber: Int = Random().nextInt(1000)
+            val newDocumentId = docs.document.id + randomNumber
             docs.details.forEach {
                 with(appRepository) {
-                    val details = getDocumentDetailCount(docs.document.id + docCount)
+                    val details = getDocumentDetailCount(newDocumentId)
                     val documentDto = docs.document.copy(
-                        id = docs.document.id + docCount,
+                        id = newDocumentId,
                         title = docs.document.title + " " + FILE_NAME,
                         dateTime = dateTime
                     )
 
                     val documentDetailDto = it.copy(
-                        dateTime = dateTime, idDoc = docs.document.id + docCount
+                        dateTime = dateTime, idDoc = newDocumentId
                     )
 
                     if (details == 0) insertDocument(documentDto)
