@@ -28,4 +28,13 @@ interface DocumentDao {
     @Transaction
     @Query("SELECT * FROM tbl_document")
     suspend fun getAllDocsWithDetails(): List<DocumentRelationEntity>
+
+    @Query("DELETE FROM tbl_document WHERE id = :id")
+    suspend fun deleteDocument(id: Long)
+
+    @Query("DELETE FROM tbl_document_detail WHERE id = :id")
+    suspend fun deleteDocumentDetail(id: Long)
+
+    @Query("SELECT COUNT(file_path) FROM tbl_document_detail WHERE file_path = :filePath")
+    suspend fun getDocumentFileCount(filePath: String): Int
 }

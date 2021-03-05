@@ -9,6 +9,7 @@ import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.domain.repository.AppRepository
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.*
 import javax.inject.Inject
 
@@ -52,6 +53,20 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
             }
         }
 
+        getDocuments()
+    }
+
+    fun doDeleteDocuments(
+        files: List<DocumentRelationDto>
+    ) = viewModelScope.launch {
+        val deletedFilePath = files.flatMap { it.details.map { detail -> detail.filePath } }
+        files.forEach { docs -> appRepository.deleteDocument(docs.document.id) }
+        deletedFilePath.forEach {
+            val fileCount = appRepository.getDocumentFileCount(it)
+            if (fileCount == 0) {
+                File(it).delete()
+            }
+        }
         getDocuments()
     }
 

@@ -108,9 +108,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }
 
         binding.mainRelativelayoutDelete.setOnClickListener {
-            val isSelected = documentData.any { it.document.isSelected }
-            if (isSelected) {
-
+            val duplicateDocument = documentData.filter { it.document.isSelected }
+            if (duplicateDocument.isNotEmpty()) {
+                mainViewModel.doDeleteDocuments(duplicateDocument)
+                toggleEditMode(false)
             } else {
                 showToast(R.string.general_error_selected)
             }
@@ -286,7 +287,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                 }.size.toString())
             } else getString(R.string.app_name)
         }
-
+        with(binding.mainImageviewChecked) {
+            setBackgroundResource(R.drawable.general_ic_checkedall)
+            setImageDrawable(null)
+        }
         binding.mainViewPro.isGone = editMode
         binding.mainFabAdd.isGone = editMode
         binding.mainImageviewSearch.isGone = editMode

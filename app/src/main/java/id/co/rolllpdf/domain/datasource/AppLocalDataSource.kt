@@ -26,4 +26,11 @@ class AppLocalDataSource @Inject constructor(
         appDatabase.documentDao().getDocumentDetailCount(idDoc)
 
     suspend fun getAllDocsWithDetails() = appDatabase.documentDao().getAllDocsWithDetails()
+
+    suspend fun deleteDocument(id: Long) = appDatabase.documentDao().deleteDocument(id)
+
+    suspend fun deleteDocumentDetail(id: Long) = appDatabase.documentDao().deleteDocumentDetail(id)
+
+    suspend fun getDocumentFileCount(filePath: String) =
+        appDatabase.documentDao().getDocumentFileCount(filePath)
 }
