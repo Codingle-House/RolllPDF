@@ -12,6 +12,7 @@
     <string name="general_text_duplicate">Duplicate</string>
     <string name="general_text_delete">Delete</string>
     <string name="general_error_selected">You haven\'t select any document yet.</string>
+    <string name="general_hint_search">Enter your keyword…</string>
 
     <string name="splashscreen_text_desc">Easily Scan Your Document</string>
 

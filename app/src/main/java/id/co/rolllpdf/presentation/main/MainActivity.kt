@@ -46,7 +46,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         )
     }
 
-    private var isEditMode: Boolean = false
+    private var actionState: Int = ActionState.DEFAULT
     private val documentData: MutableList<DocumentRelationDto> = mutableListOf()
 
     override fun setupViewBinding() {
@@ -73,8 +73,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     private fun setupToolbar() {
         binding.mainToolbar.setNavigationOnClickListener {
-            if (isEditMode) {
-                toggleEditMode(false)
+            when (actionState) {
+                ActionState.EDIT -> toggleEditMode(ActionState.DEFAULT)
+                ActionState.SEARCH -> toggleSearchMode(ActionState.DEFAULT)
+                else -> finish()
             }
         }
 
@@ -87,6 +89,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                 setBackgroundResource(if (allSelected) R.drawable.general_ic_checkedall else R.drawable.general_shape_circle_green)
                 setImageDrawable(if (allSelected) null else getDrawableCompat(R.drawable.general_ic_check))
             }
+        }
+
+        binding.mainImageviewSearch.setOnClickListener {
+            toggleSearchMode(ActionState.SEARCH)
         }
     }
 
@@ -101,7 +107,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             val duplicateDocument = documentData.filter { it.document.isSelected }
             if (duplicateDocument.isNotEmpty()) {
                 mainViewModel.doInsertDocument(duplicateDocument)
-                toggleEditMode(false)
+                toggleEditMode(ActionState.DEFAULT)
             } else {
                 showToast(R.string.general_error_selected)
             }
@@ -111,7 +117,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             val duplicateDocument = documentData.filter { it.document.isSelected }
             if (duplicateDocument.isNotEmpty()) {
                 mainViewModel.doDeleteDocuments(duplicateDocument)
-                toggleEditMode(false)
+                toggleEditMode(ActionState.DEFAULT)
             } else {
                 showToast(R.string.general_error_selected)
             }
@@ -213,7 +219,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     override fun onResume() {
         super.onResume()
-        if (isEditMode.not()) {
+        if (actionState != ActionState.EDIT) {
             loadData()
             binding.mainViewPro.showWithAnimation()
         }
@@ -229,7 +235,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     private fun handleOnAdapterClickListener(pos: Int, data: DocumentRelationDto) {
-        if (isEditMode.not()) {
+        if (actionState != ActionState.EDIT) {
             val intent = Intent(this, DocumentDetailActivity::class.java).apply {
                 putExtra(IntentArguments.DOCUMENT_TITLE, data.document.title)
                 putExtra(IntentArguments.DOCUMENT_ID, data.document.id)
@@ -243,7 +249,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             val newDocument = data.document.copy(isSelected = data.document.isSelected.not())
             val newData = documentData[pos].copy(document = newDocument)
             documentData[pos] = newData
-            binding.mainToolbar.title = if (isEditMode) {
+            binding.mainToolbar.title = if (actionState == ActionState.EDIT) {
                 getString(R.string.general_placeholder_selected, documentData.filter {
                     it.document.isSelected
                 }.size.toString())
@@ -259,11 +265,15 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     private fun handleOnAdapterLongClickListener(pos: Int, data: DocumentRelationDto) {
-        toggleEditMode(true)
+        if (actionState == ActionState.SEARCH) {
+            toggleSearchMode(ActionState.DEFAULT)
+        }
+
+        toggleEditMode(ActionState.EDIT)
         val newDocument = data.document.copy(isSelected = data.document.isSelected.not())
         val newData = documentData[pos].copy(document = newDocument)
         documentData[pos] = newData
-        binding.mainToolbar.title = if (isEditMode) {
+        binding.mainToolbar.title = if (actionState == ActionState.EDIT) {
             getString(R.string.general_placeholder_selected, documentData.filter {
                 it.document.isSelected
             }.size.toString())
@@ -271,17 +281,17 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         mainAdapter.setData(documentData)
     }
 
-    private fun toggleEditMode(editMode: Boolean) {
-        isEditMode = editMode
-        if (isEditMode.not()) {
+    private fun toggleEditMode(state: Int) {
+        actionState = state
+        if (actionState != ActionState.EDIT) {
             bulkUpdateDocumentSelected(false)
         }
         with(binding.mainToolbar) {
-            navigationIcon = if (isEditMode) {
+            navigationIcon = if (actionState == ActionState.EDIT) {
                 getDrawableCompat(R.drawable.general_ic_chevron_left)
             } else null
 
-            title = if (isEditMode) {
+            title = if (actionState == ActionState.EDIT) {
                 getString(R.string.general_placeholder_selected, documentData.filter {
                     it.document.isSelected
                 }.size.toString())
@@ -291,12 +301,25 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             setBackgroundResource(R.drawable.general_ic_checkedall)
             setImageDrawable(null)
         }
-        binding.mainViewPro.isGone = editMode
-        binding.mainFabAdd.isGone = editMode
-        binding.mainImageviewSearch.isGone = editMode
-        binding.mainImageviewMore.isGone = editMode
-        binding.mainLinearlayoutAction.isGone = editMode.not()
-        binding.mainImageviewChecked.isGone = editMode.not()
+        binding.mainViewPro.isGone = actionState == ActionState.EDIT
+        binding.mainFabAdd.isGone = actionState == ActionState.EDIT
+        binding.mainImageviewSearch.isGone = actionState == ActionState.EDIT
+        binding.mainImageviewMore.isGone = actionState == ActionState.EDIT
+        binding.mainLinearlayoutAction.isGone = (actionState == ActionState.EDIT).not()
+        binding.mainImageviewChecked.isGone = (actionState == ActionState.EDIT).not()
+    }
+
+
+    private fun toggleSearchMode(state: Int) {
+        actionState = state
+        with(binding.mainToolbar) {
+            navigationIcon = if (actionState == ActionState.SEARCH) {
+                getDrawableCompat(R.drawable.general_ic_chevron_left)
+            } else null
+
+            title = if (actionState == ActionState.SEARCH) null else getString(R.string.app_name)
+        }
+        binding.mainEdittextSearch.isGone = actionState != ActionState.SEARCH
     }
 
     override fun onRequestPermissionsResult(
@@ -334,8 +357,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }
         with(mainAdapter) {
             setData(documentData)
-            setEditModen(isEditMode)
-            notifyDataSetChanged()
+            setEditMode(actionState == ActionState.EDIT)
+            binding.mainRecyclerviewDocument.post {
+                notifyDataSetChanged()
+            }
         }
         binding.mainToolbar.title =
             getString(R.string.general_placeholder_selected, documentData.filter {
@@ -345,10 +370,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     override fun onBackPressed() {
-        if (isEditMode) {
-            toggleEditMode(false)
-        } else {
-            finish()
+        when (actionState) {
+            ActionState.EDIT -> toggleEditMode(ActionState.DEFAULT)
+            ActionState.SEARCH -> toggleSearchMode(ActionState.DEFAULT)
+            else -> finish()
         }
     }
 
@@ -359,5 +384,15 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     private object State {
         const val EMPTY = 0
         const val DATA = 1
+    }
+
+    private object ActionState {
+        const val DEFAULT = 0
+        const val EDIT = 1
+        const val SEARCH = 2
+    }
+
+    companion object {
+        private const val EMPTY_STRING = ""
     }
 }

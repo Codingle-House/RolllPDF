@@ -25,6 +25,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_5sdp"
+            android:ellipsize="end"
+            android:maxLines="2"
             app:layout_constraintTop_toBottomOf="@+id/recyclermain_imageview_thumbnail"
             app:rolll_text_code="h7_B"
             tools:text="Document 1" />

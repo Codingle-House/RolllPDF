@@ -18,10 +18,27 @@
             app:contentInsetStartWithNavigation="0dp"
             app:layout_anchor="@+id/appBarLayout"
             app:layout_anchorGravity="center"
+            android:animateLayoutChanges="true"
             app:title="@string/app_name"
             app:titleTextAppearance="@style/ToolbarTextAppearance">
 
+            <EditText
+                android:id="@+id/main_edittext_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/_16sdp"
+                android:background="@drawable/general_bg_search"
+                android:drawableEnd="@drawable/general_ic_search"
+                android:hint="@string/general_hint_search"
+                android:maxLines="1"
+                android:padding="@dimen/_10sdp"
+                android:textColor="@color/dark_textview"
+                android:textColorHint="@color/app_hint_color"
+                android:textSize="@dimen/_11ssp"
+                android:visibility="gone" />
+
             <LinearLayout
+                android:id="@+id/main_linearlayout_toolbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
@@ -33,8 +50,8 @@
                     android:id="@+id/main_imageview_checked"
                     android:layout_width="@dimen/_18ssp"
                     android:layout_height="@dimen/_18ssp"
-                    android:padding="@dimen/_5sdp"
                     android:background="@drawable/general_ic_checkedall"
+                    android:padding="@dimen/_5sdp"
                     android:visibility="gone" />
 
                 <ImageView

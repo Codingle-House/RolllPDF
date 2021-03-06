@@ -51,7 +51,7 @@ class MainAdapter(
         calculateDiff(list)
     }
 
-    fun setEditModen(editMode: Boolean) {
+    fun setEditMode(editMode: Boolean) {
         this.editMode = editMode
     }
 
