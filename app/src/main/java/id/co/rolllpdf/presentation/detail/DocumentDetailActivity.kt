@@ -11,6 +11,7 @@ import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.core.orZero
+import id.co.rolllpdf.core.showToast
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.databinding.ActivityDocumentDetailsBinding
@@ -73,6 +74,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         showProView()
         setupRecyclerView()
         floatingActionButtonListener()
+        editModeListener()
     }
 
     override fun onViewModelObserver() {
@@ -103,6 +105,28 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             }
         }
 
+    }
+
+    private fun editModeListener() {
+        binding.documentdetailsRelativelayoutCopy.setOnClickListener {
+            val duplicateDocument = documentData.filter { it.isSelected }
+            if (duplicateDocument.isNotEmpty()) {
+                documentDetailViewModel.doInsertDocument(documentId, duplicateDocument)
+                toggleEditMode(ActionState.DEFAULT)
+            } else {
+                showToast(R.string.general_error_selected)
+            }
+        }
+
+        binding.documentdetailsRelativelayoutDelete.setOnClickListener {
+            val duplicateDocument = documentData.filter { it.isSelected }
+            if (duplicateDocument.isNotEmpty()) {
+                documentDetailViewModel.doDeleteDocuments(documentId, duplicateDocument)
+                toggleEditMode(ActionState.DEFAULT)
+            } else {
+                showToast(R.string.general_error_selected)
+            }
+        }
     }
 
     private fun initOverScroll() {
