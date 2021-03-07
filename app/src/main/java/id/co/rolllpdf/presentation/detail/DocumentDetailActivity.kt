@@ -18,6 +18,7 @@ import id.co.rolllpdf.databinding.ActivityDocumentDetailsBinding
 import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
 import id.co.rolllpdf.presentation.detail.adapter.DocumentDetailAdapter
+import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
@@ -121,8 +122,13 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         binding.documentdetailsRelativelayoutDelete.setOnClickListener {
             val duplicateDocument = documentData.filter { it.isSelected }
             if (duplicateDocument.isNotEmpty()) {
-                documentDetailViewModel.doDeleteDocuments(documentId, duplicateDocument)
-                toggleEditMode(ActionState.DEFAULT)
+                DeleteConfirmationDialog(this).apply {
+                    setListener {
+                        documentDetailViewModel.doDeleteDocuments(documentId, duplicateDocument)
+                        toggleEditMode(ActionState.DEFAULT)
+                    }
+                    show()
+                }
             } else {
                 showToast(R.string.general_error_selected)
             }
@@ -268,7 +274,9 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         with(documentAdapter) {
             setData(documentData)
             setEditMode(actionState == ActionState.EDIT)
-            notifyDataSetChanged()
+            binding.documentdetailsRecyclerviewDocument.post {
+                notifyDataSetChanged()
+            }
         }
         binding.documentdetailsToolbar.title =
             getString(R.string.general_placeholder_selected, documentData.filter {
