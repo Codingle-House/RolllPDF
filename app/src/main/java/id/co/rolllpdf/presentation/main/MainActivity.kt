@@ -24,6 +24,7 @@ import id.co.rolllpdf.databinding.ActivityMainBinding
 import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
 import id.co.rolllpdf.presentation.detail.DocumentDetailActivity
+import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
 import id.co.rolllpdf.presentation.main.adapter.MainAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
@@ -144,8 +145,13 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         binding.mainRelativelayoutDelete.setOnClickListener {
             val duplicateDocument = documentData.filter { it.document.isSelected }
             if (duplicateDocument.isNotEmpty()) {
-                mainViewModel.doDeleteDocuments(duplicateDocument)
-                toggleEditMode(ActionState.DEFAULT)
+                DeleteConfirmationDialog(this).apply {
+                    setListener {
+                        mainViewModel.doDeleteDocuments(duplicateDocument)
+                        toggleEditMode(ActionState.DEFAULT)
+                    }
+                    show()
+                }
             } else {
                 showToast(R.string.general_error_selected)
             }

@@ -15,4 +15,5 @@
     <color name="app_shadow">#C1C1C1</color>
     <color name="app_line_color">#F5F5F5</color>
     <color name="app_hint_color">#A5A5A5</color>
+    <color name="app_error_color">#E05D5C</color>
 </resources>
