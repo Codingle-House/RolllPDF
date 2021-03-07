@@ -62,4 +62,8 @@ class DocumentDetailViewModel @Inject constructor(private val appRepository: App
         }
         getDocuments(id)
     }
+
+    fun updateDocumentTitle(title: String, id: Long) = viewModelScope.launch {
+        appRepository.updateDocumentTitle(title, id)
+    }
 }

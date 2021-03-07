@@ -37,4 +37,7 @@ interface DocumentDao {
 
     @Query("SELECT COUNT(file_path) FROM tbl_document_detail WHERE file_path = :filePath")
     suspend fun getDocumentFileCount(filePath: String): Int
+
+    @Query("UPDATE tbl_document SET title = :title WHERE id =:id")
+    suspend fun updateDocumentTitle(title: String, id: Long)
 }

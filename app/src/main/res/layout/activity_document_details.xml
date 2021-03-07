@@ -37,17 +37,18 @@
                     android:visibility="gone" />
 
                 <ImageView
-                    android:id="@+id/documentdetails_imageview_pdf"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/_15sdp"
-                    android:src="@drawable/general_ic_pdf" />
-
-                <ImageView
                     android:id="@+id/documentdetails_imageview_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/_15sdp"
                     android:src="@drawable/general_ic_edit" />
+
+                <ImageView
+                    android:id="@+id/documentdetails_imageview_pdf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/general_ic_pdf" />
+
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
 

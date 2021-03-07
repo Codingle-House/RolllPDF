@@ -15,6 +15,7 @@
     <string name="general_hint_search">Enter your keyword…</string>
     <string name="general_text_yes">Yes</string>
     <string name="general_text_no">No</string>
+    <string name="general_text_edit">Edit</string>
 
     <string name="splashscreen_text_desc">Easily Scan Your Document</string>
 
@@ -42,5 +43,8 @@
 
     <string name="dialog_title_delete">Delete Documents</string>
     <string name="dialog_text_deleteconfirmation">Are you sure want to delete selected documents ?</string>
+
+    <string name="dialog_hint_edit">Enter your title…</string>
+    <string name="dialog_error_edit">Title can\'t be empty</string>
 
 </resources>

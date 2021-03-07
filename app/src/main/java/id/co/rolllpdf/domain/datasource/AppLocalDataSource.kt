@@ -36,4 +36,7 @@ class AppLocalDataSource @Inject constructor(
 
     suspend fun getDocumentFileCount(filePath: String) =
         appDatabase.documentDao().getDocumentFileCount(filePath)
+
+    suspend fun updateDocumentTitle(title: String, id: Long) =
+        appDatabase.documentDao().updateDocumentTitle(title, id)
 }

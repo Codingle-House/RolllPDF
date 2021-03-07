@@ -19,6 +19,8 @@ import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
 import id.co.rolllpdf.presentation.detail.adapter.DocumentDetailAdapter
 import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
+import id.co.rolllpdf.presentation.dialog.EditDocumentDialog
+import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
@@ -44,9 +46,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         ActivityDocumentDetailsBinding.inflate(layoutInflater)
     }
 
-    private val documentTitle by lazy {
-        intent?.getStringExtra(IntentArguments.DOCUMENT_TITLE).orEmpty()
-    }
+    private var documentTitle: String = ""
 
     private val documentId by lazy {
         intent?.getLongExtra(IntentArguments.DOCUMENT_ID, 0).orZero()
@@ -83,6 +83,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     }
 
     private fun setupToolbar() {
+        documentTitle = intent?.getStringExtra(IntentArguments.DOCUMENT_TITLE).orEmpty()
         with(binding.documentdetailsToolbar) {
             title = documentTitle
             setNavigationOnClickListener {
@@ -106,6 +107,16 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             }
         }
 
+        binding.documentdetailsImageviewEdit.setOnClickListener {
+            EditDocumentDialog(this, documentTitle).apply {
+                setListener {
+                    documentTitle = it
+                    binding.documentdetailsToolbar.title = documentTitle
+                    documentDetailViewModel.updateDocumentTitle(documentTitle, documentId)
+                }
+                show()
+            }
+        }
     }
 
     private fun editModeListener() {
@@ -181,7 +192,17 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
 
     private fun handleOnAdapterClickListener(pos: Int, data: DocumentDetailDto) {
         if (actionState != ActionState.EDIT) {
-
+            val files = listOf(data.filePath)
+            val intent = Intent(this, ImageProcessingActivity::class.java).apply {
+                putStringArrayListExtra(IntentArguments.CAMERA_IMAGES, ArrayList(files))
+                putExtra(IntentArguments.DOCUMENT_ID, documentId)
+                putExtra(IntentArguments.DOCUMENT_PREVIEW_MODE, true)
+            }
+            startActivity(intent)
+            overridePendingTransition(
+                R.anim.transition_anim_slide_in_right,
+                R.anim.transition_anim_slide_out_left
+            )
         } else {
             val newDocument = data.copy(isSelected = data.isSelected.not())
             documentData[pos] = newDocument

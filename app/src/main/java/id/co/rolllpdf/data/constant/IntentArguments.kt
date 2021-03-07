@@ -12,4 +12,6 @@ object IntentArguments {
 
     const val DOCUMENT_TITLE = "DOCUMENT_TITLE"
     const val DOCUMENT_ID = "DOCUMENT_ID"
+
+    const val DOCUMENT_PREVIEW_MODE = "DOCUMENT_PREVIEW_MODE"
 }

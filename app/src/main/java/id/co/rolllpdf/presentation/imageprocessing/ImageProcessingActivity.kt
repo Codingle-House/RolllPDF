@@ -14,6 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.core.orFalse
 import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.databinding.ActivityImageProcessingBinding
@@ -56,6 +57,10 @@ class ImageProcessingActivity : BaseActivity() {
         if (id != 0L) id else Calendar.getInstance().timeInMillis
     }
 
+    private val previewMode by lazy {
+        intent?.getBooleanExtra(IntentArguments.DOCUMENT_PREVIEW_MODE, false).orFalse()
+    }
+
     private val startCropForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult -> replaceImage(result) }
@@ -79,6 +84,13 @@ class ImageProcessingActivity : BaseActivity() {
         setupToolbar()
         setupRecyclerView()
         setupViewListener()
+        setupPreviewMode()
+    }
+
+    private fun setupPreviewMode() {
+        binding.imageprocessingTextviewSave.isGone = previewMode
+        binding.imageprocessingLinearContainer.isGone = previewMode
+        binding.imageprocessingTextviewPage.isGone = previewMode
     }
 
     override fun onViewModelObserver() {
@@ -96,9 +108,12 @@ class ImageProcessingActivity : BaseActivity() {
     }
 
     private fun setupToolbar() {
-        binding.imageprocessingToolbar.setNavigationOnClickListener {
-            deleteFiles()
-            finish()
+        with(binding.imageprocessingToolbar) {
+            title = if (previewMode) "" else getString(R.string.imagecropping_title_page)
+            setNavigationOnClickListener {
+                deleteFiles()
+                finish()
+            }
         }
         binding.imageprocessingTextviewSave.setOnClickListener {
             imageProcessingViewModel.doInsertDocument(documentId, listOfFile)

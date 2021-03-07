@@ -34,13 +34,18 @@ class AppRepository @Inject constructor(
     suspend fun getDocumentDetailCount(idDoc: Long) =
         appLocalDataSource.getDocumentDetailCount(idDoc)
 
-    suspend fun getAllDocsWithDetails(search: String) = appLocalDataSource.getAllDocsWithDetails(search).map {
-        appDataMapperDto.convertDocumentRelationDto(it)
-    }
+    suspend fun getAllDocsWithDetails(search: String) =
+        appLocalDataSource.getAllDocsWithDetails(search).map {
+            appDataMapperDto.convertDocumentRelationDto(it)
+        }
 
     suspend fun deleteDocument(id: Long) = appLocalDataSource.deleteDocument(id)
 
     suspend fun deleteDocumentDetail(id: Long) = appLocalDataSource.deleteDocumentDetail(id)
 
-    suspend fun getDocumentFileCount(filePath: String) = appLocalDataSource.getDocumentFileCount(filePath)
+    suspend fun getDocumentFileCount(filePath: String) =
+        appLocalDataSource.getDocumentFileCount(filePath)
+
+    suspend fun updateDocumentTitle(title: String, id: Long) =
+        appLocalDataSource.updateDocumentTitle(title, id)
 }
