@@ -25,4 +25,19 @@ class UserPreferenceManager(context: Context) {
         }.build()
     }
 
+    fun getDuplicateCount() = dataStore.data.map { it.duplicateCount }
+
+    suspend fun updateDuplicateCount(count: Int) = dataStore.updateData { user ->
+        user.toBuilder().apply {
+            duplicateCount = count
+        }.build()
+    }
+
+    fun getPdfCount() = dataStore.data.map { it.pdfCount }
+
+    suspend fun updatePdfCount(count: Int) = dataStore.updateData { user ->
+        user.toBuilder().apply {
+            pdfCount = count
+        }.build()
+    }
 }

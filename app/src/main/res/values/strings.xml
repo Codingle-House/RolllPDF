@@ -16,7 +16,7 @@
     <string name="general_text_yes">Yes</string>
     <string name="general_text_no">No</string>
     <string name="general_text_edit">Edit</string>
-
+    <string name="general_error_maxduplicate">You have reached maximun duplicate document 10 times</string>
     <string name="splashscreen_text_desc">Easily Scan Your Document</string>
 
     <string name="main_title_empty">Empty Document</string>

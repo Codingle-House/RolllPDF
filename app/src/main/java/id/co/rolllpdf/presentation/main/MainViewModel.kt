@@ -30,6 +30,9 @@ class MainViewModel @Inject constructor(
     private val purchaseStatus = SingleLiveEvent<Boolean>()
     fun observePurchaseStatus(): LiveData<Boolean> = purchaseStatus
 
+    private val duplicateCount = SingleLiveEvent<Int>()
+    fun observeDuplicateCount(): LiveData<Int> = duplicateCount
+
     fun getDocuments(search: String = "") = viewModelScope.launch {
         val data = appRepository.getAllDocsWithDetails(search)
         documents.postValue(data)
@@ -82,6 +85,17 @@ class MainViewModel @Inject constructor(
         userPreferenceManager.getPurchaseStatus().collect {
             purchaseStatus.postValue(it)
         }
+    }
+
+    fun getDuplicateCount() = viewModelScope.launch {
+        userPreferenceManager.getDuplicateCount().collect {
+            duplicateCount.postValue(it)
+        }
+    }
+
+    fun updateDuplicateCount(count: Int) = viewModelScope.launch {
+        userPreferenceManager.updateDuplicateCount(count)
+        getDuplicateCount()
     }
 
     companion object {

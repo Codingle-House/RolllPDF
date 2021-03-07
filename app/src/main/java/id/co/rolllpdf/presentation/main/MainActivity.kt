@@ -18,6 +18,7 @@ import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.core.showToast
+import id.co.rolllpdf.data.constant.AppConstant.MAX_DUPLICATE_COUNT
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.databinding.ActivityMainBinding
@@ -63,6 +64,8 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     private var actionState: Int = ActionState.DEFAULT
     private val documentData: MutableList<DocumentRelationDto> = mutableListOf()
     private var firstLoad: Boolean = true
+    private var duplicateCount: Int = 0
+    private var isPro: Boolean = false
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -86,6 +89,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         with(mainViewModel) {
             observeDocuments().onResult { handleDocumentsLiveData(it) }
             observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
+            observeDuplicateCount().onResult { duplicateCount = it }
         }
     }
 
@@ -147,8 +151,15 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         binding.mainRelativelayoutCopy.setOnClickListener {
             val duplicateDocument = documentData.filter { it.document.isSelected }
             if (duplicateDocument.isNotEmpty()) {
-                mainViewModel.doInsertDocument(duplicateDocument)
-                toggleEditMode(ActionState.DEFAULT)
+                if (isPro || duplicateCount < MAX_DUPLICATE_COUNT) {
+                    with(mainViewModel) {
+                        doInsertDocument(duplicateDocument)
+                        updateDuplicateCount(duplicateCount.inc())
+                    }
+                    toggleEditMode(ActionState.DEFAULT)
+                } else {
+                    showToast(R.string.general_error_maxduplicate)
+                }
             } else {
                 showToast(R.string.general_error_selected)
             }
@@ -175,12 +186,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             setListener { action ->
                 when (action) {
                     DialogProFeatureView.Action.Click -> {
-                        val intent = Intent(this@MainActivity, ProActivity::class.java)
-                        startActivity(intent)
-                        overridePendingTransition(
-                            R.anim.transition_anim_slide_in_right,
-                            R.anim.transition_anim_slide_out_left
-                        )
+                        navigateToProActivity()
                     }
                     DialogProFeatureView.Action.Close -> {
 
@@ -276,6 +282,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             with(mainViewModel) {
                 getDocuments()
                 getPurchaseStatus()
+                getDuplicateCount()
             }
         }
     }
@@ -292,6 +299,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
 
     private fun handlePurchaseStatusLiveData(status: Boolean) {
+        isPro = status
         if (status.not()) {
             binding.mainViewPro.showWithAnimation()
             showAdMob()
@@ -473,6 +481,14 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }.onStart { emit(text) }
     }
 
+    private fun navigateToProActivity() {
+        val intent = Intent(this@MainActivity, ProActivity::class.java)
+        startActivity(intent)
+        overridePendingTransition(
+            R.anim.transition_anim_slide_in_right,
+            R.anim.transition_anim_slide_out_left
+        )
+    }
 
     override fun onBackPressed() {
         when (actionState) {
