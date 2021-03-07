@@ -2,9 +2,15 @@ package id.co.rolllpdf.presentation.detail
 
 import android.Manifest
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
@@ -28,7 +34,9 @@ import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorat
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 /**
  * Created by pertadima on 04,March,2021
@@ -47,8 +55,6 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         ActivityDocumentDetailsBinding.inflate(layoutInflater)
     }
 
-    private var documentTitle: String = ""
-
     private val documentId by lazy {
         intent?.getLongExtra(IntentArguments.DOCUMENT_ID, 0).orZero()
     }
@@ -62,6 +68,11 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
 
     private var actionState: Int = ActionState.DEFAULT
     private val documentData: MutableList<DocumentDetailDto> = mutableListOf()
+    private var documentTitle: String = ""
+    private var interstitialAd: InterstitialAd? = null
+
+    private var hitPercent = 0.3f
+    private val generator: Random = Random()
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -78,6 +89,8 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         floatingActionButtonListener()
         editModeListener()
         showAdMob()
+        initAds()
+        showInterstitialAds()
     }
 
     override fun onViewModelObserver() {
@@ -153,6 +166,31 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             initializeAdMob()
             bringToFront()
         }
+    }
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build()
+        InterstitialAd.load(
+            this@DocumentDetailActivity,
+            getString(R.string.interstitial_ad_unit_id).orEmpty(),
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    interstitialAd = null
+                }
+
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    this@DocumentDetailActivity.interstitialAd = interstitialAd
+                }
+            })
+    }
+
+    private fun showInterstitialAds() {
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (generator.nextFloat() <= hitPercent) {
+                interstitialAd?.show(this)
+            }
+        }, 500)
     }
 
     private fun initOverScroll() {
