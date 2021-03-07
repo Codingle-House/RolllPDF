@@ -197,6 +197,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_10sdp"
+        android:visibility="gone"
         app:adSize="BANNER"
         app:adUnitId="@string/banner_ad_unit_id"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />

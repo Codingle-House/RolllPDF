@@ -80,12 +80,12 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         floatingActionButtonListener()
         setupRecyclerView()
         editModeListener()
-        showAdMob()
     }
 
     override fun onViewModelObserver() {
         with(mainViewModel) {
             observeDocuments().onResult { handleDocumentsLiveData(it) }
+            observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
         }
     }
 
@@ -194,6 +194,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         binding.mainAdviewBanner.run {
             initializeAdMob()
             bringToFront()
+            isGone = false
         }
     }
 
@@ -272,8 +273,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     override fun onResume() {
         super.onResume()
         if (actionState != ActionState.EDIT) {
-            mainViewModel.getDocuments()
-            binding.mainViewPro.showWithAnimation()
+            with(mainViewModel) {
+                getDocuments()
+                getPurchaseStatus()
+            }
         }
     }
 
@@ -286,6 +289,18 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         binding.mainFlipperData.displayedChild = if (data.isEmpty()) State.EMPTY else State.DATA
         mainAdapter.setData(data)
     }
+
+
+    private fun handlePurchaseStatusLiveData(status: Boolean) {
+        if (status.not()) {
+            binding.mainViewPro.showWithAnimation()
+            showAdMob()
+            binding.mainViewSpace.isGone = false
+        } else {
+            binding.mainViewSpace.isGone = true
+        }
+    }
+
 
     private fun handleOnAdapterClickListener(pos: Int, data: DocumentRelationDto) {
         if (actionState != ActionState.EDIT) {

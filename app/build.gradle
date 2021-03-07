@@ -119,7 +119,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2"
 
     // Data Store Protobug altenate to shared preference
-    implementation "androidx.datastore:datastore:1.0.0-alpha07"
+    implementation "androidx.datastore:datastore:1.0.0-alpha06"
     implementation 'com.google.protobuf:protobuf-lite:3.0.1'
 
     // Responsive Size

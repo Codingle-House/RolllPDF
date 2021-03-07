@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.co.rolllpdf.core.DateTimeUtils
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
+import id.co.rolllpdf.data.local.preference.UserPreferenceManager
 import id.co.rolllpdf.domain.repository.AppRepository
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
@@ -18,11 +20,17 @@ import javax.inject.Inject
  */
 
 @HiltViewModel
-class DocumentDetailViewModel @Inject constructor(private val appRepository: AppRepository) :
+class DocumentDetailViewModel @Inject constructor(
+    private val appRepository: AppRepository,
+    private val userPreferenceManager: UserPreferenceManager
+) :
     ViewModel() {
 
     private val documents = SingleLiveEvent<List<DocumentDetailDto>>()
     fun observeDocuments(): LiveData<List<DocumentDetailDto>> = documents
+
+    private val purchaseStatus = SingleLiveEvent<Boolean>()
+    fun observePurchaseStatus(): LiveData<Boolean> = purchaseStatus
 
     fun getDocuments(id: Long) = viewModelScope.launch {
         val data = appRepository.getDetailDocumentDetail(id)
@@ -65,5 +73,11 @@ class DocumentDetailViewModel @Inject constructor(private val appRepository: App
 
     fun updateDocumentTitle(title: String, id: Long) = viewModelScope.launch {
         appRepository.updateDocumentTitle(title, id)
+    }
+
+    fun getPurchaseStatus() = viewModelScope.launch {
+        userPreferenceManager.getPurchaseStatus().collect {
+            purchaseStatus.postValue(it)
+        }
     }
 }

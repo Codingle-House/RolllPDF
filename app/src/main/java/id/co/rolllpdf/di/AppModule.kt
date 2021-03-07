@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.AppDatabase
+import id.co.rolllpdf.data.local.preference.UserPreferenceManager
 import id.co.rolllpdf.data.mapper.AppDataMapperDto
 import id.co.rolllpdf.data.mapper.AppDataMapperEntity
 import id.co.rolllpdf.domain.datasource.AppLocalDataSource
@@ -51,4 +52,10 @@ object AppModule {
         appDataMapperDto: AppDataMapperDto,
         appDataMapperEntity: AppDataMapperEntity
     ) = AppRepository(appLocalDataSource, appDataMapperDto, appDataMapperEntity)
+
+    @Singleton
+    @Provides
+    fun providesUserPreferenceManager(
+        @ApplicationContext appContext: Context,
+    ) = UserPreferenceManager(appContext)
 }

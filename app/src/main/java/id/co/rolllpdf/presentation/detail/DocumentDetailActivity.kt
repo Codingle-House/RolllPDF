@@ -88,13 +88,13 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         setupRecyclerView()
         floatingActionButtonListener()
         editModeListener()
-        showAdMob()
-        initAds()
-        showInterstitialAds()
     }
 
     override fun onViewModelObserver() {
-        documentDetailViewModel.observeDocuments().onResult { handleDocumentDetailLiveData(it) }
+        with(documentDetailViewModel) {
+            observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
+            observeDocuments().onResult { handleDocumentDetailLiveData(it) }
+        }
     }
 
     private fun setupToolbar() {
@@ -165,6 +165,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         binding.documentdetailsAdviewBanner.run {
             initializeAdMob()
             bringToFront()
+            isGone = false
         }
     }
 
@@ -240,6 +241,18 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         documentAdapter.setData(data)
     }
 
+    private fun handlePurchaseStatusLiveData(status: Boolean) {
+        if (status.not()) {
+            binding.documentdetailsViewPro.showWithAnimation()
+            showAdMob()
+            initAds()
+            showInterstitialAds()
+            binding.documentdetailsViewSpace.isGone = false
+        } else {
+            binding.documentdetailsViewSpace.isGone = true
+        }
+    }
+
     private fun handleOnAdapterClickListener(pos: Int, data: DocumentDetailDto) {
         if (actionState != ActionState.EDIT) {
             val files = listOf(data.filePath)
@@ -296,8 +309,10 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
 
     override fun onResume() {
         super.onResume()
-        binding.documentdetailsViewPro.showWithAnimation()
-        documentDetailViewModel.getDocuments(documentId)
+        with(documentDetailViewModel) {
+            getDocuments(documentId)
+            getPurchaseStatus()
+        }
     }
 
     private fun floatingActionButtonListener() {
