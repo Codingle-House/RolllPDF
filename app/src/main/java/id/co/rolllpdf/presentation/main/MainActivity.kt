@@ -80,6 +80,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         floatingActionButtonListener()
         setupRecyclerView()
         editModeListener()
+        showAdMob()
     }
 
     override fun onViewModelObserver() {
@@ -186,6 +187,13 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                     }
                 }
             }
+        }
+    }
+
+    private fun showAdMob() {
+        binding.mainAdviewBanner.run {
+            initializeAdMob()
+            bringToFront()
         }
     }
 

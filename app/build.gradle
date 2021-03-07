@@ -31,12 +31,18 @@ android {
         debug {
             minifyEnabled false
             debuggable true
+            resValue("string","mobileads_app_id","ca-app-pub-3940256099942544~3347511713")
+            resValue("string","banner_ad_unit_id","ca-app-pub-3940256099942544/6300978111")
+            resValue("string","interstitial_ad_unit_id","ca-app-pub-3940256099942544/1033173712")
         }
         release {
             debuggable false
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue("string","mobileads_app_id","ca-app-pub-5236561708257284~3033893655")
+            resValue("string","banner_ad_unit_id","ca-app-pub-5236561708257284/8506901553")
+            resValue("string","interstitial_ad_unit_id","ca-app-pub-5236561708257284/1781780912")
         }
     }
     compileOptions {
@@ -131,6 +137,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-appindexing'
+    implementation 'com.android.billingclient:billing-ktx:3.0.2'
+    implementation 'com.google.android.gms:play-services-ads:19.7.0'
 
     // Room
     implementation "androidx.room:room-runtime:2.2.6"

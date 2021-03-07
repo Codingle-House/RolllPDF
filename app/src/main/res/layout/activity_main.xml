@@ -83,6 +83,11 @@
             android:animateLayoutChanges="true"
             android:orientation="vertical">
 
+            <View
+                android:id="@+id/main_view_space"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp" />
+
             <id.co.rolllpdf.presentation.customview.DialogProFeatureView
                 android:id="@+id/main_view_pro"
                 android:layout_width="match_parent"
@@ -169,7 +174,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_20sdp" />
+                android:layout_height="@dimen/_60sdp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -177,7 +182,7 @@
         android:id="@+id/main_fab_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
+        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/_16sdp"
         android:gravity="center"
         android:src="@drawable/general_ic_add"
@@ -186,4 +191,13 @@
         app:fabCustomSize="@dimen/_50sdp"
         app:maxImageSize="@dimen/_36sdp"
         app:tint="@android:color/white" />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/main_adview_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
+        app:adSize="BANNER"
+        app:adUnitId="@string/banner_ad_unit_id"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -77,6 +77,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         setupRecyclerView()
         floatingActionButtonListener()
         editModeListener()
+        showAdMob()
     }
 
     override fun onViewModelObserver() {
@@ -144,6 +145,13 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             } else {
                 showToast(R.string.general_error_selected)
             }
+        }
+    }
+
+    private fun showAdMob() {
+        binding.documentdetailsAdviewBanner.run {
+            initializeAdMob()
+            bringToFront()
         }
     }
 
