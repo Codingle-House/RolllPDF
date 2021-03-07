@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <id.co.rolllpdf.uikit.UiKitTextview
+        android:id="@+id/recyclerabout_textview_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:drawableEnd="@drawable/general_ic_chevron_right"
+        android:drawablePadding="@dimen/_10sdp"
+        android:focusable="true"
+        android:paddingHorizontal="@dimen/_10sdp"
+        android:paddingVertical="@dimen/_9sdp"
+        app:rolll_text_code="p_a_b"
+        app:rolll_text_color="dark"
+        tools:text="Pixel Perfext" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_1sdp"
+        android:background="@color/app_line_color" />
+</LinearLayout>

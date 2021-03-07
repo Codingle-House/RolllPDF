@@ -53,4 +53,8 @@
     <string name="pro_text_unlimitiedpdf">Unlimited PDF Converter</string>
     <string name="pro_text_unlimitiedduplicate">Unlimited Documents Duplication</string>
     <string name="pro_text_freeupgrade">Lifetime Free Feature Update</string>
+
+    <string name="about_title_page">About</string>
+    <string name="aboutus_text_description"><b>Rolll Scanner - Document Scanner</b> is lightweight document scanner to help you to easy scan and organize your documents.</string>
+    <string name="aboutus_text_copyright">We thank you for using several vectors from the following accounts:</string>
 </resources>

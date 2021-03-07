@@ -21,6 +21,7 @@ import id.co.rolllpdf.core.showToast
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.databinding.ActivityMainBinding
+import id.co.rolllpdf.presentation.about.AboutUsActivity
 import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.customview.DialogProFeatureView
 import id.co.rolllpdf.presentation.detail.DocumentDetailActivity
@@ -124,6 +125,15 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                 mainViewModel.getDocuments(it.toString())
             }
         }.launchIn(lifecycleScope)
+
+        binding.mainImageviewMore.setOnClickListener {
+            val intent = Intent(this@MainActivity, AboutUsActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(
+                R.anim.transition_anim_slide_in_right,
+                R.anim.transition_anim_slide_out_left
+            )
+        }
     }
 
     private fun initOverScroll() {
