@@ -47,4 +47,10 @@
     <string name="dialog_hint_edit">Enter your title…</string>
     <string name="dialog_error_edit">Title can\'t be empty</string>
 
+    <string name="pro_title_page">Upgrade</string>
+    <string name="pro_text_desc">Get various advantages with <b>pro</b> upgrades</string>
+    <string name="pro_text_no_ads">No Ads</string>
+    <string name="pro_text_unlimitiedpdf">Unlimited PDF Converter</string>
+    <string name="pro_text_unlimitiedduplicate">Unlimited Documents Duplication</string>
+    <string name="pro_text_freeupgrade">Lifetime Free Feature Update</string>
 </resources>

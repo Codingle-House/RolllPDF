@@ -21,6 +21,7 @@ import id.co.rolllpdf.presentation.detail.adapter.DocumentDetailAdapter
 import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
 import id.co.rolllpdf.presentation.dialog.EditDocumentDialog
 import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
+import id.co.rolllpdf.presentation.pro.ProActivity
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
@@ -154,15 +155,18 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
 
     private fun showProView() {
         with(binding.documentdetailsViewPro) {
-            setListener {
-                setListener { action ->
-                    when (action) {
-                        DialogProFeatureView.Action.Click -> {
+            setListener { action ->
+                when (action) {
+                    DialogProFeatureView.Action.Click -> {
+                        val intent = Intent(this@DocumentDetailActivity, ProActivity::class.java)
+                        startActivity(intent)
+                        overridePendingTransition(
+                            R.anim.transition_anim_slide_in_right,
+                            R.anim.transition_anim_slide_out_left
+                        )
+                    }
+                    DialogProFeatureView.Action.Close -> {
 
-                        }
-                        DialogProFeatureView.Action.Close -> {
-
-                        }
                     }
                 }
             }

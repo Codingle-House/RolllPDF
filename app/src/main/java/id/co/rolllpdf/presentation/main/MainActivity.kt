@@ -26,6 +26,7 @@ import id.co.rolllpdf.presentation.customview.DialogProFeatureView
 import id.co.rolllpdf.presentation.detail.DocumentDetailActivity
 import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
 import id.co.rolllpdf.presentation.main.adapter.MainAdapter
+import id.co.rolllpdf.presentation.pro.ProActivity
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -160,15 +161,18 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     private fun showProView() {
         with(binding.mainViewPro) {
-            setListener {
-                setListener { action ->
-                    when (action) {
-                        DialogProFeatureView.Action.Click -> {
+            setListener { action ->
+                when (action) {
+                    DialogProFeatureView.Action.Click -> {
+                        val intent = Intent(this@MainActivity, ProActivity::class.java)
+                        startActivity(intent)
+                        overridePendingTransition(
+                            R.anim.transition_anim_slide_in_right,
+                            R.anim.transition_anim_slide_out_left
+                        )
+                    }
+                    DialogProFeatureView.Action.Close -> {
 
-                        }
-                        DialogProFeatureView.Action.Close -> {
-
-                        }
                     }
                 }
             }
