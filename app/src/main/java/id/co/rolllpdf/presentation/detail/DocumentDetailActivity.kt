@@ -3,11 +3,13 @@ package id.co.rolllpdf.presentation.detail
 import android.Manifest
 import android.content.Intent
 import androidx.activity.viewModels
+import androidx.core.view.isGone
 import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
@@ -55,6 +57,9 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         )
     }
 
+    private var actionState: Int = ActionState.DEFAULT
+    private val documentData: MutableList<DocumentDetailDto> = mutableListOf()
+
     override fun setupViewBinding() {
         val view = binding.root
         setContentView(view)
@@ -77,8 +82,27 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     private fun setupToolbar() {
         with(binding.documentdetailsToolbar) {
             title = documentTitle
-            setNavigationOnClickListener { finish() }
+            setNavigationOnClickListener {
+                when (actionState) {
+                    ActionState.EDIT -> {
+                        toggleEditMode(ActionState.DEFAULT)
+                        documentDetailViewModel.getDocuments(documentId)
+                    }
+                    else -> finish()
+                }
+            }
         }
+
+        with(binding.documentdetailsImageviewChecked) {
+            setOnClickListener {
+                val allSelected = documentData.filter { it.isSelected }.size == documentData.size
+                bulkUpdateDocumentSelected(allSelected.not())
+
+                setBackgroundResource(if (allSelected) R.drawable.general_ic_checkedall else R.drawable.general_shape_circle_green)
+                setImageDrawable(if (allSelected) null else getDrawableCompat(R.drawable.general_ic_check))
+            }
+        }
+
     }
 
     private fun initOverScroll() {
@@ -108,23 +132,54 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         with(binding.documentdetailsRecyclerviewDocument) {
             val gridLayoutManager = GridLayoutManager(this@DocumentDetailActivity, 3)
             layoutManager = gridLayoutManager
-            adapter = documentAdapter
+            adapter = documentAdapter.apply {
+                setHasStableIds(true)
+            }
             addItemDecoration(SpaceItemDecoration(10, 3))
         }
     }
 
     private fun handleDocumentDetailLiveData(data: List<DocumentDetailDto>) {
+        with(documentData) {
+            clear()
+            addAll(data)
+        }
         binding.documentdetailsFlipperData.displayedChild =
             if (data.isEmpty()) State.EMPTY else State.DATA
         documentAdapter.setData(data)
     }
 
-    private fun handleOnAdapterClickListener(data: DocumentDetailDto) {
+    private fun handleOnAdapterClickListener(pos: Int, data: DocumentDetailDto) {
+        if (actionState != ActionState.EDIT) {
 
+        } else {
+            val newDocument = data.copy(isSelected = data.isSelected.not())
+            documentData[pos] = newDocument
+            binding.documentdetailsToolbar.title = if (actionState == ActionState.EDIT) {
+                getString(R.string.general_placeholder_selected, documentData.filter {
+                    it.isSelected
+                }.size.toString())
+            } else documentTitle
+            val allSelected =
+                documentData.filter { it.isSelected }.size == documentData.size
+            with(binding.documentdetailsImageviewChecked) {
+                setBackgroundResource(if (allSelected) R.drawable.general_shape_circle_green else R.drawable.general_ic_checkedall)
+                setImageDrawable(if (allSelected) getDrawableCompat(R.drawable.general_ic_check) else null)
+            }
+            documentAdapter.setData(documentData)
+        }
     }
 
     private fun handleOnAdapterLongClickListener(pos: Int, data: DocumentDetailDto) {
-
+        toggleEditMode(ActionState.EDIT)
+        val newDocument = data.copy(isSelected = data.isSelected.not())
+        documentData[pos] = newDocument
+        binding.documentdetailsToolbar.title = if (actionState == ActionState.EDIT) {
+            getString(R.string.general_placeholder_selected, documentData.filter {
+                it.isSelected
+            }.size.toString())
+        } else documentTitle
+        documentAdapter.setData(documentData)
     }
 
     private fun goToCamera() {
@@ -151,6 +206,53 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             }
         }
     }
+
+    private fun toggleEditMode(state: Int) {
+        actionState = state
+        if (actionState != ActionState.EDIT) {
+            bulkUpdateDocumentSelected(false)
+        }
+        with(binding.documentdetailsToolbar) {
+            title =
+                if (actionState == ActionState.EDIT) {
+                    getString(
+                        R.string.general_placeholder_selected,
+                        documentData.filter {
+                            it.isSelected
+                        }.size.toString()
+                    )
+                } else documentTitle
+        }
+        with(binding.documentdetailsImageviewChecked) {
+            setBackgroundResource(R.drawable.general_ic_checkedall)
+            setImageDrawable(null)
+        }
+        binding.documentdetailsViewPro.isGone = actionState == ActionState.EDIT
+        binding.documentdetailsFabAdd.isGone = actionState == ActionState.EDIT
+        binding.documentdetailsImageviewPdf.isGone = actionState == ActionState.EDIT
+        binding.documentdetailsImageviewEdit.isGone = actionState == ActionState.EDIT
+        binding.documentdetailsLinearlayoutAction.isGone =
+            (actionState == ActionState.EDIT).not()
+        binding.documentdetailsImageviewChecked.isGone = (actionState == ActionState.EDIT).not()
+    }
+
+    private fun bulkUpdateDocumentSelected(isSelected: Boolean) {
+        documentData.forEachIndexed { pos, data ->
+            val newDocument = data.copy(isSelected = isSelected)
+            documentData[pos] = newDocument
+        }
+        with(documentAdapter) {
+            setData(documentData)
+            setEditMode(actionState == ActionState.EDIT)
+            notifyDataSetChanged()
+        }
+        binding.documentdetailsToolbar.title =
+            getString(R.string.general_placeholder_selected, documentData.filter {
+                it.isSelected
+            }.size.toString())
+
+    }
+
 
     @AfterPermissionGranted(Permission.MEDIA)
     private fun checkStoragePermission(onHasPermission: () -> Unit) {
@@ -223,6 +325,17 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
 
     }
 
+    override fun onBackPressed() {
+        when (actionState) {
+            ActionState.EDIT -> {
+                toggleEditMode(ActionState.DEFAULT)
+                documentDetailViewModel.getDocuments(documentId)
+            }
+            else -> finish()
+        }
+    }
+
+
     override fun finish() {
         super.finish()
         overridePendingTransition(
@@ -238,5 +351,10 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     private object State {
         const val EMPTY = 0
         const val DATA = 1
+    }
+
+    private object ActionState {
+        const val DEFAULT = 0
+        const val EDIT = 1
     }
 }

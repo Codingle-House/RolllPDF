@@ -17,7 +17,39 @@
             android:background="@android:color/white"
             app:contentInsetStartWithNavigation="0dp"
             app:navigationIcon="@drawable/general_ic_chevron_left"
-            app:titleTextAppearance="@style/ToolbarTextAppearance" />
+            app:titleTextAppearance="@style/ToolbarTextAppearance">
+
+            <LinearLayout
+                android:id="@+id/documentdetails_linearlayout_toolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/_16sdp"
+                android:animateLayoutChanges="true"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/documentdetails_imageview_checked"
+                    android:layout_width="@dimen/_18ssp"
+                    android:layout_height="@dimen/_18ssp"
+                    android:background="@drawable/general_ic_checkedall"
+                    android:padding="@dimen/_5sdp"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/documentdetails_imageview_pdf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/_15sdp"
+                    android:src="@drawable/general_ic_pdf" />
+
+                <ImageView
+                    android:id="@+id/documentdetails_imageview_edit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/general_ic_edit" />
+            </LinearLayout>
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -39,6 +71,63 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_16sdp"
                 android:layout_marginTop="@dimen/_16sdp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/documentdetails_linearlayout_action"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_16sdp"
+                android:layout_marginTop="@dimen/_16sdp"
+                android:visibility="gone"
+                app:cardCornerRadius="@dimen/_5sdp"
+                app:cardElevation="@dimen/_3sdp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <RelativeLayout
+                        android:id="@+id/documentdetails_relativelayout_copy"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingVertical="@dimen/_10sdp">
+
+                        <id.co.rolllpdf.uikit.UiKitTextview
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:drawableStart="@drawable/general_ic_copy"
+                            android:drawablePadding="@dimen/_10sdp"
+                            android:gravity="center"
+                            android:text="@string/general_text_duplicate" />
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="@dimen/_1sdp"
+                        android:layout_height="match_parent"
+                        android:background="@color/app_line_color" />
+
+                    <RelativeLayout
+                        android:id="@+id/documentdetails_relativelayout_delete"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingVertical="@dimen/_10sdp">
+
+                        <id.co.rolllpdf.uikit.UiKitTextview
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:drawableStart="@drawable/general_ic_delete"
+                            android:drawablePadding="@dimen/_10sdp"
+                            android:text="@string/general_text_delete" />
+                    </RelativeLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <ViewFlipper
                 android:id="@+id/documentdetails_flipper_data"
@@ -65,7 +154,7 @@
                 android:layout_height="@dimen/_20sdp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-    
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/documentdetails_fab_add"
         android:layout_width="wrap_content"

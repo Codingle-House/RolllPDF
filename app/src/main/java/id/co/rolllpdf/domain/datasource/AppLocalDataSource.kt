@@ -1,6 +1,5 @@
 package id.co.rolllpdf.domain.datasource
 
-import android.util.Log
 import id.co.rolllpdf.data.AppDatabase
 import id.co.rolllpdf.data.local.entity.DocumentDetailEntity
 import id.co.rolllpdf.data.local.entity.DocumentEntity
@@ -27,8 +26,7 @@ class AppLocalDataSource @Inject constructor(
     suspend fun getDocumentDetailCount(idDoc: Long) =
         appDatabase.documentDao().getDocumentDetailCount(idDoc)
 
-    suspend fun getAllDocsWithDetails(search: String) : List<DocumentRelationEntity> {
-        Log.e("IRFAN", "${search}: ");
+    suspend fun getAllDocsWithDetails(search: String): List<DocumentRelationEntity> {
         return appDatabase.documentDao().getAllDocsWithDetails(search)
     }
 

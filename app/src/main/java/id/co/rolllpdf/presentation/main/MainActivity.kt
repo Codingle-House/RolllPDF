@@ -37,7 +37,6 @@ import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 
-@FlowPreview
 @AndroidEntryPoint
 class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     EasyPermissions.RationaleCallbacks {
@@ -67,6 +66,8 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         setContentView(view)
     }
 
+    @FlowPreview
+    @ExperimentalCoroutinesApi
     override fun setupUi() {
         changeStatusBarTextColor(true)
         changeStatusBarColor(android.R.color.white)

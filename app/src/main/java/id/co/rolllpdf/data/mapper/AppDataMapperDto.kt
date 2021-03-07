@@ -20,7 +20,8 @@ object AppDataMapperDto {
     fun convertDocumentDetailToDto(documentDetailEntity: DocumentDetailEntity) = DocumentDetailDto(
         filePath = documentDetailEntity.filePath,
         dateTime = documentDetailEntity.dateTime,
-        idDoc = documentDetailEntity.idNote
+        idDoc = documentDetailEntity.idNote,
+        id = documentDetailEntity.id
     )
 
     fun convertDocumentRelationDto(documentRelationEntity: DocumentRelationEntity) =

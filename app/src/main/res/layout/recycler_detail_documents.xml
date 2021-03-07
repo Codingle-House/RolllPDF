@@ -39,6 +39,17 @@
             app:layout_constraintTop_toBottomOf="@+id/recyclerdetail_textview_title"
             app:rolll_text_code="h7_R"
             tools:text="Feb 23 19:50" />
-        
+
+        <ImageView
+            android:id="@+id/recyclerdetail_imageview_checked"
+            android:layout_width="@dimen/_18ssp"
+            android:layout_height="@dimen/_18ssp"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@drawable/general_shape_circle_green"
+            android:padding="@dimen/_5sdp"
+            android:src="@drawable/general_ic_check"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
