@@ -26,8 +26,8 @@ interface DocumentDao {
     suspend fun getDocumentDetailCount(id: Long): Int
 
     @Transaction
-    @Query("SELECT * FROM tbl_document")
-    suspend fun getAllDocsWithDetails(): List<DocumentRelationEntity>
+    @Query("SELECT * FROM tbl_document WHERE title LIKE '%' || :search || '%'")
+    suspend fun getAllDocsWithDetails(search: String): List<DocumentRelationEntity>
 
     @Query("DELETE FROM tbl_document WHERE id = :id")
     suspend fun deleteDocument(id: Long)

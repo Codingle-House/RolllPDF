@@ -1,9 +1,16 @@
 package id.co.rolllpdf.presentation.main
 
 import android.Manifest
+import android.app.Service
 import android.content.Intent
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.activity.viewModels
+import androidx.annotation.CheckResult
 import androidx.core.view.isGone
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
@@ -20,12 +27,17 @@ import id.co.rolllpdf.presentation.detail.DocumentDetailActivity
 import id.co.rolllpdf.presentation.main.adapter.MainAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.*
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 
+@FlowPreview
 @AndroidEntryPoint
 class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     EasyPermissions.RationaleCallbacks {
@@ -48,6 +60,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     private var actionState: Int = ActionState.DEFAULT
     private val documentData: MutableList<DocumentRelationDto> = mutableListOf()
+    private var firstLoad: Boolean = true
 
     override fun setupViewBinding() {
         val view = binding.root
@@ -71,11 +84,19 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }
     }
 
+    @FlowPreview
+    @ExperimentalCoroutinesApi
     private fun setupToolbar() {
         binding.mainToolbar.setNavigationOnClickListener {
             when (actionState) {
-                ActionState.EDIT -> toggleEditMode(ActionState.DEFAULT)
-                ActionState.SEARCH -> toggleSearchMode(ActionState.DEFAULT)
+                ActionState.EDIT -> {
+                    toggleEditMode(ActionState.DEFAULT)
+                    mainViewModel.getDocuments()
+                }
+                ActionState.SEARCH -> {
+                    toggleSearchMode(ActionState.DEFAULT)
+                    mainViewModel.getDocuments()
+                }
                 else -> finish()
             }
         }
@@ -94,6 +115,12 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         binding.mainImageviewSearch.setOnClickListener {
             toggleSearchMode(ActionState.SEARCH)
         }
+
+        binding.mainEdittextSearch.textChanges().debounce(300).onEach {
+            if (actionState != ActionState.EDIT && !firstLoad) {
+                mainViewModel.getDocuments(it.toString())
+            }
+        }.launchIn(lifecycleScope)
     }
 
     private fun initOverScroll() {
@@ -213,19 +240,16 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }
     }
 
-    private fun loadData() {
-        mainViewModel.getDocuments()
-    }
-
     override fun onResume() {
         super.onResume()
         if (actionState != ActionState.EDIT) {
-            loadData()
+            mainViewModel.getDocuments()
             binding.mainViewPro.showWithAnimation()
         }
     }
 
     private fun handleDocumentsLiveData(data: List<DocumentRelationDto>) {
+        firstLoad = false
         with(documentData) {
             clear()
             addAll(data)
@@ -319,7 +343,21 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
             title = if (actionState == ActionState.SEARCH) null else getString(R.string.app_name)
         }
-        binding.mainEdittextSearch.isGone = actionState != ActionState.SEARCH
+
+        val inputMethodManager =
+            getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
+        with(binding.mainEdittextSearch) {
+            isGone = actionState != ActionState.SEARCH
+            setText(EMPTY_STRING)
+            if (actionState == ActionState.SEARCH) {
+                requestFocus()
+                inputMethodManager.showSoftInput(this, 0)
+            } else {
+                clearFocus()
+                inputMethodManager.hideSoftInputFromWindow(this.windowToken, 0)
+            }
+        }
+
     }
 
     override fun onRequestPermissionsResult(
@@ -369,10 +407,39 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
     }
 
+    @ExperimentalCoroutinesApi
+    @CheckResult
+    fun EditText.textChanges(): Flow<CharSequence?> {
+        return callbackFlow<CharSequence?> {
+            val listener = object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) = Unit
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) = Unit
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    offer(s)
+                }
+            }
+            addTextChangedListener(listener)
+            awaitClose { removeTextChangedListener(listener) }
+        }.onStart { emit(text) }
+    }
+
+
     override fun onBackPressed() {
         when (actionState) {
-            ActionState.EDIT -> toggleEditMode(ActionState.DEFAULT)
-            ActionState.SEARCH -> toggleSearchMode(ActionState.DEFAULT)
+            ActionState.EDIT -> {
+                toggleEditMode(ActionState.DEFAULT)
+                mainViewModel.getDocuments()
+            }
+            ActionState.SEARCH -> {
+                toggleSearchMode(ActionState.DEFAULT)
+                mainViewModel.getDocuments()
+            }
             else -> finish()
         }
     }

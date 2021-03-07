@@ -1,8 +1,10 @@
 package id.co.rolllpdf.domain.datasource
 
+import android.util.Log
 import id.co.rolllpdf.data.AppDatabase
 import id.co.rolllpdf.data.local.entity.DocumentDetailEntity
 import id.co.rolllpdf.data.local.entity.DocumentEntity
+import id.co.rolllpdf.data.local.entity.DocumentRelationEntity
 import javax.inject.Inject
 
 /**
@@ -25,7 +27,10 @@ class AppLocalDataSource @Inject constructor(
     suspend fun getDocumentDetailCount(idDoc: Long) =
         appDatabase.documentDao().getDocumentDetailCount(idDoc)
 
-    suspend fun getAllDocsWithDetails() = appDatabase.documentDao().getAllDocsWithDetails()
+    suspend fun getAllDocsWithDetails(search: String) : List<DocumentRelationEntity> {
+        Log.e("IRFAN", "${search}: ");
+        return appDatabase.documentDao().getAllDocsWithDetails(search)
+    }
 
     suspend fun deleteDocument(id: Long) = appDatabase.documentDao().deleteDocument(id)
 

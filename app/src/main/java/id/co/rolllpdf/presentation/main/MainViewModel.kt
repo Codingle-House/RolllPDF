@@ -22,8 +22,8 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
     private val documents = SingleLiveEvent<List<DocumentRelationDto>>()
     fun observeDocuments(): LiveData<List<DocumentRelationDto>> = documents
 
-    fun getDocuments() = viewModelScope.launch {
-        val data = appRepository.getAllDocsWithDetails()
+    fun getDocuments(search: String = "") = viewModelScope.launch {
+        val data = appRepository.getAllDocsWithDetails(search)
         documents.postValue(data)
     }
 
