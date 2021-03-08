@@ -1,9 +1,18 @@
 package id.co.rolllpdf.presentation.detail
 
 import android.Manifest
+import android.app.ProgressDialog
+import android.content.ContentUris
+import android.content.Context
 import android.content.Intent
+import android.graphics.*
+import android.graphics.pdf.PdfDocument
+import android.graphics.pdf.PdfDocument.PageInfo
+import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.GridLayoutManager
@@ -14,10 +23,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
-import id.co.rolllpdf.core.DiffCallback
-import id.co.rolllpdf.core.getDrawableCompat
-import id.co.rolllpdf.core.orZero
-import id.co.rolllpdf.core.showToast
+import id.co.rolllpdf.core.*
 import id.co.rolllpdf.data.constant.AppConstant
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
@@ -35,9 +41,14 @@ import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorat
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
+
 
 /**
  * Created by pertadima on 04,March,2021
@@ -136,6 +147,10 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
                 }
                 show()
             }
+        }
+
+        binding.documentdetailsImageviewPdf.setOnClickListener {
+            createPDFWithMultipleImage()
         }
     }
 
@@ -458,6 +473,68 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
 
     }
 
+    private fun createPDFWithMultipleImage() {
+        val dialog = ProgressDialog.show(this, "", getString(R.string.pdf_loading_pdf));
+        dialog.show()
+        val file = getOutputFile()
+        if (file != null) {
+            try {
+                val fileOutputStream = FileOutputStream(file)
+                val pdfDocument = PdfDocument()
+                documentData.forEachIndexed { pos, data ->
+                    val bitmap = try {
+                        getBitmap(this, Uri.fromFile(File(data.filePath)))
+                    } catch (ex: Exception) {
+                        val uri = getImageUri(data.filePath.substringAfterLast("/"))
+                        getBitmap(this, uri)
+                    }
+                    val pageInfo =
+                        PageInfo.Builder(bitmap?.width.orZero(), bitmap?.height.orZero(), pos + 1)
+                            .create()
+                    val page = pdfDocument.startPage(pageInfo)
+                    val canvas: Canvas = page.canvas
+                    val paint = Paint()
+                    paint.color = Color.BLUE
+                    canvas.drawPaint(paint)
+                    bitmap?.let {
+                        val copyBitmap = it.copy(Bitmap.Config.ARGB_8888, true)
+                        canvas.drawBitmap(copyBitmap, 0f, 0f, null)
+                        pdfDocument.finishPage(page)
+                        copyBitmap.recycle()
+                    }
+                }
+                pdfDocument.writeTo(fileOutputStream)
+                pdfDocument.close()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    dialog.dismiss()
+                    showToast(getString(R.string.pdf_text_saved, file.path))
+                }, 300)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                dialog.dismiss()
+            }
+        } else {
+            dialog.dismiss()
+        }
+    }
+
+    private fun getOutputFile(): File? {
+        val root = File(getExternalFilesDir(null), getString(R.string.pdf_text_folder))
+        var isFolderCreated = true
+        if (!root.exists()) {
+            isFolderCreated = root.mkdir()
+        }
+        return if (isFolderCreated) {
+            val timeStamp: String =
+                SimpleDateFormat(DateTimeUtils.DEFAULT_FILE_NAME, Locale.US).format(Date())
+            val imageFileName = "PDF_$timeStamp"
+            File(root, "$imageFileName.pdf")
+        } else {
+            showToast(R.string.pdf_error_folder)
+            null
+        }
+    }
+
     override fun onBackPressed() {
         when (actionState) {
             ActionState.EDIT -> {
@@ -468,6 +545,27 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         }
     }
 
+    private fun getBitmap(context: Context, imageUri: Uri): Bitmap? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoder.decodeBitmap(
+                ImageDecoder.createSource(
+                    context.contentResolver,
+                    imageUri
+                )
+            )
+
+        } else {
+            context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
+
+        }
+    }
+
+    private fun getImageUri(path: String) = ContentUris.withAppendedId(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        path.toLong()
+    )
 
     override fun finish() {
         super.finish()

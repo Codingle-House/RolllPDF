@@ -54,4 +54,5 @@ object DateTimeUtils {
     const val DEFAULT_DATE = "yyyy-MM-dd HH:mm"
     const val DEFAULT_TIME = "HH:mm"
     const val DEFAULT_TARGET_TIME = "MMM dd HH:mm"
+    const val DEFAULT_FILE_NAME = "yyyyMMdd_HHmmss"
 }
