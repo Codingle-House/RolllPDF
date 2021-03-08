@@ -55,6 +55,12 @@ class AboutUsActivity : BaseActivity() {
         aboutUsViewModel.observeVectorAuthor().onResult {
             aboutAdapter.setData(it)
         }
+
+        aboutUsViewModel.observePurchaseStatus().onResult {
+            if (it.not()) {
+                binding.aboutusProview.showWithAnimation()
+            }
+        }
     }
 
     private fun setupToolbar() {
@@ -69,7 +75,6 @@ class AboutUsActivity : BaseActivity() {
 
     private fun showProView() {
         with(binding.aboutusProview) {
-            showWithAnimation()
             setListener { action ->
                 when (action) {
                     DialogProFeatureView.Action.Click -> {
@@ -104,6 +109,11 @@ class AboutUsActivity : BaseActivity() {
             data = Uri.parse(url)
         }
         startActivity(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        aboutUsViewModel.getPurchaseStatus()
     }
 
     override fun finish() {
