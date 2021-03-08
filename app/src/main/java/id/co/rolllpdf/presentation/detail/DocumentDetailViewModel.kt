@@ -23,8 +23,7 @@ import javax.inject.Inject
 class DocumentDetailViewModel @Inject constructor(
     private val appRepository: AppRepository,
     private val userPreferenceManager: UserPreferenceManager
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val documents = SingleLiveEvent<List<DocumentDetailDto>>()
     fun observeDocuments(): LiveData<List<DocumentDetailDto>> = documents

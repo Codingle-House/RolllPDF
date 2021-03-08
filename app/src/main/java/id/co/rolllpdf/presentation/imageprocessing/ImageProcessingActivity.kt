@@ -10,6 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
@@ -72,6 +76,9 @@ class ImageProcessingActivity : BaseActivity() {
     private val listOfFile = mutableListOf<String>()
     private var selectedPosition: Int = 0
 
+    private var hitPercent = 0.3f
+    private val generator: Random = Random()
+
     override fun setupViewBinding() {
         val view = binding.root
         setContentView(view)
@@ -94,10 +101,13 @@ class ImageProcessingActivity : BaseActivity() {
     }
 
     override fun onViewModelObserver() {
-        imageProcessingViewModel.observeInsertDone().onResult {
-            if (it) {
-                finish()
+        with(imageProcessingViewModel) {
+            observeInsertDone().onResult {
+                if (it) {
+                    finish()
+                }
             }
+            observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
         }
     }
 
@@ -203,6 +213,31 @@ class ImageProcessingActivity : BaseActivity() {
         listOfFile.forEach {
             File(it).delete()
         }
+    }
+
+    private fun handlePurchaseStatusLiveData(status: Boolean) {
+        if (status.not()) {
+            initAds()
+        }
+    }
+
+    private fun initAds() {
+        val adRequest = AdRequest.Builder().build()
+        InterstitialAd.load(
+            this@ImageProcessingActivity,
+            getString(R.string.interstitial_ad_unit_id).orEmpty(),
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+
+                }
+
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    if (generator.nextFloat() <= hitPercent) {
+                        interstitialAd.show(this@ImageProcessingActivity)
+                    }
+                }
+            })
     }
 
     override fun onBackPressed() {
