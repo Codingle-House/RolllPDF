@@ -1,0 +1,68 @@
+image: javiersantos/android-ci:latest
+
+stages:
+  - build
+  - clean
+
+before_script:
+  - export GRADLE_USER_HOME=$(pwd)/.gradle
+  - chmod +x ./gradlew
+  - echo $KEYSTORE
+  - echo $KEYSTORE > key.txt
+  - base64 -d key.txt > keystore
+  - echo $KEY_PASSWORD
+  - echo "keyPassword=$KEY_PASSWORD" > key.properties
+  - echo $KEY_ALIAS
+  - echo "keyAlias=$KEY_ALIAS" >> key.properties
+  - echo $ALIAS_PASSWORD
+  - echo "aliasPassword=$ALIAS_PASSWORD" >> key.properties
+
+
+build:apk:
+  stage: build
+  only:
+    - master
+  script:
+    - export BUILD_NUMBER=$CI_JOB_ID
+    - ./gradlew -g /cache/.gradle clean assembleRelease --parallel --stacktrace --no-daemon -x lint
+    - cd app/build/outputs/apk/release/
+    - export FILENAME=$(ls)
+    - echo FILENAME
+    - curl -F file=@${FILENAME} -F channels=$CHANNEL_ID -F initial_comment="[BUILD APK] SUCCESS JOB FROM $CI_COMMIT_REF_NAME APP BUNDLE - READY TO UPLOAD" -F token=$SLACK_TOKEN https://slack.com/api/files.upload
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - app/build/outputs/apk/release/*.apk
+  cache:
+    key: "$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+
+build:aab:
+  stage: build
+  only:
+    - master
+    - develop
+  script:
+    - export BUILD_NUMBER=$CI_JOB_ID
+    - ./gradlew -g /cache/.gradle clean bundleRelease --parallel --stacktrace --no-daemon -x lint
+    - cd app/build/outputs/bundle/release/
+    - export FILENAME=$(ls)
+    - echo FILENAME
+    - curl -F file=@${FILENAME} -F channels=$CHANNEL_ID -F initial_comment="[BUILD AAB] SUCCESS JOB FROM $CI_COMMIT_REF_NAME APP BUNDLE - READY TO UPLOAD" -F token=$SLACK_TOKEN https://slack.com/api/files.upload
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - app/build/outputs/bundle/release/*.aab
+  cache:
+    key: "$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+
+cleanFile:
+  stage: clean
+  script:
+    - rm -f key.txt
+    - rm -f keystore

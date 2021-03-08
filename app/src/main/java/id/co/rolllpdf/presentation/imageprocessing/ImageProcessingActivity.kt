@@ -119,7 +119,7 @@ class ImageProcessingActivity : BaseActivity() {
 
     private fun setupToolbar() {
         with(binding.imageprocessingToolbar) {
-            title = if (previewMode) "" else getString(R.string.imagecropping_title_page)
+            title = if (previewMode) "" else getString(R.string.imageprocessing_title_page)
             setNavigationOnClickListener {
                 deleteFiles()
                 finish()

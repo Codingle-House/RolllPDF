@@ -8,6 +8,10 @@ plugins {
     id 'com.google.firebase.crashlytics'
 }
 
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -17,10 +21,19 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['aliasPassword']
+            storeFile rootProject.file("keystore")
+            storePassword keystoreProperties['keyPassword']
+        }
     }
 
     buildFeatures {
@@ -40,6 +53,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
             resValue("string","mobileads_app_id","ca-app-pub-5236561708257284~3033893655")
             resValue("string","banner_ad_unit_id","ca-app-pub-5236561708257284/8506901553")
             resValue("string","interstitial_ad_unit_id","ca-app-pub-5236561708257284/1781780912")

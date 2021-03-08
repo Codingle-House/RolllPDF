@@ -379,7 +379,11 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             setBackgroundResource(R.drawable.general_ic_checkedall)
             setImageDrawable(null)
         }
-        binding.mainViewPro.isGone = actionState == ActionState.EDIT
+        if (isPro) {
+            binding.mainViewPro.isGone = true
+        } else {
+            binding.mainViewPro.isGone = actionState == ActionState.EDIT
+        }
         binding.mainFabAdd.isGone = actionState == ActionState.EDIT
         binding.mainImageviewSearch.isGone = actionState == ActionState.EDIT
         binding.mainImageviewMore.isGone = actionState == ActionState.EDIT

@@ -382,8 +382,12 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             setBackgroundResource(R.drawable.general_ic_checkedall)
             setImageDrawable(null)
         }
+        if (isPro) {
+            binding.documentdetailsViewPro.isGone = true
+        } else {
+            binding.documentdetailsViewPro.isGone = actionState == ActionState.EDIT
+        }
         binding.documentdetailsLinearlayoutHint.isGone = actionState == ActionState.EDIT
-        binding.documentdetailsViewPro.isGone = actionState == ActionState.EDIT
         binding.documentdetailsFabAdd.isGone = actionState == ActionState.EDIT
         binding.documentdetailsImageviewPdf.isGone = actionState == ActionState.EDIT
         binding.documentdetailsImageviewEdit.isGone = actionState == ActionState.EDIT
