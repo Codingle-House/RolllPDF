@@ -10,6 +10,7 @@ import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfDocument.PageInfo
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
@@ -87,6 +88,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     private val generator: Random = Random()
 
     private var duplicateCount: Int = 0
+    private var pdfCount: Int = 0
     private var isPro: Boolean = false
 
     override fun setupViewBinding() {
@@ -110,6 +112,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
             observeDocuments().onResult { handleDocumentDetailLiveData(it) }
             observeDuplicateCount().onResult { duplicateCount = it }
+            observePDFGeneratedCount().onResult { pdfCount = it }
         }
     }
 
@@ -150,7 +153,12 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         }
 
         binding.documentdetailsImageviewPdf.setOnClickListener {
-            createPDFWithMultipleImage()
+            if (isPro || pdfCount < AppConstant.MAX_PDF_COUNT) {
+                createPDFWithMultipleImage()
+                documentDetailViewModel.updatePdfGeneratedCount(pdfCount.inc())
+            } else {
+                showToast(R.string.pdf_error_generate)
+            }
         }
     }
 
@@ -214,11 +222,9 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     }
 
     private fun showInterstitialAds() {
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (generator.nextFloat() <= hitPercent) {
-                interstitialAd?.show(this)
-            }
-        }, 500)
+        if (generator.nextFloat() <= hitPercent) {
+            interstitialAd?.show(this)
+        }
     }
 
     private fun initOverScroll() {
@@ -278,6 +284,9 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             binding.documentdetailsViewSpace.isGone = false
         } else {
             binding.documentdetailsViewSpace.isGone = true
+            binding.documentdetailsViewPro.isGone = true
+            binding.documentdetailsAdviewBanner.isGone = true
+            this.interstitialAd = null
         }
     }
 
@@ -341,6 +350,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             getDocuments(documentId)
             getPurchaseStatus()
             getDuplicateCount()
+            getPDFGeneratedCount()
         }
     }
 
@@ -508,6 +518,10 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
                 Handler(Looper.getMainLooper()).postDelayed({
                     dialog.dismiss()
                     showToast(getString(R.string.pdf_text_saved, file.path))
+                    if (isPro) return@postDelayed
+                    if (generator.nextFloat() <= hitPercent) {
+                        interstitialAd?.show(this)
+                    }
                 }, 300)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -519,7 +533,10 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     }
 
     private fun getOutputFile(): File? {
-        val root = File(getExternalFilesDir(null), getString(R.string.pdf_text_folder))
+        val root = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+            getString(R.string.pdf_text_folder)
+        )
         var isFolderCreated = true
         if (!root.exists()) {
             isFolderCreated = root.mkdir()

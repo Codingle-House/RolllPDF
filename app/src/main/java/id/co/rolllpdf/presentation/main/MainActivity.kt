@@ -306,6 +306,8 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
             binding.mainViewSpace.isGone = false
         } else {
             binding.mainViewSpace.isGone = true
+            binding.mainViewPro.isGone = true
+            binding.mainAdviewBanner.isGone = true
         }
     }
 

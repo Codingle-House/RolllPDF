@@ -63,4 +63,5 @@
     <string name="pdf_error_folder">Folder is not created</string>
     <string name="pdf_loading_pdf">Generating PDF</string>
     <string name="pdf_text_saved">PDF generated in %s</string>
+    <string name="pdf_error_generate">You have reached maximun generate pdf document 5 times</string>
 </resources>

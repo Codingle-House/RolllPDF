@@ -31,13 +31,17 @@ class DocumentDetailViewModel @Inject constructor(
     private val purchaseStatus = SingleLiveEvent<Boolean>()
     fun observePurchaseStatus(): LiveData<Boolean> = purchaseStatus
 
+    private val duplicateCount = SingleLiveEvent<Int>()
+    fun observeDuplicateCount(): LiveData<Int> = duplicateCount
+
+    private val pdfCount = SingleLiveEvent<Int>()
+    fun observePDFGeneratedCount(): LiveData<Int> = pdfCount
+
+
     fun getDocuments(id: Long) = viewModelScope.launch {
         val data = appRepository.getDetailDocumentDetail(id)
         documents.postValue(data)
     }
-
-    private val duplicateCount = SingleLiveEvent<Int>()
-    fun observeDuplicateCount(): LiveData<Int> = duplicateCount
 
     fun doInsertDocument(
         id: Long,
@@ -91,6 +95,18 @@ class DocumentDetailViewModel @Inject constructor(
 
     fun updateDuplicateCount(count: Int) = viewModelScope.launch {
         userPreferenceManager.updateDuplicateCount(count)
+        getDuplicateCount()
+    }
+
+
+    fun getPDFGeneratedCount() = viewModelScope.launch {
+        userPreferenceManager.getPdfCount().collect {
+            pdfCount.postValue(it)
+        }
+    }
+
+    fun updatePdfGeneratedCount(count: Int) = viewModelScope.launch {
+        userPreferenceManager.updatePdfCount(count)
         getDuplicateCount()
     }
 }
