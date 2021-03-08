@@ -37,6 +37,9 @@ class DocumentDetailViewModel @Inject constructor(
         documents.postValue(data)
     }
 
+    private val duplicateCount = SingleLiveEvent<Int>()
+    fun observeDuplicateCount(): LiveData<Int> = duplicateCount
+
     fun doInsertDocument(
         id: Long,
         files: List<DocumentDetailDto>
@@ -79,5 +82,16 @@ class DocumentDetailViewModel @Inject constructor(
         userPreferenceManager.getPurchaseStatus().collect {
             purchaseStatus.postValue(it)
         }
+    }
+
+    fun getDuplicateCount() = viewModelScope.launch {
+        userPreferenceManager.getDuplicateCount().collect {
+            duplicateCount.postValue(it)
+        }
+    }
+
+    fun updateDuplicateCount(count: Int) = viewModelScope.launch {
+        userPreferenceManager.updateDuplicateCount(count)
+        getDuplicateCount()
     }
 }

@@ -23,9 +23,10 @@
     <string name="main_text_empty">You haven’t add any document to scan yet. Please add using
         <b>(+)</b> button on bottom right corner.
     </string>
+    <string name="main_text_actionhint">Long press to duplicate or delete documents.</string>
 
     <string name="pro_text_message">Pay once, enjoy the application without ads and other excellent
-        features
+        features.
     </string>
 
     <string name="camera_title_page">Camera</string>

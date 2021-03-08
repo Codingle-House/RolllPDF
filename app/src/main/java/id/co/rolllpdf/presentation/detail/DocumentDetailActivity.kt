@@ -18,6 +18,7 @@ import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.core.showToast
+import id.co.rolllpdf.data.constant.AppConstant
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.databinding.ActivityDocumentDetailsBinding
@@ -74,6 +75,9 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     private var hitPercent = 0.3f
     private val generator: Random = Random()
 
+    private var duplicateCount: Int = 0
+    private var isPro: Boolean = false
+
     override fun setupViewBinding() {
         val view = binding.root
         setContentView(view)
@@ -94,6 +98,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         with(documentDetailViewModel) {
             observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
             observeDocuments().onResult { handleDocumentDetailLiveData(it) }
+            observeDuplicateCount().onResult { duplicateCount = it }
         }
     }
 
@@ -138,8 +143,15 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         binding.documentdetailsRelativelayoutCopy.setOnClickListener {
             val duplicateDocument = documentData.filter { it.isSelected }
             if (duplicateDocument.isNotEmpty()) {
-                documentDetailViewModel.doInsertDocument(documentId, duplicateDocument)
-                toggleEditMode(ActionState.DEFAULT)
+                if (isPro || duplicateCount < AppConstant.MAX_DUPLICATE_COUNT) {
+                    with(documentDetailViewModel) {
+                        documentDetailViewModel.doInsertDocument(documentId, duplicateDocument)
+                        updateDuplicateCount(duplicateCount.inc())
+                    }
+                    toggleEditMode(ActionState.DEFAULT)
+                } else {
+                    showToast(R.string.general_error_maxduplicate)
+                }
             } else {
                 showToast(R.string.general_error_selected)
             }
@@ -242,6 +254,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     }
 
     private fun handlePurchaseStatusLiveData(status: Boolean) {
+        isPro = status
         if (status.not()) {
             binding.documentdetailsViewPro.showWithAnimation()
             showAdMob()
@@ -312,6 +325,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         with(documentDetailViewModel) {
             getDocuments(documentId)
             getPurchaseStatus()
+            getDuplicateCount()
         }
     }
 
@@ -343,6 +357,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
             setBackgroundResource(R.drawable.general_ic_checkedall)
             setImageDrawable(null)
         }
+        binding.documentdetailsLinearlayoutHint.isGone = actionState == ActionState.EDIT
         binding.documentdetailsViewPro.isGone = actionState == ActionState.EDIT
         binding.documentdetailsFabAdd.isGone = actionState == ActionState.EDIT
         binding.documentdetailsImageviewPdf.isGone = actionState == ActionState.EDIT

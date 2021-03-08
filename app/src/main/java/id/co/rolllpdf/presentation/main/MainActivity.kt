@@ -381,6 +381,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         binding.mainFabAdd.isGone = actionState == ActionState.EDIT
         binding.mainImageviewSearch.isGone = actionState == ActionState.EDIT
         binding.mainImageviewMore.isGone = actionState == ActionState.EDIT
+        binding.mainLinearlayoutHint.isGone = actionState == ActionState.EDIT
         binding.mainLinearlayoutAction.isGone = (actionState == ActionState.EDIT).not()
         binding.mainImageviewChecked.isGone = (actionState == ActionState.EDIT).not()
     }

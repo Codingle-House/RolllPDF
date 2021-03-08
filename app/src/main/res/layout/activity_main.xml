@@ -96,11 +96,31 @@
                 android:layout_marginTop="@dimen/_16sdp" />
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/main_linearlayout_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_16sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                app:cardCornerRadius="@dimen/_5sdp"
+                app:cardElevation="@dimen/_3sdp"
+                app:contentPadding="@dimen/_10sdp">
+
+                <id.co.rolllpdf.uikit.UiKitTextview
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/general_ic_info"
+                    android:drawablePadding="@dimen/_10sdp"
+                    android:gravity="center_vertical"
+                    app:rolll_text_code="h7_B"
+                    android:text="@string/main_text_actionhint" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/main_linearlayout_action"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_16sdp"
-                android:layout_marginTop="@dimen/_16sdp"
+                android:layout_marginTop="@dimen/_10sdp"
                 android:visibility="gone"
                 app:cardCornerRadius="@dimen/_5sdp"
                 app:cardElevation="@dimen/_3sdp">
