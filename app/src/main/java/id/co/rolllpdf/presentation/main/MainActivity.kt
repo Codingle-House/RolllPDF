@@ -1,6 +1,7 @@
 package id.co.rolllpdf.presentation.main
 
 import android.Manifest
+import android.R.color.white
 import android.app.Service
 import android.content.Intent
 import android.text.Editable
@@ -24,7 +25,6 @@ import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.databinding.ActivityMainBinding
 import id.co.rolllpdf.presentation.about.AboutUsActivity
 import id.co.rolllpdf.presentation.camera.CameraActivity
-import id.co.rolllpdf.presentation.customview.DialogProFeatureView
 import id.co.rolllpdf.presentation.detail.DocumentDetailActivity
 import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
 import id.co.rolllpdf.presentation.main.adapter.MainAdapter
@@ -34,7 +34,12 @@ import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
@@ -76,10 +81,9 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     @ExperimentalCoroutinesApi
     override fun setupUi() {
         changeStatusBarTextColor(true)
-        changeStatusBarColor(android.R.color.white)
+        changeStatusBarColor(white)
         setupToolbar()
         initOverScroll()
-        showProView()
         floatingActionButtonListener()
         setupRecyclerView()
         editModeListener()
@@ -102,10 +106,12 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                     toggleEditMode(ActionState.DEFAULT)
                     mainViewModel.getDocuments()
                 }
+
                 ActionState.SEARCH -> {
                     toggleSearchMode(ActionState.DEFAULT)
                     mainViewModel.getDocuments()
                 }
+
                 else -> finish()
             }
         }
@@ -177,21 +183,6 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                 }
             } else {
                 showToast(R.string.general_error_selected)
-            }
-        }
-    }
-
-    private fun showProView() {
-        with(binding.mainViewPro) {
-            setListener { action ->
-                when (action) {
-                    DialogProFeatureView.Action.Click -> {
-                        navigateToProActivity()
-                    }
-                    DialogProFeatureView.Action.Close -> {
-
-                    }
-                }
             }
         }
     }
@@ -291,14 +282,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
 
 
     private fun handlePurchaseStatusLiveData(status: Boolean) {
-        isPro = status
-        if (status.not()) {
-            binding.mainViewPro.showWithAnimation()
-            binding.mainViewSpace.isGone = false
-        } else {
-            binding.mainViewSpace.isGone = true
-            binding.mainViewPro.isGone = true
-        }
+
     }
 
 
@@ -368,11 +352,6 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         with(binding.mainImageviewChecked) {
             setBackgroundResource(R.drawable.general_ic_checkedall)
             setImageDrawable(null)
-        }
-        if (isPro) {
-            binding.mainViewPro.isGone = true
-        } else {
-            binding.mainViewPro.isGone = actionState == ActionState.EDIT
         }
         binding.mainFabAdd.isGone = actionState == ActionState.EDIT
         binding.mainImageviewSearch.isGone = actionState == ActionState.EDIT
@@ -494,10 +473,12 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                 toggleEditMode(ActionState.DEFAULT)
                 mainViewModel.getDocuments()
             }
+
             ActionState.SEARCH -> {
                 toggleSearchMode(ActionState.DEFAULT)
                 mainViewModel.getDocuments()
             }
+
             else -> finish()
         }
     }
