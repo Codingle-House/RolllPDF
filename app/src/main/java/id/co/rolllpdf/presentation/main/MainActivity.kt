@@ -196,14 +196,6 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         }
     }
 
-    private fun showAdMob() {
-        binding.mainAdviewBanner.run {
-            initializeAdMob()
-            bringToFront()
-            isGone = false
-        }
-    }
-
     private fun setupRecyclerView() {
         with(binding.mainRecyclerviewDocument) {
             val gridLayoutManager = GridLayoutManager(this@MainActivity, 3)
@@ -302,12 +294,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
         isPro = status
         if (status.not()) {
             binding.mainViewPro.showWithAnimation()
-            showAdMob()
             binding.mainViewSpace.isGone = false
         } else {
             binding.mainViewSpace.isGone = true
             binding.mainViewPro.isGone = true
-            binding.mainAdviewBanner.isGone = true
         }
     }
 
@@ -480,7 +470,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
                 ) = Unit
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    offer(s)
+                    trySend(s).isSuccess
                 }
             }
             addTextChangedListener(listener)
@@ -498,6 +488,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     }
 
     override fun onBackPressed() {
+        super.onBackPressed()
         when (actionState) {
             ActionState.EDIT -> {
                 toggleEditMode(ActionState.DEFAULT)

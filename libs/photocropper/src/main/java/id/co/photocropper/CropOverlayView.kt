@@ -1,7 +1,17 @@
 package id.co.photocropper
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Point
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
+import android.graphics.Region
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -247,6 +257,7 @@ class CropOverlayView : View {
                 onActionDown(event)
                 return true
             }
+
             MotionEvent.ACTION_MOVE -> {
                 parent.requestDisallowInterceptTouchEvent(true)
                 onActionMove(event)
@@ -297,18 +308,23 @@ class CropOverlayView : View {
                 adjustTopLeft(deltaX, deltaY)
                 invalidate()
             }
+
             CropPosition.TOP_RIGHT -> {
                 adjustTopRight(deltaX, deltaY)
                 invalidate()
             }
+
             CropPosition.BOTTOM_LEFT -> {
                 adjustBottomLeft(deltaX, deltaY)
                 invalidate()
             }
+
             CropPosition.BOTTOM_RIGHT -> {
                 adjustBottomRight(deltaX, deltaY)
                 invalidate()
             }
+
+            else -> Unit
         }
         touchDownX = event.x
         touchDownY = event.y

@@ -195,14 +195,4 @@
         app:fabCustomSize="@dimen/_50sdp"
         app:maxImageSize="@dimen/_36sdp"
         app:tint="@android:color/white" />
-
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/documentdetails_adview_banner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:visibility="gone"
-        app:adSize="BANNER"
-        app:adUnitId="@string/banner_ad_unit_id"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

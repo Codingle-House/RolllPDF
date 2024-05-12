@@ -11,7 +11,7 @@ import java.io.OutputStream
  * Created by pertadima on 07,March,2021
  */
 object UserSerializer : Serializer<UserPreference> {
-    override fun readFrom(input: InputStream): UserPreference {
+    override suspend fun readFrom(input: InputStream): UserPreference {
         try {
             return UserPreference.parseFrom(input)
         } catch (exception: InvalidProtocolBufferException) {
@@ -19,7 +19,7 @@ object UserSerializer : Serializer<UserPreference> {
         }
     }
 
-    override fun writeTo(t: UserPreference, output: OutputStream) = t.writeTo(output)
+    override suspend fun writeTo(t: UserPreference, output: OutputStream) = t.writeTo(output)
 
     override val defaultValue: UserPreference
         get() = UserPreference.getDefaultInstance()

@@ -10,10 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
@@ -216,31 +212,11 @@ class ImageProcessingActivity : BaseActivity() {
     }
 
     private fun handlePurchaseStatusLiveData(status: Boolean) {
-        if (status.not()) {
-            initAds()
-        }
-    }
 
-    private fun initAds() {
-        val adRequest = AdRequest.Builder().build()
-        InterstitialAd.load(
-            this@ImageProcessingActivity,
-            getString(R.string.interstitial_ad_unit_id).orEmpty(),
-            adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-
-                }
-
-                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    if (generator.nextFloat() <= hitPercent) {
-                        interstitialAd.show(this@ImageProcessingActivity)
-                    }
-                }
-            })
     }
 
     override fun onBackPressed() {
+        super.onBackPressed()
         deleteFiles()
         finish()
     }

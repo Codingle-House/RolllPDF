@@ -7,10 +7,6 @@ import android.view.WindowInsetsController
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.MobileAds
 import id.co.rolllpdf.core.getColorCompat
 
 /**
@@ -44,6 +40,7 @@ abstract class BaseActivity : AppCompatActivity() {
                         WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
                     )
                 }
+
                 else -> {
                     window.insetsController?.setSystemBarsAppearance(
                         WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS.inv(),
@@ -57,6 +54,7 @@ abstract class BaseActivity : AppCompatActivity() {
                     window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 
                 }
+
                 else -> {
                     val decorView = window.decorView
                     decorView.systemUiVisibility =
@@ -67,12 +65,6 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     protected fun <T> LiveData<T>.onResult(action: (T) -> Unit) {
-        observe(this@BaseActivity, Observer { data -> data?.let(action) })
-    }
-
-    protected fun AdView.initializeAdMob() {
-        MobileAds.initialize(this@BaseActivity)
-        val adRequest = AdRequest.Builder().build()
-        loadAd(adRequest)
+        observe(this@BaseActivity, { data -> data?.let(action) })
     }
 }

@@ -1,5 +1,6 @@
 package id.co.rolllpdf.uikit
 
+import RolllPDF.R
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle

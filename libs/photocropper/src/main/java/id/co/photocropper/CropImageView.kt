@@ -1,12 +1,11 @@
 package id.co.photocropper
 
+import RolllPDF.databinding.CropImageViewBinding
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import id.co.photocropper.databinding.CropImageViewBinding
 
 /**
  * Created by pertadima on 27,February,2021
@@ -17,10 +16,6 @@ class CropImageView @JvmOverloads constructor(
 
     private val binding by lazy {
         CropImageViewBinding.inflate(LayoutInflater.from(context), this)
-    }
-
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
     }
 
     fun setImageBitmap(bitmap: Bitmap?) {

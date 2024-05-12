@@ -17,10 +17,6 @@ import android.provider.MediaStore
 import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
@@ -82,7 +78,6 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     private var actionState: Int = ActionState.DEFAULT
     private val documentData: MutableList<DocumentDetailDto> = mutableListOf()
     private var documentTitle: String = ""
-    private var interstitialAd: InterstitialAd? = null
 
     private var hitPercent = 0.3f
     private val generator: Random = Random()
@@ -196,37 +191,6 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         }
     }
 
-    private fun showAdMob() {
-        binding.documentdetailsAdviewBanner.run {
-            initializeAdMob()
-            bringToFront()
-            isGone = false
-        }
-    }
-
-    private fun initAds() {
-        val adRequest = AdRequest.Builder().build()
-        InterstitialAd.load(
-            this@DocumentDetailActivity,
-            getString(R.string.interstitial_ad_unit_id).orEmpty(),
-            adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-                    interstitialAd = null
-                }
-
-                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    this@DocumentDetailActivity.interstitialAd = interstitialAd
-                }
-            })
-    }
-
-    private fun showInterstitialAds() {
-        if (generator.nextFloat() <= hitPercent) {
-            interstitialAd?.show(this)
-        }
-    }
-
     private fun initOverScroll() {
         VerticalOverScrollBounceEffectDecorator(
             NestedScrollViewOverScrollDecorAdapter(binding.documentdetailsNestedscroll)
@@ -278,15 +242,10 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         isPro = status
         if (status.not()) {
             binding.documentdetailsViewPro.showWithAnimation()
-            showAdMob()
-            initAds()
-            showInterstitialAds()
             binding.documentdetailsViewSpace.isGone = false
         } else {
             binding.documentdetailsViewSpace.isGone = true
             binding.documentdetailsViewPro.isGone = true
-            binding.documentdetailsAdviewBanner.isGone = true
-            this.interstitialAd = null
         }
     }
 
@@ -523,9 +482,6 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
                     dialog.dismiss()
                     showToast(getString(R.string.pdf_text_saved, file.path))
                     if (isPro) return@postDelayed
-                    if (generator.nextFloat() <= hitPercent) {
-                        interstitialAd?.show(this)
-                    }
                 }, 300)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -556,7 +512,9 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        super.onBackPressed()
         when (actionState) {
             ActionState.EDIT -> {
                 toggleEditMode(ActionState.DEFAULT)

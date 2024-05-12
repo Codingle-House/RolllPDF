@@ -111,8 +111,8 @@
                     android:drawableStart="@drawable/general_ic_info"
                     android:drawablePadding="@dimen/_10sdp"
                     android:gravity="center_vertical"
-                    app:rolll_text_code="h7_B"
-                    android:text="@string/main_text_actionhint" />
+                    android:text="@string/main_text_actionhint"
+                    app:rolll_text_code="h7_B" />
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
@@ -211,14 +211,4 @@
         app:fabCustomSize="@dimen/_50sdp"
         app:maxImageSize="@dimen/_36sdp"
         app:tint="@android:color/white" />
-
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/main_adview_banner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:visibility="gone"
-        app:adSize="BANNER"
-        app:adUnitId="@string/banner_ad_unit_id"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

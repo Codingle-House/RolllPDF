@@ -1,15 +1,16 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = '1.4.31'
+    ext.kotlin_version = "1.9.22"
     repositories {
         google()
+        mavenCentral()
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.1.2"
+        classpath "com.android.tools.build:gradle:8.2.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.28-alpha'
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.12'
+        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.46'
         classpath 'com.google.gms:google-services:4.3.5'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.0'
         // NOTE: Do not place your application dependencies here; they belong
@@ -17,11 +18,29 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.google.devtools.ksp' version '1.9.22-1.0.17' apply false
+    id 'com.google.dagger.hilt.android' version '2.48' apply false
+}
+
 allprojects {
     repositories {
         google()
+        mavenCentral()
         jcenter()
         maven { url "https://jitpack.io" }
+    }
+}
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                if (namespace == null) {
+                    namespace project.group
+                }
+            }
+        }
     }
 }
 
