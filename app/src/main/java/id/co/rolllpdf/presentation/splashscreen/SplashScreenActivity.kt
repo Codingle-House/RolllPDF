@@ -1,6 +1,7 @@
 package id.co.rolllpdf.presentation.splashscreen
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -18,6 +19,7 @@ import kotlin.math.pow
  */
 
 
+@SuppressLint("CustomSplashScreen")
 class SplashScreenActivity : BaseActivity() {
     private val binding by lazy {
         ActivitySplashScreenBinding.inflate(layoutInflater)
