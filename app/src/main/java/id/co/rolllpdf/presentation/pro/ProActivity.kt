@@ -1,9 +1,11 @@
 package id.co.rolllpdf.presentation.pro
 
+import android.view.LayoutInflater
 import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.databinding.ActivityPhotoPickerBinding
 import id.co.rolllpdf.databinding.ActivityProBinding
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
@@ -12,18 +14,12 @@ import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorat
  * Created by pertadima on 07,March,2021
  */
 @AndroidEntryPoint
-class ProActivity : BaseActivity() {
+class ProActivity : BaseActivity<ActivityProBinding>() {
+
+    override val bindingInflater: (LayoutInflater) -> ActivityProBinding
+        get() = ActivityProBinding::inflate
 
     private val proViewModel: ProViewModel by viewModels()
-
-    private val binding by lazy {
-        ActivityProBinding.inflate(layoutInflater)
-    }
-
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
-    }
 
     override fun setupUi() {
         changeStatusBarTextColor(true)

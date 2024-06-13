@@ -10,6 +10,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.view.LayoutInflater
 import com.mukesh.imageproccessing.OnProcessingCompletionListener
 import com.mukesh.imageproccessing.PhotoFilter
 import com.mukesh.imageproccessing.filters.AutoFix
@@ -28,10 +29,11 @@ import java.io.File
 /**
  * Created by pertadima on 01,March,2021
  */
-class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
-    private val binding by lazy {
-        ActivityPhotoFilterBinding.inflate(layoutInflater)
-    }
+class PhotoFilterActivity : BaseActivity<ActivityPhotoFilterBinding>(),
+    OnProcessingCompletionListener {
+
+    override val bindingInflater: (LayoutInflater) -> ActivityPhotoFilterBinding
+        get() = ActivityPhotoFilterBinding::inflate
 
     private val imagePath by lazy {
         intent?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
@@ -43,11 +45,6 @@ class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
 
     private var photoFilter: PhotoFilter? = null
     private var filterBitmap: Bitmap? = null
-
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
-    }
 
     override fun setupUi() {
         changeStatusBarTextColor(true)
@@ -99,12 +96,15 @@ class PhotoFilterActivity : BaseActivity(), OnProcessingCompletionListener {
             PhotoFilterAction.ORIGINAL -> getImageBitmap()?.let {
                 photoFilter?.applyEffect(it, None())
             }
+
             PhotoFilterAction.MAGIC -> getImageBitmap()?.let {
                 photoFilter?.applyEffect(it, AutoFix())
             }
+
             PhotoFilterAction.BW -> getImageBitmap()?.let {
                 photoFilter?.applyEffect(it, Documentary())
             }
+
             else -> getImageBitmap()?.let {
                 photoFilter?.applyEffect(it, Grayscale())
             }

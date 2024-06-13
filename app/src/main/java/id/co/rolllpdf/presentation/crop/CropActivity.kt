@@ -10,10 +10,12 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.view.LayoutInflater
 import id.co.photocropper.CropListener
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
-import id.co.rolllpdf.data.constant.IntentArguments
+import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_IMAGES
+import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_POSITION
 import id.co.rolllpdf.databinding.ActivityCropBinding
 import id.co.rolllpdf.util.image.convertBitmapToFile
 import id.co.rolllpdf.util.image.createFile
@@ -24,22 +26,16 @@ import java.io.File
 /**
  * Created by pertadima on 26,February,2021
  */
-class CropActivity : BaseActivity(), CropListener {
-    private val binding by lazy {
-        ActivityCropBinding.inflate(layoutInflater)
-    }
+class CropActivity : BaseActivity<ActivityCropBinding>(), CropListener {
+    override val bindingInflater: (LayoutInflater) -> ActivityCropBinding
+        get() = ActivityCropBinding::inflate
 
     private val imagePath by lazy {
-        intent?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
+        intent?.getStringExtra(PROCESSING_IMAGES).orEmpty()
     }
 
     private val selectedPosition by lazy {
-        intent?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0)
-    }
-
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
+        intent?.getIntExtra(PROCESSING_POSITION, 0)
     }
 
     override fun setupUi() {
@@ -52,10 +48,8 @@ class CropActivity : BaseActivity(), CropListener {
     override fun onViewModelObserver() {
     }
 
-    private fun setupToolbar() {
-        binding.imagecroppingToolbar.setNavigationOnClickListener {
-            finish()
-        }
+    private fun setupToolbar() = binding.imagecroppingToolbar.setNavigationOnClickListener {
+        finish()
     }
 
     private fun setupView() {
@@ -103,8 +97,8 @@ class CropActivity : BaseActivity(), CropListener {
         }
         val savedUri = Uri.fromFile(photoFile)
         val resultIntent = Intent().apply {
-            putExtra(IntentArguments.PROCESSING_IMAGES, savedUri.path)
-            putExtra(IntentArguments.PROCESSING_POSITION, selectedPosition)
+            putExtra(PROCESSING_IMAGES, savedUri.path)
+            putExtra(PROCESSING_POSITION, selectedPosition)
         }
         setResult(Activity.RESULT_OK, resultIntent)
         finish()

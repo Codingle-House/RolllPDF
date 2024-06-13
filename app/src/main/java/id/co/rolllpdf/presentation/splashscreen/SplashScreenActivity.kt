@@ -5,11 +5,14 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.Interpolator
 import androidx.core.view.isGone
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.Constant.FLOAT_ZERO
+import id.co.rolllpdf.core.Constant.ONE
 import id.co.rolllpdf.databinding.ActivitySplashScreenBinding
 import id.co.rolllpdf.presentation.main.MainActivity
 import kotlin.math.pow
@@ -20,32 +23,27 @@ import kotlin.math.pow
 
 
 @SuppressLint("CustomSplashScreen")
-class SplashScreenActivity : BaseActivity() {
-    private val binding by lazy {
-        ActivitySplashScreenBinding.inflate(layoutInflater)
-    }
+class SplashScreenActivity : BaseActivity<ActivitySplashScreenBinding>() {
 
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
-    }
+    override val bindingInflater: (LayoutInflater) -> ActivitySplashScreenBinding
+        get() = ActivitySplashScreenBinding::inflate
 
     override fun setupUi() {
         changeStatusBarTextColor(true)
         changeStatusBarColor(android.R.color.white)
-        doAnimationLogo()
+        doLogoAnimation()
     }
 
 
     override fun onViewModelObserver() {
     }
 
-    private fun doAnimationLogo() {
-        binding.splashscreenImageviewLogo.doBounceAnimation {
-            binding.splashscreenTextviewTitle.isGone = false
-            binding.splashscreenTextviewDesc.isGone = false
+    private fun doLogoAnimation() = with(binding) {
+        splashscreenImageviewLogo.doBounceAnimation {
+            splashscreenTextviewTitle.isGone = false
+            splashscreenTextviewDesc.isGone = false
             Handler(Looper.getMainLooper()).postDelayed({
-                val intent = Intent(this, MainActivity::class.java)
+                val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(
                     R.anim.transition_anim_fade_in,
@@ -57,17 +55,12 @@ class SplashScreenActivity : BaseActivity() {
     }
 
     private fun View.doBounceAnimation(onAnimationEnd: () -> Unit) {
-        val bounceInterpolator: Interpolator = Interpolator { v ->
-            getPowOut(
-                v,
-                POW
-            )
-        }
+        val bounceInterpolator = Interpolator { v -> getPowOut(v) }
 
         ObjectAnimator.ofFloat(
             this,
-            BOUNCE_TRANSLATION_Y, 0F,
-            TRANSLATION_Y, 0F
+            BOUNCE_TRANSLATION_Y, FLOAT_ZERO,
+            TRANSLATION_Y, FLOAT_ZERO
         ).apply {
             interpolator = bounceInterpolator
             startDelay = BOUNCE_ANIMATION_DELAY
@@ -81,8 +74,8 @@ class SplashScreenActivity : BaseActivity() {
         Handler(Looper.getMainLooper()).postDelayed({ onAnimationEnd.invoke() }, delayMillis)
     }
 
-    private fun getPowOut(elapsedTimeRate: Float, pow: Double): Float {
-        return (1.toFloat() - (1 - elapsedTimeRate.toDouble()).pow(pow)).toFloat()
+    private fun getPowOut(elapsedTimeRate: Float): Float {
+        return (ONE.toFloat() - (ONE - elapsedTimeRate.toDouble()).pow(POW)).toFloat()
     }
 
     companion object {

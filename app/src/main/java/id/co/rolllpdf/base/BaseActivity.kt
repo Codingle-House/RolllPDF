@@ -2,26 +2,33 @@ package id.co.rolllpdf.base
 
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsetsController
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
+import androidx.viewbinding.ViewBinding
 import id.co.rolllpdf.core.getColorCompat
 
 /**
  * Created by pertadima on 25,February,2021
  */
-abstract class BaseActivity : AppCompatActivity() {
+abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
+
+    private var _binding: VB? = null
+    protected val binding: VB get() = _binding!!
+
+    abstract val bindingInflater: (LayoutInflater) -> VB
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupViewBinding()
+        _binding = bindingInflater(layoutInflater)
+        setContentView(binding.root)
         setupUi()
         onViewModelObserver()
     }
 
-    abstract fun setupViewBinding()
     abstract fun setupUi()
     abstract fun onViewModelObserver()
 

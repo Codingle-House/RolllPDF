@@ -6,6 +6,7 @@ import android.app.Service
 import android.content.Intent
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.activity.viewModels
@@ -47,17 +48,16 @@ import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
+class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.PermissionCallbacks,
     EasyPermissions.RationaleCallbacks {
+
+    override val bindingInflater: (LayoutInflater) -> ActivityMainBinding
+        get() = ActivityMainBinding::inflate
 
     private val mainViewModel: MainViewModel by viewModels()
 
     @Inject
     lateinit var diffCallback: DiffCallback
-
-    private val binding by lazy {
-        ActivityMainBinding.inflate(layoutInflater)
-    }
 
     private val mainAdapter by lazy {
         MainAdapter(
@@ -71,11 +71,6 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
     private var firstLoad: Boolean = true
     private var duplicateCount: Int = 0
     private var isPro: Boolean = false
-
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
-    }
 
     @FlowPreview
     @ExperimentalCoroutinesApi
