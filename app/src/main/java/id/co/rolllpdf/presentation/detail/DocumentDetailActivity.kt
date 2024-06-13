@@ -5,7 +5,12 @@ import android.app.ProgressDialog
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.ImageDecoder
+import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfDocument.PageInfo
 import android.net.Uri
@@ -14,13 +19,18 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
-import id.co.rolllpdf.core.*
+import id.co.rolllpdf.core.DateTimeUtils
+import id.co.rolllpdf.core.DiffCallback
+import id.co.rolllpdf.core.getDrawableCompat
+import id.co.rolllpdf.core.orZero
+import id.co.rolllpdf.core.showToast
 import id.co.rolllpdf.data.constant.AppConstant
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
@@ -44,7 +54,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 
 
 /**
@@ -52,17 +61,17 @@ import kotlin.collections.ArrayList
  */
 
 @AndroidEntryPoint
-class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbacks,
+class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
+    EasyPermissions.PermissionCallbacks,
     EasyPermissions.RationaleCallbacks {
+
+    override val bindingInflater: (LayoutInflater) -> ActivityDocumentDetailsBinding
+        get() = ActivityDocumentDetailsBinding::inflate
 
     private val documentDetailViewModel: DocumentDetailViewModel by viewModels()
 
     @Inject
     lateinit var diffCallback: DiffCallback
-
-    private val binding by lazy {
-        ActivityDocumentDetailsBinding.inflate(layoutInflater)
-    }
 
     private val documentId by lazy {
         intent?.getLongExtra(IntentArguments.DOCUMENT_ID, 0).orZero()
@@ -85,11 +94,6 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
     private var duplicateCount: Int = 0
     private var pdfCount: Int = 0
     private var isPro: Boolean = false
-
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
-    }
 
     override fun setupUi() {
         changeStatusBarTextColor(true)
@@ -121,6 +125,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
                         toggleEditMode(ActionState.DEFAULT)
                         documentDetailViewModel.getDocuments(documentId)
                     }
+
                     else -> finish()
                 }
             }
@@ -209,6 +214,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
                             R.anim.transition_anim_slide_out_left
                         )
                     }
+
                     DialogProFeatureView.Action.Close -> {
 
                     }
@@ -520,6 +526,7 @@ class DocumentDetailActivity : BaseActivity(), EasyPermissions.PermissionCallbac
                 toggleEditMode(ActionState.DEFAULT)
                 documentDetailViewModel.getDocuments(documentId)
             }
+
             else -> finish()
         }
     }

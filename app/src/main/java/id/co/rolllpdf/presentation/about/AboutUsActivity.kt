@@ -2,6 +2,7 @@ package id.co.rolllpdf.presentation.about
 
 import android.content.Intent
 import android.net.Uri
+import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,25 +22,18 @@ import javax.inject.Inject
  * Created by pertadima on 07,March,2021
  */
 @AndroidEntryPoint
-class AboutUsActivity : BaseActivity() {
+class AboutUsActivity : BaseActivity<ActivityAboutUsBinding>() {
+
+    override val bindingInflater: (LayoutInflater) -> ActivityAboutUsBinding
+        get() = ActivityAboutUsBinding::inflate
 
     private val aboutUsViewModel: AboutUsViewModel by viewModels()
 
     @Inject
     lateinit var diffClass: DiffCallback
 
-
-    private val binding by lazy {
-        ActivityAboutUsBinding.inflate(layoutInflater)
-    }
-
     private val aboutAdapter: AboutAdapter by lazy {
         AboutAdapter(this, diffClass, ::handleAdapterClickListener)
-    }
-
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
     }
 
     override fun setupUi() {
@@ -51,15 +45,11 @@ class AboutUsActivity : BaseActivity() {
         setupRecyclerView()
     }
 
-    override fun onViewModelObserver() {
-        aboutUsViewModel.observeVectorAuthor().onResult {
-            aboutAdapter.setData(it)
-        }
+    override fun onViewModelObserver() = with(aboutUsViewModel) {
+        observeVectorAuthor().onResult { aboutAdapter.setData(it) }
 
-        aboutUsViewModel.observePurchaseStatus().onResult {
-            if (it.not()) {
-                binding.aboutusProview.showWithAnimation()
-            }
+        observePurchaseStatus().onResult {
+            if (it.not()) binding.aboutusProview.showWithAnimation()
         }
     }
 
@@ -85,6 +75,7 @@ class AboutUsActivity : BaseActivity() {
                             R.anim.transition_anim_slide_out_left
                         )
                     }
+
                     DialogProFeatureView.Action.Close -> {
 
                     }

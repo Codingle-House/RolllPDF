@@ -9,11 +9,23 @@ import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.util.DisplayMetrics
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.ScaleGestureDetector
 import android.webkit.MimeTypeMap
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.*
+import androidx.camera.core.AspectRatio
+import androidx.camera.core.AspectRatio.RATIO_16_9
+import androidx.camera.core.AspectRatio.RATIO_4_3
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraInfoUnavailableException
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.core.TorchState
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
@@ -22,6 +34,7 @@ import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.constant.IntentArguments
+import id.co.rolllpdf.data.constant.IntentArguments.CAMERA_IMAGES
 import id.co.rolllpdf.databinding.ActivityCameraBinding
 import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
 import id.co.rolllpdf.presentation.photopicker.PhotoPickerActivity
@@ -30,7 +43,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -39,10 +51,10 @@ import kotlin.math.min
  * Created by pertadima on 25,February,2021
  */
 
-class CameraActivity : BaseActivity() {
-    private val binding by lazy {
-        ActivityCameraBinding.inflate(layoutInflater)
-    }
+class CameraActivity : BaseActivity<ActivityCameraBinding>() {
+
+    override val bindingInflater: (LayoutInflater) -> ActivityCameraBinding
+        get() = ActivityCameraBinding::inflate
 
     private val cameraExecutor by lazy {
         Executors.newSingleThreadExecutor()
@@ -74,42 +86,27 @@ class CameraActivity : BaseActivity() {
     private val listOfFile = mutableListOf<String>()
     private lateinit var outputDirectory: File
 
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
-    }
-
     override fun setupUi() {
         changeStatusBarTextColor(true)
         changeStatusBarColor(android.R.color.white)
         setupToolbar()
-        binding.cameraPreviewFinder.post {
-            bindCameraUseCases()
-        }
+        binding.cameraPreviewFinder.post { bindCameraUseCases() }
         setupCameraControlListener()
     }
 
     override fun onViewModelObserver() {
     }
 
-    private fun setupToolbar() {
-        binding.cameraToolbar.setNavigationOnClickListener {
-            deleteFiles()
-            finish()
-        }
+    private fun setupToolbar() = binding.cameraToolbar.setNavigationOnClickListener {
+        deleteFiles()
+        finish()
     }
 
-    private fun setupCameraControlListener() {
-        binding.cameraImageviewFlash.setOnClickListener {
-            toggleFlash()
-        }
-
-        binding.cameraImageviewCapture.setOnClickListener {
-            takePicture()
-        }
-
-        binding.cameraImageviewGallery.setOnClickListener {
-            val intent = Intent(this, PhotoPickerActivity::class.java)
+    private fun setupCameraControlListener() = with(binding) {
+        cameraImageviewFlash.setOnClickListener { toggleFlash() }
+        cameraImageviewCapture.setOnClickListener { takePicture() }
+        cameraImageviewGallery.setOnClickListener {
+            val intent = Intent(this@CameraActivity, PhotoPickerActivity::class.java)
             startForResult.launch(intent)
             overridePendingTransition(
                 R.anim.transition_anim_slide_in_right,
@@ -117,19 +114,21 @@ class CameraActivity : BaseActivity() {
             )
         }
 
-        binding.cameraImageviewDone.setOnClickListener {
-            if (listOfFile.isNotEmpty()) {
-                val intent = Intent(this, ImageProcessingActivity::class.java).apply {
-                    putStringArrayListExtra(IntentArguments.CAMERA_IMAGES, ArrayList(listOfFile))
-                    putExtra(IntentArguments.DOCUMENT_ID, documentId)
-                }
-                startActivity(intent)
-                overridePendingTransition(
-                    R.anim.transition_anim_slide_in_right,
-                    R.anim.transition_anim_slide_out_left
-                )
-                finish()
+        cameraImageviewDone.setOnClickListener {
+            if (listOfFile.isEmpty()) return@setOnClickListener
+            val intent = Intent(
+                this@CameraActivity,
+                ImageProcessingActivity::class.java
+            ).apply {
+                putStringArrayListExtra(CAMERA_IMAGES, ArrayList(listOfFile))
+                putExtra(IntentArguments.DOCUMENT_ID, documentId)
             }
+            startActivity(intent)
+            overridePendingTransition(
+                R.anim.transition_anim_slide_in_right,
+                R.anim.transition_anim_slide_out_left
+            )
+            finish()
         }
     }
 
@@ -178,7 +177,7 @@ class CameraActivity : BaseActivity() {
                 checkForFlashAvailability()
                 enableZoomFeature()
             } catch (exception: Exception) {
-
+                Log.e("TAG", "bindCameraUseCases: ${exception.localizedMessage}")
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -203,8 +202,8 @@ class CameraActivity : BaseActivity() {
 
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = max(width, height).toDouble() / min(width, height)
-        return if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) AspectRatio.RATIO_4_3
-        else AspectRatio.RATIO_16_9
+        return if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) RATIO_4_3
+        else RATIO_16_9
     }
 
 

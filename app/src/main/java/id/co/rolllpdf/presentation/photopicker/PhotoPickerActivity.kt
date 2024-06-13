@@ -2,6 +2,7 @@ package id.co.rolllpdf.presentation.photopicker
 
 import android.app.Activity
 import android.content.Intent
+import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +12,7 @@ import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.dto.GalleryPictureDto
+import id.co.rolllpdf.databinding.ActivityMainBinding
 import id.co.rolllpdf.databinding.ActivityPhotoPickerBinding
 import id.co.rolllpdf.presentation.photopicker.adapter.PhotoPickerAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
@@ -21,16 +23,15 @@ import javax.inject.Inject
  */
 
 @AndroidEntryPoint
-class PhotoPickerActivity : BaseActivity() {
+class PhotoPickerActivity : BaseActivity<ActivityPhotoPickerBinding>() {
+
+    override val bindingInflater: (LayoutInflater) -> ActivityPhotoPickerBinding
+        get() = ActivityPhotoPickerBinding::inflate
 
     private val photoPickerViewModel: PhotoPickerViewModel by viewModels()
 
     @Inject
     lateinit var diffCallback: DiffCallback
-
-    private val binding by lazy {
-        ActivityPhotoPickerBinding.inflate(layoutInflater)
-    }
 
     private val photoPickerAdapter by lazy {
         PhotoPickerAdapter(this, diffCallback).apply {
@@ -39,11 +40,6 @@ class PhotoPickerActivity : BaseActivity() {
     }
 
     private var listGallery = mutableListOf<GalleryPictureDto>()
-
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
-    }
 
     override fun setupUi() {
         changeStatusBarTextColor(true)

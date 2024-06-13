@@ -2,6 +2,7 @@ package id.co.rolllpdf.presentation.imageprocessing
 
 import android.app.Activity
 import android.content.Intent
+import android.view.LayoutInflater
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -33,16 +34,15 @@ import javax.inject.Inject
  */
 
 @AndroidEntryPoint
-class ImageProcessingActivity : BaseActivity() {
+class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
+
+    override val bindingInflater: (LayoutInflater) -> ActivityImageProcessingBinding
+        get() = ActivityImageProcessingBinding::inflate
 
     private val imageProcessingViewModel: ImageProcessingViewModel by viewModels()
 
     @Inject
     lateinit var diffCallback: DiffCallback
-
-    private val binding by lazy {
-        ActivityImageProcessingBinding.inflate(layoutInflater)
-    }
 
     private val imageList by lazy {
         intent?.getStringArrayListExtra(IntentArguments.CAMERA_IMAGES).orEmpty()
@@ -74,11 +74,6 @@ class ImageProcessingActivity : BaseActivity() {
 
     private var hitPercent = 0.3f
     private val generator: Random = Random()
-
-    override fun setupViewBinding() {
-        val view = binding.root
-        setContentView(view)
-    }
 
     override fun setupUi() {
         changeStatusBarTextColor(true)
