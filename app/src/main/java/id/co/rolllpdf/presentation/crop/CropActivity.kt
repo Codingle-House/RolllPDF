@@ -10,7 +10,6 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.P
-import android.provider.MediaStore
 import android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 import android.view.LayoutInflater
 import id.co.photocropper.CropListener
@@ -45,8 +44,7 @@ class CropActivity : BaseActivity<ActivityCropBinding>(), CropListener {
         setupView()
     }
 
-    override fun onViewModelObserver() {
-    }
+    override fun onViewModelObserver() = Unit
 
     private fun setupToolbar() = binding.imagecroppingToolbar.setNavigationOnClickListener {
         finish()

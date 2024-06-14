@@ -35,8 +35,7 @@ class SplashScreenActivity : BaseActivity<ActivitySplashScreenBinding>() {
     }
 
 
-    override fun onViewModelObserver() {
-    }
+    override fun onViewModelObserver() = Unit
 
     private fun doLogoAnimation() = with(binding) {
         splashscreenImageviewLogo.doBounceAnimation {

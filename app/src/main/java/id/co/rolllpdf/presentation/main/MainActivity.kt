@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.Constant.TEN
+import id.co.rolllpdf.core.Constant.THREE
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.core.showToast
@@ -28,8 +30,8 @@ import id.co.rolllpdf.presentation.about.AboutUsActivity
 import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.detail.DocumentDetailActivity
 import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
+import id.co.rolllpdf.presentation.main.MainActivity.ActionState.EDIT
 import id.co.rolllpdf.presentation.main.adapter.MainAdapter
-import id.co.rolllpdf.presentation.pro.ProActivity
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -87,7 +89,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
     override fun onViewModelObserver() {
         with(mainViewModel) {
             observeDocuments().onResult { handleDocumentsLiveData(it) }
-            observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
             observeDuplicateCount().onResult { duplicateCount = it }
         }
     }
@@ -97,7 +98,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
     private fun setupToolbar() {
         binding.mainToolbar.setNavigationOnClickListener {
             when (actionState) {
-                ActionState.EDIT -> {
+                EDIT -> {
                     toggleEditMode(ActionState.DEFAULT)
                     mainViewModel.getDocuments()
                 }
@@ -117,8 +118,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
                     documentData.filter { it.document.isSelected }.size == documentData.size
                 bulkUpdateDocumentSelected(allSelected.not())
 
-                setBackgroundResource(if (allSelected) R.drawable.general_ic_checkedall else R.drawable.general_shape_circle_green)
-                setImageDrawable(if (allSelected) null else getDrawableCompat(R.drawable.general_ic_check))
+                setBackgroundResource(
+                    if (allSelected) R.drawable.general_ic_checkedall
+                    else R.drawable.general_shape_circle_green
+                )
+                setImageDrawable(
+                    if (allSelected) null
+                    else getDrawableCompat(R.drawable.general_ic_check)
+                )
             }
         }
 
@@ -126,8 +133,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
             toggleSearchMode(ActionState.SEARCH)
         }
 
-        binding.mainEdittextSearch.textChanges().debounce(300).onEach {
-            if (actionState != ActionState.EDIT && !firstLoad) {
+        binding.mainEdittextSearch.textChanges().debounce(DEBOUNCE_SEARCH).onEach {
+            if (actionState != EDIT && !firstLoad) {
                 mainViewModel.getDocuments(it.toString())
             }
         }.launchIn(lifecycleScope)
@@ -184,12 +191,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
 
     private fun setupRecyclerView() {
         with(binding.mainRecyclerviewDocument) {
-            val gridLayoutManager = GridLayoutManager(this@MainActivity, 3)
+            val gridLayoutManager = GridLayoutManager(this@MainActivity, THREE)
             layoutManager = gridLayoutManager
-            adapter = mainAdapter.apply {
-                setHasStableIds(true)
-            }
-            addItemDecoration(SpaceItemDecoration(10, 3))
+            adapter = mainAdapter.apply { setHasStableIds(true) }
+            addItemDecoration(SpaceItemDecoration(TEN, THREE))
         }
     }
 
@@ -256,10 +261,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
 
     override fun onResume() {
         super.onResume()
-        if (actionState != ActionState.EDIT) {
+        if (actionState != EDIT) {
             with(mainViewModel) {
                 getDocuments()
-                getPurchaseStatus()
                 getDuplicateCount()
             }
         }
@@ -275,14 +279,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         mainAdapter.setData(data)
     }
 
-
-    private fun handlePurchaseStatusLiveData(status: Boolean) {
-
-    }
-
-
     private fun handleOnAdapterClickListener(pos: Int, data: DocumentRelationDto) {
-        if (actionState != ActionState.EDIT) {
+        if (actionState != EDIT) {
             val intent = Intent(this, DocumentDetailActivity::class.java).apply {
                 putExtra(IntentArguments.DOCUMENT_TITLE, data.document.title)
                 putExtra(IntentArguments.DOCUMENT_ID, data.document.id)
@@ -296,7 +294,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
             val newDocument = data.document.copy(isSelected = data.document.isSelected.not())
             val newData = documentData[pos].copy(document = newDocument)
             documentData[pos] = newData
-            binding.mainToolbar.title = if (actionState == ActionState.EDIT) {
+            binding.mainToolbar.title = if (actionState == EDIT) {
                 getString(R.string.general_placeholder_selected, documentData.filter {
                     it.document.isSelected
                 }.size.toString())
@@ -304,7 +302,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
             val allSelected =
                 documentData.filter { it.document.isSelected }.size == documentData.size
             with(binding.mainImageviewChecked) {
-                setBackgroundResource(if (allSelected) R.drawable.general_shape_circle_green else R.drawable.general_ic_checkedall)
+                setBackgroundResource(
+                    if (allSelected) {
+                        R.drawable.general_shape_circle_green
+                    } else R.drawable.general_ic_checkedall
+                )
                 setImageDrawable(if (allSelected) getDrawableCompat(R.drawable.general_ic_check) else null)
             }
             mainAdapter.setData(documentData)
@@ -316,11 +318,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
             toggleSearchMode(ActionState.DEFAULT)
         }
 
-        toggleEditMode(ActionState.EDIT)
+        toggleEditMode(EDIT)
         val newDocument = data.document.copy(isSelected = data.document.isSelected.not())
         val newData = documentData[pos].copy(document = newDocument)
         documentData[pos] = newData
-        binding.mainToolbar.title = if (actionState == ActionState.EDIT) {
+        binding.mainToolbar.title = if (actionState == EDIT) {
             getString(R.string.general_placeholder_selected, documentData.filter {
                 it.document.isSelected
             }.size.toString())
@@ -330,15 +332,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
 
     private fun toggleEditMode(state: Int) {
         actionState = state
-        if (actionState != ActionState.EDIT) {
+        if (actionState != EDIT) {
             bulkUpdateDocumentSelected(false)
         }
         with(binding.mainToolbar) {
-            navigationIcon = if (actionState == ActionState.EDIT) {
+            navigationIcon = if (actionState == EDIT) {
                 getDrawableCompat(R.drawable.general_ic_chevron_left)
             } else null
 
-            title = if (actionState == ActionState.EDIT) {
+            title = if (actionState == EDIT) {
                 getString(R.string.general_placeholder_selected, documentData.filter {
                     it.document.isSelected
                 }.size.toString())
@@ -348,12 +350,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
             setBackgroundResource(R.drawable.general_ic_checkedall)
             setImageDrawable(null)
         }
-        binding.mainFabAdd.isGone = actionState == ActionState.EDIT
-        binding.mainImageviewSearch.isGone = actionState == ActionState.EDIT
-        binding.mainImageviewMore.isGone = actionState == ActionState.EDIT
-        binding.mainLinearlayoutHint.isGone = actionState == ActionState.EDIT
-        binding.mainLinearlayoutAction.isGone = (actionState == ActionState.EDIT).not()
-        binding.mainImageviewChecked.isGone = (actionState == ActionState.EDIT).not()
+        binding.mainFabAdd.isGone = actionState == EDIT
+        binding.mainImageviewSearch.isGone = actionState == EDIT
+        binding.mainImageviewMore.isGone = actionState == EDIT
+        binding.mainLinearlayoutHint.isGone = actionState == EDIT
+        binding.mainLinearlayoutAction.isGone = (actionState == EDIT).not()
+        binding.mainImageviewChecked.isGone = (actionState == EDIT).not()
     }
 
 
@@ -392,23 +394,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         goToCamera()
     }
 
-    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-
-    }
-
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) = Unit
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             AppSettingsDialog.Builder(this).build().show()
         }
     }
 
-    override fun onRationaleAccepted(requestCode: Int) {
+    override fun onRationaleAccepted(requestCode: Int) = Unit
 
-    }
-
-    override fun onRationaleDenied(requestCode: Int) {
-
-    }
+    override fun onRationaleDenied(requestCode: Int) = Unit
 
     private fun bulkUpdateDocumentSelected(isSelected: Boolean) {
         documentData.forEachIndexed { pos, data ->
@@ -418,10 +413,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         }
         with(mainAdapter) {
             setData(documentData)
-            setEditMode(actionState == ActionState.EDIT)
-            binding.mainRecyclerviewDocument.post {
-                notifyDataSetChanged()
-            }
+            setEditMode(actionState == EDIT)
+            binding.mainRecyclerviewDocument.post { notifyDataSetChanged() }
         }
         binding.mainToolbar.title =
             getString(R.string.general_placeholder_selected, documentData.filter {
@@ -452,19 +445,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         }.onStart { emit(text) }
     }
 
-    private fun navigateToProActivity() {
-        val intent = Intent(this@MainActivity, ProActivity::class.java)
-        startActivity(intent)
-        overridePendingTransition(
-            R.anim.transition_anim_slide_in_right,
-            R.anim.transition_anim_slide_out_left
-        )
-    }
-
     override fun onBackPressed() {
         super.onBackPressed()
         when (actionState) {
-            ActionState.EDIT -> {
+            EDIT -> {
                 toggleEditMode(ActionState.DEFAULT)
                 mainViewModel.getDocuments()
             }
@@ -495,5 +479,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
 
     companion object {
         private const val EMPTY_STRING = ""
+        private const val DEBOUNCE_SEARCH = 300L
     }
 }

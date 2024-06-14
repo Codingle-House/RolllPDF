@@ -2,6 +2,7 @@ package id.co.rolllpdf.presentation.imageprocessing
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -72,9 +73,6 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
     private val listOfFile = mutableListOf<String>()
     private var selectedPosition: Int = 0
 
-    private var hitPercent = 0.3f
-    private val generator: Random = Random()
-
     override fun setupUi() {
         changeStatusBarTextColor(true)
         changeStatusBarColor(android.R.color.white)
@@ -93,12 +91,7 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
 
     override fun onViewModelObserver() {
         with(imageProcessingViewModel) {
-            observeInsertDone().onResult {
-                if (it) {
-                    finish()
-                }
-            }
-            observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
+            observeInsertDone().onResult { if (it) finish() }
         }
     }
 
@@ -192,7 +185,7 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
                 val deletedImage = listOfFile[pos]
                 File(deletedImage).delete()
             } catch (ex: Exception) {
-                ex.printStackTrace()
+                Log.e("TAG", ex.localizedMessage)
             }
             listOfFile[pos] = imagePath
             imageProcessingAdapter.setData(listOfFile)
@@ -204,10 +197,6 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
         listOfFile.forEach {
             File(it).delete()
         }
-    }
-
-    private fun handlePurchaseStatusLiveData(status: Boolean) {
-
     }
 
     override fun onBackPressed() {

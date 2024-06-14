@@ -54,13 +54,10 @@ class PhotoFilterActivity : BaseActivity<ActivityPhotoFilterBinding>(),
         setupView()
     }
 
-    override fun onViewModelObserver() {
-    }
+    override fun onViewModelObserver() = Unit
 
-    private fun setupToolbar() {
-        binding.photofilterToolbar.setNavigationOnClickListener {
-            finish()
-        }
+    private fun setupToolbar() = binding.photofilterToolbar.setNavigationOnClickListener {
+        finish()
     }
 
     private fun setupView() {

@@ -15,7 +15,7 @@ class SingleLiveEvent<T> : MutableLiveData<T>() {
 
     override fun observe(owner: LifecycleOwner, observer: Observer<in T>) {
         if (hasActiveObservers()) {
-            throw IllegalStateException("Multiple observers on event")
+            error("Multiple observers on event")
         }
 
         super.observe(owner, Observer {

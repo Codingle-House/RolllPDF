@@ -21,6 +21,7 @@ import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.Q
 import android.os.Environment
+import android.os.Environment.DIRECTORY_DOCUMENTS
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
@@ -32,7 +33,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
 import id.co.rolllpdf.core.Constant.LONG_ZERO
-import id.co.rolllpdf.core.DateTimeUtils
+import id.co.rolllpdf.core.Constant.TEN
+import id.co.rolllpdf.core.Constant.THREE
+import id.co.rolllpdf.core.DateTimeUtils.DEFAULT_FILE_NAME
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.core.orZero
@@ -67,6 +70,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.Locale.US
 import javax.inject.Inject
 
 
@@ -142,8 +146,14 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
             setOnClickListener {
                 val allSelected = documentData.filter { it.isSelected }.size == documentData.size
                 bulkUpdateDocumentSelected(allSelected.not())
-                setBackgroundResource(if (allSelected) R.drawable.general_ic_checkedall else R.drawable.general_shape_circle_green)
-                setImageDrawable(if (allSelected) null else getDrawableCompat(R.drawable.general_ic_check))
+                setBackgroundResource(
+                    if (allSelected) R.drawable.general_ic_checkedall
+                    else R.drawable.general_shape_circle_green
+                )
+                setImageDrawable(
+                    if (allSelected) null
+                    else getDrawableCompat(R.drawable.general_ic_check)
+                )
             }
         }
 
@@ -198,10 +208,10 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
 
     private fun setupRecyclerView() {
         with(binding.documentdetailsRecyclerviewDocument) {
-            val gridLayoutManager = GridLayoutManager(this@DocumentDetailActivity, 3)
+            val gridLayoutManager = GridLayoutManager(this@DocumentDetailActivity, THREE)
             layoutManager = gridLayoutManager
             adapter = documentAdapter.apply { setHasStableIds(true) }
-            addItemDecoration(SpaceItemDecoration(10, 3))
+            addItemDecoration(SpaceItemDecoration(TEN, THREE))
         }
     }
 
@@ -239,8 +249,14 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
             val allSelected =
                 documentData.filter { it.isSelected }.size == documentData.size
             with(binding.documentdetailsImageviewChecked) {
-                setBackgroundResource(if (allSelected) R.drawable.general_shape_circle_green else R.drawable.general_ic_checkedall)
-                setImageDrawable(if (allSelected) getDrawableCompat(R.drawable.general_ic_check) else null)
+                setBackgroundResource(
+                    if (allSelected) R.drawable.general_shape_circle_green
+                    else R.drawable.general_ic_checkedall
+                )
+                setImageDrawable(
+                    if (allSelected) getDrawableCompat(R.drawable.general_ic_check)
+                    else null
+                )
             }
             documentAdapter.setData(documentData)
         }
@@ -373,9 +389,7 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
         goToCamera()
     }
 
-    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-
-    }
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) = Unit
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
@@ -383,13 +397,9 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
         }
     }
 
-    override fun onRationaleAccepted(requestCode: Int) {
+    override fun onRationaleAccepted(requestCode: Int) = Unit
 
-    }
-
-    override fun onRationaleDenied(requestCode: Int) {
-
-    }
+    override fun onRationaleDenied(requestCode: Int) = Unit
 
     private fun createPDFWithMultipleImage() {
         val dialog = ProgressDialog.show(this, "", getString(R.string.pdf_loading_pdf));
@@ -426,7 +436,7 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
                 Handler(Looper.getMainLooper()).postDelayed({
                     dialog.dismiss()
                     showToast(getString(R.string.pdf_text_saved, file.path))
-                }, 300)
+                }, TOAST_DELAY)
             } catch (e: IOException) {
                 e.printStackTrace()
                 dialog.dismiss()
@@ -438,7 +448,7 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
 
     private fun getOutputFile(): File? {
         val root = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+            Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS),
             getString(R.string.pdf_text_folder)
         )
         var isFolderCreated = true
@@ -446,8 +456,7 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
             isFolderCreated = root.mkdir()
         }
         return if (isFolderCreated) {
-            val timeStamp: String =
-                SimpleDateFormat(DateTimeUtils.DEFAULT_FILE_NAME, Locale.US).format(Date())
+            val timeStamp = SimpleDateFormat(DEFAULT_FILE_NAME, US).format(Date())
             val imageFileName = "PDF_$timeStamp"
             File(root, "$imageFileName.pdf")
         } else {
@@ -511,5 +520,9 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
     private object ActionState {
         const val DEFAULT = 0
         const val EDIT = 1
+    }
+
+    companion object {
+        private const val TOAST_DELAY = 300L
     }
 }

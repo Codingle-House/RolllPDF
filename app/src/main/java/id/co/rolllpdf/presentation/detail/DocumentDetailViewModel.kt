@@ -45,7 +45,7 @@ class DocumentDetailViewModel @Inject constructor(
     ) = viewModelScope.launch {
         files.forEach { docs ->
             val dateTime = DateTimeUtils.getCurrentDateString()
-            val randomNumber: Int = Random().nextInt(1000)
+            val randomNumber: Int = Random().nextInt(MAX_RANDOM)
             val newDocumentId = docs.id + randomNumber
             with(appRepository) {
                 val documentDetailDto = docs.copy(
@@ -98,5 +98,9 @@ class DocumentDetailViewModel @Inject constructor(
     fun updatePdfGeneratedCount(count: Int) = viewModelScope.launch {
         userPreferenceManager.updatePdfCount(count)
         getDuplicateCount()
+    }
+
+    companion object {
+        private const val MAX_RANDOM = 1000
     }
 }
