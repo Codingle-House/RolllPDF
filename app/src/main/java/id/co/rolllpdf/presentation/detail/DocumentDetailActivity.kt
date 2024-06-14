@@ -1,6 +1,9 @@
 package id.co.rolllpdf.presentation.detail
 
-import android.Manifest
+import android.Manifest.permission.ACCESS_MEDIA_LOCATION
+import android.Manifest.permission.CAMERA
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.ProgressDialog
 import android.content.ContentUris
 import android.content.Context
@@ -15,6 +18,8 @@ import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfDocument.PageInfo
 import android.net.Uri
 import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -26,28 +31,37 @@ import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.Constant.LONG_ZERO
 import id.co.rolllpdf.core.DateTimeUtils
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.core.showToast
-import id.co.rolllpdf.data.constant.AppConstant
-import id.co.rolllpdf.data.constant.IntentArguments
+import id.co.rolllpdf.data.constant.IntentArguments.CAMERA_IMAGES
+import id.co.rolllpdf.data.constant.IntentArguments.DOCUMENT_ID
+import id.co.rolllpdf.data.constant.IntentArguments.DOCUMENT_PREVIEW_MODE
+import id.co.rolllpdf.data.constant.IntentArguments.DOCUMENT_TITLE
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.databinding.ActivityDocumentDetailsBinding
 import id.co.rolllpdf.presentation.camera.CameraActivity
-import id.co.rolllpdf.presentation.customview.DialogProFeatureView
+import id.co.rolllpdf.presentation.detail.DocumentDetailActivity.ActionState.DEFAULT
+import id.co.rolllpdf.presentation.detail.DocumentDetailActivity.ActionState.EDIT
+import id.co.rolllpdf.presentation.detail.DocumentDetailActivity.Permission.MEDIA
+import id.co.rolllpdf.presentation.detail.DocumentDetailActivity.State.DATA
+import id.co.rolllpdf.presentation.detail.DocumentDetailActivity.State.EMPTY
 import id.co.rolllpdf.presentation.detail.adapter.DocumentDetailAdapter
 import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
 import id.co.rolllpdf.presentation.dialog.EditDocumentDialog
 import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
-import id.co.rolllpdf.presentation.pro.ProActivity
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks
+import pub.devrel.easypermissions.EasyPermissions.RationaleCallbacks
+import pub.devrel.easypermissions.EasyPermissions.hasPermissions
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -61,68 +75,61 @@ import javax.inject.Inject
  */
 
 @AndroidEntryPoint
-class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
-    EasyPermissions.PermissionCallbacks,
-    EasyPermissions.RationaleCallbacks {
+class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), PermissionCallbacks,
+    RationaleCallbacks {
+
+    @Inject
+    lateinit var diffCallback: DiffCallback
 
     override val bindingInflater: (LayoutInflater) -> ActivityDocumentDetailsBinding
         get() = ActivityDocumentDetailsBinding::inflate
 
     private val documentDetailViewModel: DocumentDetailViewModel by viewModels()
 
-    @Inject
-    lateinit var diffCallback: DiffCallback
-
     private val documentId by lazy {
-        intent?.getLongExtra(IntentArguments.DOCUMENT_ID, 0).orZero()
+        intent?.getLongExtra(DOCUMENT_ID, LONG_ZERO).orZero()
     }
 
     private val documentAdapter by lazy {
         DocumentDetailAdapter(
-            this, diffCallback, ::handleOnAdapterClickListener,
+            this,
+            diffCallback,
+            ::handleOnAdapterClickListener,
             ::handleOnAdapterLongClickListener
         )
     }
 
-    private var actionState: Int = ActionState.DEFAULT
+    private var actionState: Int = DEFAULT
     private val documentData: MutableList<DocumentDetailDto> = mutableListOf()
     private var documentTitle: String = ""
 
-    private var hitPercent = 0.3f
-    private val generator: Random = Random()
-
     private var duplicateCount: Int = 0
     private var pdfCount: Int = 0
-    private var isPro: Boolean = false
 
     override fun setupUi() {
         changeStatusBarTextColor(true)
         changeStatusBarColor(android.R.color.white)
         setupToolbar()
         initOverScroll()
-        showProView()
         setupRecyclerView()
         floatingActionButtonListener()
         editModeListener()
     }
 
-    override fun onViewModelObserver() {
-        with(documentDetailViewModel) {
-            observePurchaseStatus().onResult { handlePurchaseStatusLiveData(it) }
-            observeDocuments().onResult { handleDocumentDetailLiveData(it) }
-            observeDuplicateCount().onResult { duplicateCount = it }
-            observePDFGeneratedCount().onResult { pdfCount = it }
-        }
+    override fun onViewModelObserver() = with(documentDetailViewModel) {
+        observeDocuments().onResult { handleDocumentDetailLiveData(it) }
+        observeDuplicateCount().onResult { duplicateCount = it }
+        observePDFGeneratedCount().onResult { pdfCount = it }
     }
 
-    private fun setupToolbar() {
-        documentTitle = intent?.getStringExtra(IntentArguments.DOCUMENT_TITLE).orEmpty()
-        with(binding.documentdetailsToolbar) {
+    private fun setupToolbar() = with(binding) {
+        documentTitle = intent?.getStringExtra(DOCUMENT_TITLE).orEmpty()
+        with(documentdetailsToolbar) {
             title = documentTitle
             setNavigationOnClickListener {
                 when (actionState) {
-                    ActionState.EDIT -> {
-                        toggleEditMode(ActionState.DEFAULT)
+                    EDIT -> {
+                        toggleEditMode(DEFAULT)
                         documentDetailViewModel.getDocuments(documentId)
                     }
 
@@ -131,18 +138,17 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
             }
         }
 
-        with(binding.documentdetailsImageviewChecked) {
+        with(documentdetailsImageviewChecked) {
             setOnClickListener {
                 val allSelected = documentData.filter { it.isSelected }.size == documentData.size
                 bulkUpdateDocumentSelected(allSelected.not())
-
                 setBackgroundResource(if (allSelected) R.drawable.general_ic_checkedall else R.drawable.general_shape_circle_green)
                 setImageDrawable(if (allSelected) null else getDrawableCompat(R.drawable.general_ic_check))
             }
         }
 
-        binding.documentdetailsImageviewEdit.setOnClickListener {
-            EditDocumentDialog(this, documentTitle).apply {
+        documentdetailsImageviewEdit.setOnClickListener {
+            EditDocumentDialog(this@DocumentDetailActivity, documentTitle).apply {
                 setListener {
                     documentTitle = it
                     binding.documentdetailsToolbar.title = documentTitle
@@ -152,84 +158,49 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
             }
         }
 
-        binding.documentdetailsImageviewPdf.setOnClickListener {
-            if (isPro || pdfCount < AppConstant.MAX_PDF_COUNT) {
-                createPDFWithMultipleImage()
-                documentDetailViewModel.updatePdfGeneratedCount(pdfCount.inc())
-            } else {
-                showToast(R.string.pdf_error_generate)
-            }
+        documentdetailsImageviewPdf.setOnClickListener {
+            createPDFWithMultipleImage()
+            documentDetailViewModel.updatePdfGeneratedCount(pdfCount.inc())
         }
     }
 
-    private fun editModeListener() {
-        binding.documentdetailsRelativelayoutCopy.setOnClickListener {
+    private fun editModeListener() = with(binding) {
+        documentdetailsRelativelayoutCopy.setOnClickListener {
             val duplicateDocument = documentData.filter { it.isSelected }
             if (duplicateDocument.isNotEmpty()) {
-                if (isPro || duplicateCount < AppConstant.MAX_DUPLICATE_COUNT) {
-                    with(documentDetailViewModel) {
-                        documentDetailViewModel.doInsertDocument(documentId, duplicateDocument)
-                        updateDuplicateCount(duplicateCount.inc())
-                    }
-                    toggleEditMode(ActionState.DEFAULT)
-                } else {
-                    showToast(R.string.general_error_maxduplicate)
+                with(documentDetailViewModel) {
+                    documentDetailViewModel.doInsertDocument(documentId, duplicateDocument)
+                    updateDuplicateCount(duplicateCount.inc())
                 }
+                toggleEditMode(DEFAULT)
             } else {
                 showToast(R.string.general_error_selected)
             }
         }
 
-        binding.documentdetailsRelativelayoutDelete.setOnClickListener {
+        documentdetailsRelativelayoutDelete.setOnClickListener {
             val duplicateDocument = documentData.filter { it.isSelected }
             if (duplicateDocument.isNotEmpty()) {
-                DeleteConfirmationDialog(this).apply {
+                DeleteConfirmationDialog(this@DocumentDetailActivity).apply {
                     setListener {
                         documentDetailViewModel.doDeleteDocuments(documentId, duplicateDocument)
-                        toggleEditMode(ActionState.DEFAULT)
+                        toggleEditMode(DEFAULT)
                     }
                     show()
                 }
-            } else {
-                showToast(R.string.general_error_selected)
-            }
+            } else showToast(R.string.general_error_selected)
         }
     }
 
-    private fun initOverScroll() {
-        VerticalOverScrollBounceEffectDecorator(
-            NestedScrollViewOverScrollDecorAdapter(binding.documentdetailsNestedscroll)
-        )
-    }
-
-    private fun showProView() {
-        with(binding.documentdetailsViewPro) {
-            setListener { action ->
-                when (action) {
-                    DialogProFeatureView.Action.Click -> {
-                        val intent = Intent(this@DocumentDetailActivity, ProActivity::class.java)
-                        startActivity(intent)
-                        overridePendingTransition(
-                            R.anim.transition_anim_slide_in_right,
-                            R.anim.transition_anim_slide_out_left
-                        )
-                    }
-
-                    DialogProFeatureView.Action.Close -> {
-
-                    }
-                }
-            }
-        }
-    }
+    private fun initOverScroll() = VerticalOverScrollBounceEffectDecorator(
+        NestedScrollViewOverScrollDecorAdapter(binding.documentdetailsNestedscroll)
+    )
 
     private fun setupRecyclerView() {
         with(binding.documentdetailsRecyclerviewDocument) {
             val gridLayoutManager = GridLayoutManager(this@DocumentDetailActivity, 3)
             layoutManager = gridLayoutManager
-            adapter = documentAdapter.apply {
-                setHasStableIds(true)
-            }
+            adapter = documentAdapter.apply { setHasStableIds(true) }
             addItemDecoration(SpaceItemDecoration(10, 3))
         }
     }
@@ -239,29 +210,17 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
             clear()
             addAll(data)
         }
-        binding.documentdetailsFlipperData.displayedChild =
-            if (data.isEmpty()) State.EMPTY else State.DATA
+        binding.documentdetailsFlipperData.displayedChild = if (data.isEmpty()) EMPTY else DATA
         documentAdapter.setData(data)
     }
 
-    private fun handlePurchaseStatusLiveData(status: Boolean) {
-        isPro = status
-        if (status.not()) {
-            binding.documentdetailsViewPro.showWithAnimation()
-            binding.documentdetailsViewSpace.isGone = false
-        } else {
-            binding.documentdetailsViewSpace.isGone = true
-            binding.documentdetailsViewPro.isGone = true
-        }
-    }
-
     private fun handleOnAdapterClickListener(pos: Int, data: DocumentDetailDto) {
-        if (actionState != ActionState.EDIT) {
+        if (actionState != EDIT) {
             val files = listOf(data.filePath)
             val intent = Intent(this, ImageProcessingActivity::class.java).apply {
-                putStringArrayListExtra(IntentArguments.CAMERA_IMAGES, ArrayList(files))
-                putExtra(IntentArguments.DOCUMENT_ID, documentId)
-                putExtra(IntentArguments.DOCUMENT_PREVIEW_MODE, true)
+                putStringArrayListExtra(CAMERA_IMAGES, ArrayList(files))
+                putExtra(DOCUMENT_ID, documentId)
+                putExtra(DOCUMENT_PREVIEW_MODE, true)
             }
             startActivity(intent)
             overridePendingTransition(
@@ -271,10 +230,11 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
         } else {
             val newDocument = data.copy(isSelected = data.isSelected.not())
             documentData[pos] = newDocument
-            binding.documentdetailsToolbar.title = if (actionState == ActionState.EDIT) {
-                getString(R.string.general_placeholder_selected, documentData.filter {
-                    it.isSelected
-                }.size.toString())
+            binding.documentdetailsToolbar.title = if (actionState == EDIT) {
+                getString(
+                    R.string.general_placeholder_selected,
+                    documentData.filter { it.isSelected }.size.toString()
+                )
             } else documentTitle
             val allSelected =
                 documentData.filter { it.isSelected }.size == documentData.size
@@ -287,10 +247,10 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
     }
 
     private fun handleOnAdapterLongClickListener(pos: Int, data: DocumentDetailDto) {
-        toggleEditMode(ActionState.EDIT)
+        toggleEditMode(EDIT)
         val newDocument = data.copy(isSelected = data.isSelected.not())
         documentData[pos] = newDocument
-        binding.documentdetailsToolbar.title = if (actionState == ActionState.EDIT) {
+        binding.documentdetailsToolbar.title = if (actionState == EDIT) {
             getString(R.string.general_placeholder_selected, documentData.filter {
                 it.isSelected
             }.size.toString())
@@ -300,7 +260,7 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
 
     private fun goToCamera() {
         val intent = Intent(this, CameraActivity::class.java).apply {
-            putExtra(IntentArguments.DOCUMENT_ID, documentId)
+            putExtra(DOCUMENT_ID, documentId)
         }
         startActivity(intent)
         overridePendingTransition(
@@ -313,52 +273,38 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
         super.onResume()
         with(documentDetailViewModel) {
             getDocuments(documentId)
-            getPurchaseStatus()
             getDuplicateCount()
             getPDFGeneratedCount()
         }
     }
 
-    private fun floatingActionButtonListener() {
-        binding.documentdetailsFabAdd.setOnClickListener {
-            checkStoragePermission {
-                goToCamera()
-            }
-        }
+    private fun floatingActionButtonListener() = binding.documentdetailsFabAdd.setOnClickListener {
+        checkStoragePermission { goToCamera() }
     }
 
-    private fun toggleEditMode(state: Int) {
+    private fun toggleEditMode(state: Int) = with(binding) {
         actionState = state
-        if (actionState != ActionState.EDIT) {
+        if (actionState != EDIT) {
             bulkUpdateDocumentSelected(false)
         }
-        with(binding.documentdetailsToolbar) {
-            title =
-                if (actionState == ActionState.EDIT) {
-                    getString(
-                        R.string.general_placeholder_selected,
-                        documentData.filter {
-                            it.isSelected
-                        }.size.toString()
-                    )
-                } else documentTitle
+        with(documentdetailsToolbar) {
+            title = if (actionState == EDIT) {
+                getString(
+                    R.string.general_placeholder_selected,
+                    documentData.filter { it.isSelected }.size.toString()
+                )
+            } else documentTitle
         }
-        with(binding.documentdetailsImageviewChecked) {
+        with(documentdetailsImageviewChecked) {
             setBackgroundResource(R.drawable.general_ic_checkedall)
             setImageDrawable(null)
         }
-        if (isPro) {
-            binding.documentdetailsViewPro.isGone = true
-        } else {
-            binding.documentdetailsViewPro.isGone = actionState == ActionState.EDIT
-        }
-        binding.documentdetailsLinearlayoutHint.isGone = actionState == ActionState.EDIT
-        binding.documentdetailsFabAdd.isGone = actionState == ActionState.EDIT
-        binding.documentdetailsImageviewPdf.isGone = actionState == ActionState.EDIT
-        binding.documentdetailsImageviewEdit.isGone = actionState == ActionState.EDIT
-        binding.documentdetailsLinearlayoutAction.isGone =
-            (actionState == ActionState.EDIT).not()
-        binding.documentdetailsImageviewChecked.isGone = (actionState == ActionState.EDIT).not()
+        documentdetailsLinearlayoutHint.isGone = actionState == EDIT
+        documentdetailsFabAdd.isGone = actionState == EDIT
+        documentdetailsImageviewPdf.isGone = actionState == EDIT
+        documentdetailsImageviewEdit.isGone = actionState == EDIT
+        documentdetailsLinearlayoutAction.isGone = (actionState == EDIT).not()
+        documentdetailsImageviewChecked.isGone = (actionState == EDIT).not()
     }
 
     private fun bulkUpdateDocumentSelected(isSelected: Boolean) {
@@ -368,58 +314,51 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
         }
         with(documentAdapter) {
             setData(documentData)
-            setEditMode(actionState == ActionState.EDIT)
-            binding.documentdetailsRecyclerviewDocument.post {
-                notifyDataSetChanged()
-            }
+            setEditMode(actionState == EDIT)
+            binding.documentdetailsRecyclerviewDocument.post { notifyDataSetChanged() }
         }
         binding.documentdetailsToolbar.title =
-            getString(R.string.general_placeholder_selected, documentData.filter {
-                it.isSelected
-            }.size.toString())
+            getString(
+                R.string.general_placeholder_selected,
+                documentData.filter { it.isSelected }.size.toString()
+            )
 
     }
 
 
-    @AfterPermissionGranted(Permission.MEDIA)
+    @AfterPermissionGranted(MEDIA)
     private fun checkStoragePermission(onHasPermission: () -> Unit) {
-        val perms = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+        val perms = if (SDK_INT >= Q) {
             arrayOf(
-                Manifest.permission.ACCESS_MEDIA_LOCATION,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
+                ACCESS_MEDIA_LOCATION,
+                READ_EXTERNAL_STORAGE,
+                WRITE_EXTERNAL_STORAGE,
+                CAMERA
             )
-        } else {
-            arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-            )
-        }
+        } else arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, CAMERA)
 
-        if (EasyPermissions.hasPermissions(this, *perms)) {
+        if (hasPermissions(this, *perms)) {
             onHasPermission.invoke()
         } else {
             // Do not have permissions, request them now
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            if (SDK_INT >= Q) {
                 EasyPermissions.requestPermissions(
                     this,
                     "",
-                    Permission.MEDIA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.ACCESS_MEDIA_LOCATION,
+                    MEDIA,
+                    WRITE_EXTERNAL_STORAGE,
+                    READ_EXTERNAL_STORAGE,
+                    CAMERA,
+                    ACCESS_MEDIA_LOCATION,
                 )
             } else {
                 EasyPermissions.requestPermissions(
                     this,
                     "",
-                    Permission.MEDIA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA
+                    MEDIA,
+                    WRITE_EXTERNAL_STORAGE,
+                    READ_EXTERNAL_STORAGE,
+                    CAMERA
                 )
             }
         }
@@ -487,7 +426,6 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
                 Handler(Looper.getMainLooper()).postDelayed({
                     dialog.dismiss()
                     showToast(getString(R.string.pdf_text_saved, file.path))
-                    if (isPro) return@postDelayed
                 }, 300)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -522,8 +460,8 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
     override fun onBackPressed() {
         super.onBackPressed()
         when (actionState) {
-            ActionState.EDIT -> {
-                toggleEditMode(ActionState.DEFAULT)
+            EDIT -> {
+                toggleEditMode(DEFAULT)
                 documentDetailViewModel.getDocuments(documentId)
             }
 
@@ -532,7 +470,7 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(),
     }
 
     private fun getBitmap(context: Context, imageUri: Uri): Bitmap? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        return if (SDK_INT >= Build.VERSION_CODES.P) {
             ImageDecoder.decodeBitmap(
                 ImageDecoder.createSource(
                     context.contentResolver,

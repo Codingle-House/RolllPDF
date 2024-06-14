@@ -1,9 +1,9 @@
 package id.co.rolllpdf.presentation.camera
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Color.WHITE
 import android.graphics.drawable.ColorDrawable
 import android.media.MediaScannerConnection
 import android.net.Uri
@@ -15,26 +15,30 @@ import android.view.ScaleGestureDetector
 import android.webkit.MimeTypeMap
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.AspectRatio
 import androidx.camera.core.AspectRatio.RATIO_16_9
 import androidx.camera.core.AspectRatio.RATIO_4_3
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraInfoUnavailableException
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.CameraSelector.LENS_FACING_BACK
+import androidx.camera.core.CameraSelector.LENS_FACING_FRONT
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
-import androidx.camera.core.TorchState
+import androidx.camera.core.TorchState.OFF
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getMainExecutor
 import androidx.core.net.toFile
 import androidx.core.view.isGone
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.Constant.FLOAT_ZERO
+import id.co.rolllpdf.core.Constant.LONG_ZERO
 import id.co.rolllpdf.core.orZero
-import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.constant.IntentArguments.CAMERA_IMAGES
+import id.co.rolllpdf.data.constant.IntentArguments.DOCUMENT_ID
+import id.co.rolllpdf.data.constant.IntentArguments.PHOTO_PICKER_IMAGES
 import id.co.rolllpdf.databinding.ActivityCameraBinding
 import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
 import id.co.rolllpdf.presentation.photopicker.PhotoPickerActivity
@@ -42,7 +46,7 @@ import id.co.rolllpdf.util.image.LuminosityAnalyzer
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.Executors
+import java.util.concurrent.Executors.newSingleThreadExecutor
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -56,20 +60,15 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
     override val bindingInflater: (LayoutInflater) -> ActivityCameraBinding
         get() = ActivityCameraBinding::inflate
 
-    private val cameraExecutor by lazy {
-        Executors.newSingleThreadExecutor()
-    }
+    private val cameraExecutor by lazy { newSingleThreadExecutor() }
 
-    private val documentId by lazy {
-        intent?.getLongExtra(IntentArguments.DOCUMENT_ID, 0).orZero()
-    }
+    private val documentId by lazy { intent?.getLongExtra(DOCUMENT_ID, LONG_ZERO).orZero() }
 
     private val startForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data =
-                result.data?.getStringArrayListExtra(IntentArguments.PHOTO_PICKER_IMAGES).orEmpty()
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data?.getStringArrayListExtra(PHOTO_PICKER_IMAGES).orEmpty()
             listOfFile.addAll(data)
             binding.cameraTextviewCounter.text = listOfFile.size.toString()
         }
@@ -82,7 +81,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
 
-    private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var lensFacing = LENS_FACING_BACK
     private val listOfFile = mutableListOf<String>()
     private lateinit var outputDirectory: File
 
@@ -121,7 +120,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
                 ImageProcessingActivity::class.java
             ).apply {
                 putStringArrayListExtra(CAMERA_IMAGES, ArrayList(listOfFile))
-                putExtra(IntentArguments.DOCUMENT_ID, documentId)
+                putExtra(DOCUMENT_ID, documentId)
             }
             startActivity(intent)
             overridePendingTransition(
@@ -165,11 +164,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
                 .setTargetAspectRatio(screenAspectRatio)
                 .setTargetRotation(rotation)
                 .build()
-                .also {
-                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
-
-                    })
-                }
+                .also { it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { _ -> }) }
             cameraProvider.unbindAll()
 
             try {
@@ -179,14 +174,14 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
             } catch (exception: Exception) {
                 Log.e("TAG", "bindCameraUseCases: ${exception.localizedMessage}")
             }
-        }, ContextCompat.getMainExecutor(this))
+        }, getMainExecutor(this))
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun enableZoomFeature() {
         val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
-                val currentZoomRatio: Float = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 0F
+                val currentZoomRatio = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: FLOAT_ZERO
                 val delta = detector.scaleFactor
                 camera?.cameraControl?.setZoomRatio(currentZoomRatio * delta)
                 return true
@@ -202,8 +197,9 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
 
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = max(width, height).toDouble() / min(width, height)
-        return if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) RATIO_4_3
-        else RATIO_16_9
+        return if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
+            RATIO_4_3
+        } else RATIO_16_9
     }
 
 
@@ -212,12 +208,12 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
             val isFlashAvailable = camera?.cameraInfo?.hasFlashUnit() ?: false
             binding.cameraImageviewFlash.isGone = isFlashAvailable.not()
         } catch (e: CameraInfoUnavailableException) {
-
+            Log.e("ERROR", e.localizedMessage)
         }
     }
 
     private fun toggleFlash() {
-        val enable = camera?.cameraInfo?.torchState?.value == TorchState.OFF
+        val enable = camera?.cameraInfo?.torchState?.value == OFF
         camera?.cameraControl?.enableTorch(enable)
     }
 
@@ -234,9 +230,8 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
 
             // Setup image capture metadata
             val metadata = ImageCapture.Metadata().apply {
-
                 // Mirror image when using the front camera
-                isReversedHorizontal = lensFacing == CameraSelector.LENS_FACING_FRONT
+                isReversedHorizontal = lensFacing == LENS_FACING_FRONT
             }
 
             // Create output options object which contains file + metadata
@@ -254,11 +249,6 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
 
                         listOfFile.add(savedUri.path.orEmpty())
                         binding.cameraTextviewCounter.text = listOfFile.size.toString()
-                        // We can only change the foreground Drawable using API level 23+ API
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            // Update the gallery thumbnail with latest picture taken
-
-                        }
 
                         // Implicit broadcasts will be ignored for devices running API level >= 24
                         // so if you only target API level 24+ you can remove this statement
@@ -277,8 +267,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
                             this@CameraActivity,
                             arrayOf(savedUri.toString()),
                             arrayOf(mimeType)
-                        ) { _, uri ->
-                        }
+                        ) { _, _ -> }
                     }
 
                     override fun onError(exception: ImageCaptureException) {
@@ -290,7 +279,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
 
                 // Display flash animation to indicate that photo was captured
                 binding.root.postDelayed({
-                    binding.root.foreground = ColorDrawable(Color.WHITE)
+                    binding.root.foreground = ColorDrawable(WHITE)
                     binding.root.postDelayed(
                         { binding.root.foreground = null },
                         ANIMATION_FAST_MILLIS

@@ -9,7 +9,6 @@ import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.data.local.preference.UserPreferenceManager
 import id.co.rolllpdf.domain.repository.AppRepository
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
@@ -27,9 +26,6 @@ class DocumentDetailViewModel @Inject constructor(
 
     private val documents = SingleLiveEvent<List<DocumentDetailDto>>()
     fun observeDocuments(): LiveData<List<DocumentDetailDto>> = documents
-
-    private val purchaseStatus = SingleLiveEvent<Boolean>()
-    fun observePurchaseStatus(): LiveData<Boolean> = purchaseStatus
 
     private val duplicateCount = SingleLiveEvent<Int>()
     fun observeDuplicateCount(): LiveData<Int> = duplicateCount
@@ -79,12 +75,6 @@ class DocumentDetailViewModel @Inject constructor(
 
     fun updateDocumentTitle(title: String, id: Long) = viewModelScope.launch {
         appRepository.updateDocumentTitle(title, id)
-    }
-
-    fun getPurchaseStatus() = viewModelScope.launch {
-        userPreferenceManager.getPurchaseStatus().collect {
-            purchaseStatus.postValue(it)
-        }
     }
 
     fun getDuplicateCount() = viewModelScope.launch {

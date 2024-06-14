@@ -12,8 +12,6 @@ import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.dto.VectorAuthorDto
 import id.co.rolllpdf.databinding.ActivityAboutUsBinding
 import id.co.rolllpdf.presentation.about.adapter.AboutAdapter
-import id.co.rolllpdf.presentation.customview.DialogProFeatureView
-import id.co.rolllpdf.presentation.pro.ProActivity
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator
 import javax.inject.Inject
@@ -33,7 +31,7 @@ class AboutUsActivity : BaseActivity<ActivityAboutUsBinding>() {
     lateinit var diffClass: DiffCallback
 
     private val aboutAdapter: AboutAdapter by lazy {
-        AboutAdapter(this, diffClass, ::handleAdapterClickListener)
+        AboutAdapter(diffClass, ::handleAdapterClickListener)
     }
 
     override fun setupUi() {
@@ -41,48 +39,18 @@ class AboutUsActivity : BaseActivity<ActivityAboutUsBinding>() {
         changeStatusBarColor(android.R.color.white)
         setupToolbar()
         initOverScroll()
-        showProView()
         setupRecyclerView()
     }
 
     override fun onViewModelObserver() = with(aboutUsViewModel) {
         observeVectorAuthor().onResult { aboutAdapter.setData(it) }
-
-        observePurchaseStatus().onResult {
-            if (it.not()) binding.aboutusProview.showWithAnimation()
-        }
     }
 
-    private fun setupToolbar() {
-        binding.aboutusToolbar.setNavigationOnClickListener { finish() }
-    }
+    private fun setupToolbar() = binding.aboutusToolbar.setNavigationOnClickListener { finish() }
 
-    private fun initOverScroll() {
-        VerticalOverScrollBounceEffectDecorator(
-            NestedScrollViewOverScrollDecorAdapter(binding.aboutusScrollview)
-        )
-    }
-
-    private fun showProView() {
-        with(binding.aboutusProview) {
-            setListener { action ->
-                when (action) {
-                    DialogProFeatureView.Action.Click -> {
-                        val intent = Intent(this@AboutUsActivity, ProActivity::class.java)
-                        startActivity(intent)
-                        overridePendingTransition(
-                            R.anim.transition_anim_slide_in_right,
-                            R.anim.transition_anim_slide_out_left
-                        )
-                    }
-
-                    DialogProFeatureView.Action.Close -> {
-
-                    }
-                }
-            }
-        }
-    }
+    private fun initOverScroll() = VerticalOverScrollBounceEffectDecorator(
+        NestedScrollViewOverScrollDecorAdapter(binding.aboutusScrollview)
+    )
 
     private fun setupRecyclerView() {
         with(binding.aboutusRecyclerview) {
@@ -91,7 +59,7 @@ class AboutUsActivity : BaseActivity<ActivityAboutUsBinding>() {
         }
     }
 
-    private fun handleAdapterClickListener(pos: Int, data: VectorAuthorDto) {
+    private fun handleAdapterClickListener(data: VectorAuthorDto) {
         openUrl(data.urlWeb)
     }
 
@@ -100,11 +68,6 @@ class AboutUsActivity : BaseActivity<ActivityAboutUsBinding>() {
             data = Uri.parse(url)
         }
         startActivity(intent)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        aboutUsViewModel.getPurchaseStatus()
     }
 
     override fun finish() {

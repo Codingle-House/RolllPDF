@@ -22,14 +22,14 @@ class EditDocumentDialog(context: Context, val title: String) : BaseDialog(conte
         setContentView(view)
     }
 
-    override fun onCreateDialog() {
-        binding.dialogeditEdittextTitle.setText(title)
-        binding.dialogeditButtonEdit.setOnClickListener {
-            if (binding.dialogeditEdittextTitle.text.isNullOrEmpty()) {
-                binding.dialogeditTextviewError.isGone = false
+    override fun onCreateDialog() = with(binding) {
+        dialogeditEdittextTitle.setText(title)
+        dialogeditButtonEdit.setOnClickListener {
+            if (dialogeditEdittextTitle.text.isNullOrEmpty()) {
+                dialogeditTextviewError.isGone = false
             } else {
-                binding.dialogeditTextviewError.isGone = true
-                onEdit.invoke(binding.dialogeditEdittextTitle.text.toString())
+                dialogeditTextviewError.isGone = true
+                onEdit.invoke(dialogeditEdittextTitle.text.toString())
                 dismiss()
             }
         }
