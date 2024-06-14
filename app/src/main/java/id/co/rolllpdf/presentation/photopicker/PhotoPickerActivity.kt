@@ -6,13 +6,15 @@ import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.Constant.FOUR
+import id.co.rolllpdf.core.Constant.THREE
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.constant.IntentArguments
 import id.co.rolllpdf.data.dto.GalleryPictureDto
-import id.co.rolllpdf.databinding.ActivityMainBinding
 import id.co.rolllpdf.databinding.ActivityPhotoPickerBinding
 import id.co.rolllpdf.presentation.photopicker.adapter.PhotoPickerAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
@@ -84,12 +86,12 @@ class PhotoPickerActivity : BaseActivity<ActivityPhotoPickerBinding>() {
 
     private fun setupRecyclerView() {
         with(binding.photopickerRecyclerviewThumbnail) {
-            val gridLayoutManager = GridLayoutManager(this@PhotoPickerActivity, 3)
+            val gridLayoutManager = GridLayoutManager(this@PhotoPickerActivity, THREE)
             layoutManager = gridLayoutManager
             adapter = photoPickerAdapter
-            addItemDecoration(SpaceItemDecoration(4, 3))
+            addItemDecoration(SpaceItemDecoration(FOUR, THREE))
 
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            addOnScrollListener(object : OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     if (gridLayoutManager.findLastVisibleItemPosition() == photoPickerAdapter.itemCount - 1) {
                         loadPictures()

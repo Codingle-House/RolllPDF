@@ -72,6 +72,6 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     protected fun <T> LiveData<T>.onResult(action: (T) -> Unit) {
-        observe(this@BaseActivity, { data -> data?.let(action) })
+        observe(this@BaseActivity) { data -> data?.let(action) }
     }
 }

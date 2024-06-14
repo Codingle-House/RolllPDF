@@ -2,9 +2,9 @@ package id.co.rolllpdf.util.image
 
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import id.co.rolllpdf.core.Constant.ONE
 import java.nio.ByteBuffer
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Our custom image analysis class.
@@ -20,12 +20,11 @@ typealias LumaListener = (luma: Double) -> Unit
 
 internal class LuminosityAnalyzer(listener: LumaListener? = null) : ImageAnalysis.Analyzer {
 
-    private val frameRateWindow = 8
-    private val frameTimestamps = ArrayDeque<Long>(5)
+    private val frameTimestamps = ArrayDeque<Long>(FRAME_TIME_STAMP_MAX_ELEMENT)
     private var lastAnalyzedTimestamp = 0L
     private val listeners = ArrayList<LumaListener>().apply { listener?.let { add(it) } }
 
-    var framesPerSecond: Double = -1.0
+    private var framesPerSecond: Double = -1.0
         private set
 
     /**
@@ -72,12 +71,12 @@ internal class LuminosityAnalyzer(listener: LumaListener? = null) : ImageAnalysi
         frameTimestamps.push(currentTime)
 
         // Compute the FPS using a moving average
-        while (frameTimestamps.size >= frameRateWindow) frameTimestamps.removeLast()
+        while (frameTimestamps.size >= FRAME_RATE_WINDOW) frameTimestamps.removeLast()
         val timestampFirst = frameTimestamps.peekFirst() ?: currentTime
         val timestampLast = frameTimestamps.peekLast() ?: currentTime
         framesPerSecond =
-            1.0 / ((timestampFirst - timestampLast) / frameTimestamps.size.coerceAtLeast(1)
-                .toDouble()) * 1000.0
+            1.0 / ((timestampFirst - timestampLast) / frameTimestamps.size.coerceAtLeast(ONE)
+                .toDouble()) * MILLIS_FRAME
 
         // Analysis could take an arbitrarily long amount of time
         // Since we are running in a different thread, it won't stall other use cases
@@ -91,7 +90,7 @@ internal class LuminosityAnalyzer(listener: LumaListener? = null) : ImageAnalysi
         val data = buffer.toByteArray()
 
         // Convert the data into an array of pixel values ranging 0-255
-        val pixels = data.map { it.toInt() and 0xFF }
+        val pixels = data.map { it.toInt() and PIXEL }
 
         // Compute average luminance for the image
         val luma = pixels.average()
@@ -100,5 +99,12 @@ internal class LuminosityAnalyzer(listener: LumaListener? = null) : ImageAnalysi
         listeners.forEach { it(luma) }
 
         image.close()
+    }
+
+    companion object {
+        private const val FRAME_RATE_WINDOW = 8
+        private const val FRAME_TIME_STAMP_MAX_ELEMENT = 5
+        private const val PIXEL = 0xFF
+        private const val MILLIS_FRAME = 1000.0
     }
 }

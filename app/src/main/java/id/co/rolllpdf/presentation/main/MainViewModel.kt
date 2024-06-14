@@ -9,7 +9,6 @@ import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.data.local.preference.UserPreferenceManager
 import id.co.rolllpdf.domain.repository.AppRepository
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
@@ -27,9 +26,6 @@ class MainViewModel @Inject constructor(
     private val documents = SingleLiveEvent<List<DocumentRelationDto>>()
     fun observeDocuments(): LiveData<List<DocumentRelationDto>> = documents
 
-    private val purchaseStatus = SingleLiveEvent<Boolean>()
-    fun observePurchaseStatus(): LiveData<Boolean> = purchaseStatus
-
     private val duplicateCount = SingleLiveEvent<Int>()
     fun observeDuplicateCount(): LiveData<Int> = duplicateCount
 
@@ -43,7 +39,7 @@ class MainViewModel @Inject constructor(
     ) = viewModelScope.launch {
         files.forEach { docs ->
             val dateTime = DateTimeUtils.getCurrentDateString()
-            val randomNumber: Int = Random().nextInt(1000)
+            val randomNumber: Int = Random().nextInt(RANDOM_MAX)
             val newDocumentId = docs.document.id + randomNumber
             docs.details.forEach {
                 with(appRepository) {
@@ -81,12 +77,6 @@ class MainViewModel @Inject constructor(
         getDocuments()
     }
 
-    fun getPurchaseStatus() = viewModelScope.launch {
-        userPreferenceManager.getPurchaseStatus().collect {
-            purchaseStatus.postValue(it)
-        }
-    }
-
     fun getDuplicateCount() = viewModelScope.launch {
         userPreferenceManager.getDuplicateCount().collect {
             duplicateCount.postValue(it)
@@ -100,5 +90,6 @@ class MainViewModel @Inject constructor(
 
     companion object {
         private const val FILE_NAME = "Copy"
+        private const val RANDOM_MAX = 1000
     }
 }

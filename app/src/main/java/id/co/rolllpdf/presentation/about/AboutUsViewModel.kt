@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.co.rolllpdf.data.dto.VectorAuthorDto
-import id.co.rolllpdf.data.local.preference.UserPreferenceManager
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,9 +13,7 @@ import javax.inject.Inject
  * Created by pertadima on 07,March,2021
  */
 @HiltViewModel
-class AboutUsViewModel @Inject constructor(
-    private val userPreferenceManager: UserPreferenceManager
-) : ViewModel() {
+class AboutUsViewModel @Inject constructor() : ViewModel() {
 
     private val vectorAuthorDto = SingleLiveEvent<List<VectorAuthorDto>>()
     fun observeVectorAuthor(): LiveData<List<VectorAuthorDto>> = vectorAuthorDto

@@ -5,6 +5,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id "com.google.protobuf" version "0.9.4"
     id 'com.google.devtools.ksp'
+    id 'io.gitlab.arturbosch.detekt'
 }
 
 def keystorePropertiesFile = rootProject.file("key.properties")

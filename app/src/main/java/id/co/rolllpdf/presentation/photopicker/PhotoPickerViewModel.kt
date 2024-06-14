@@ -4,6 +4,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
+import android.provider.MediaStore.MediaColumns._ID
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +13,6 @@ import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.dto.GalleryPictureDto
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -63,9 +63,10 @@ class PhotoPickerViewModel @Inject constructor() : ViewModel() {
 
             for (i in startingRow until rowsToLoad) {
                 cursor.moveToPosition(i)
-                val dataColumnIndex =
-                    cursor.getColumnIndex(MediaStore.MediaColumns._ID) //get column index
-                galleryImageUrls.add(GalleryPictureDto(getImageUri(cursor.getString(dataColumnIndex)).toString())) //get Image path from column index
+                val dataColumnIndex = cursor.getColumnIndex(_ID) //get column index
+                galleryImageUrls.add(
+                    GalleryPictureDto(getImageUri(cursor.getString(dataColumnIndex)).toString())
+                ) //get Image path from column index
 
             }
             startingRow = rowsToLoad
@@ -89,7 +90,7 @@ class PhotoPickerViewModel @Inject constructor() : ViewModel() {
 
     private fun getGalleryCursor(context: Context): Cursor? {
         val externalUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        val columns = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DATE_MODIFIED)
+        val columns = arrayOf(_ID, MediaStore.MediaColumns.DATE_MODIFIED)
         val orderBy = MediaStore.MediaColumns.DATE_MODIFIED //order data by modified
         return context.contentResolver
             .query(

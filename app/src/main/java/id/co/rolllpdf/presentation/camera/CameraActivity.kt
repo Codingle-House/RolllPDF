@@ -2,7 +2,6 @@ package id.co.rolllpdf.presentation.camera
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Color.WHITE
 import android.graphics.drawable.ColorDrawable
 import android.media.MediaScannerConnection
@@ -93,8 +92,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
         setupCameraControlListener()
     }
 
-    override fun onViewModelObserver() {
-    }
+    override fun onViewModelObserver() = Unit
 
     private fun setupToolbar() = binding.cameraToolbar.setNavigationOnClickListener {
         deleteFiles()
@@ -270,8 +268,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
                         ) { _, _ -> }
                     }
 
-                    override fun onError(exception: ImageCaptureException) {
-                    }
+                    override fun onError(exception: ImageCaptureException) = Unit
                 })
 
             // We can only change the foreground Drawable using API level 23+ API
