@@ -8,12 +8,16 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.P
 import android.provider.MediaStore
+import android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 import android.view.LayoutInflater
 import id.co.photocropper.CropListener
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.Constant.DELIMITER_SLASH
+import id.co.rolllpdf.core.Constant.ZERO
 import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_IMAGES
 import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_POSITION
 import id.co.rolllpdf.databinding.ActivityCropBinding
@@ -30,13 +34,9 @@ class CropActivity : BaseActivity<ActivityCropBinding>(), CropListener {
     override val bindingInflater: (LayoutInflater) -> ActivityCropBinding
         get() = ActivityCropBinding::inflate
 
-    private val imagePath by lazy {
-        intent?.getStringExtra(PROCESSING_IMAGES).orEmpty()
-    }
+    private val imagePath by lazy { intent?.getStringExtra(PROCESSING_IMAGES).orEmpty() }
 
-    private val selectedPosition by lazy {
-        intent?.getIntExtra(PROCESSING_POSITION, 0)
-    }
+    private val selectedPosition by lazy { intent?.getIntExtra(PROCESSING_POSITION, ZERO) }
 
     override fun setupUi() {
         changeStatusBarTextColor(true)
@@ -52,40 +52,33 @@ class CropActivity : BaseActivity<ActivityCropBinding>(), CropListener {
         finish()
     }
 
-    private fun setupView() {
+    private fun setupView() = with(binding) {
         try {
-            val imageBitmap = getBitmap(this, Uri.fromFile(File(imagePath)))
-            binding.imagecroppingImageviewCrop.setImageBitmap(imageBitmap)
+            val imageBitmap = getBitmap(this@CropActivity, Uri.fromFile(File(imagePath)))
+            imagecroppingImageviewCrop.setImageBitmap(imageBitmap)
         } catch (ex: Exception) {
-            val uri = getImageUri(imagePath.substringAfterLast("/"))
-            val imageBitmap = getBitmap(this, uri)
+            val uri = getImageUri(imagePath.substringAfterLast(DELIMITER_SLASH))
+            val imageBitmap = getBitmap(this@CropActivity, uri)
             binding.imagecroppingImageviewCrop.setImageBitmap(imageBitmap)
         }
 
-        binding.imagecroppingTextviewCrop.setOnClickListener {
-            binding.imagecroppingImageviewCrop.crop(this, true)
+        imagecroppingTextviewCrop.setOnClickListener {
+            imagecroppingImageviewCrop.crop(this@CropActivity, true)
         }
     }
 
     private fun getBitmap(context: Context, imageUri: Uri): Bitmap? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            ImageDecoder.decodeBitmap(
-                ImageDecoder.createSource(
-                    context.contentResolver,
-                    imageUri
-                )
-            )
-
+        return if (SDK_INT >= P) {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, imageUri))
         } else {
             context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
                 BitmapFactory.decodeStream(inputStream)
             }
-
         }
     }
 
     private fun getImageUri(path: String) = ContentUris.withAppendedId(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        EXTERNAL_CONTENT_URI,
         path.toLong()
     )
 

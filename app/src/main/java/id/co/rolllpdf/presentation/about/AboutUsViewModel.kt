@@ -7,7 +7,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import id.co.rolllpdf.data.dto.VectorAuthorDto
 import id.co.rolllpdf.data.local.preference.UserPreferenceManager
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,9 +20,6 @@ class AboutUsViewModel @Inject constructor(
 
     private val vectorAuthorDto = SingleLiveEvent<List<VectorAuthorDto>>()
     fun observeVectorAuthor(): LiveData<List<VectorAuthorDto>> = vectorAuthorDto
-
-    private val purchaseStatus = SingleLiveEvent<Boolean>()
-    fun observePurchaseStatus(): LiveData<Boolean> = purchaseStatus
 
     init {
         getAuthor()
@@ -39,15 +35,5 @@ class AboutUsViewModel @Inject constructor(
             VectorAuthorDto("Catalin Fertu", "https://www.flaticon.com/authors/Catalin-fertu")
         )
         vectorAuthorDto.postValue(data)
-    }
-
-    fun getPurchaseStatus() = viewModelScope.launch {
-        userPreferenceManager.getPurchaseStatus().collect {
-            purchaseStatus.postValue(it)
-        }
-    }
-
-    companion object {
-        private const val FILE_NAME = "Copy"
     }
 }

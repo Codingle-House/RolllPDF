@@ -20,12 +20,9 @@ class DeleteConfirmationDialog(context: Context) : BaseDialog(context) {
         setContentView(view)
     }
 
-    override fun onCreateDialog() {
-        binding.dialogdeleteButtonNo.setOnClickListener {
-            dismiss()
-        }
-
-        binding.dialogdeleteButtonYes.setOnClickListener {
+    override fun onCreateDialog() = with(binding) {
+        dialogdeleteButtonNo.setOnClickListener { dismiss() }
+        dialogdeleteButtonYes.setOnClickListener {
             onDelete.invoke()
             dismiss()
         }

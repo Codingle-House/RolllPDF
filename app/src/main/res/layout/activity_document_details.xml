@@ -71,13 +71,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_40sdp" />
 
-            <id.co.rolllpdf.presentation.customview.DialogProFeatureView
-                android:id="@+id/documentdetails_view_pro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_16sdp"
-                android:layout_marginTop="@dimen/_16sdp" />
-
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/documentdetails_linearlayout_hint"
                 android:layout_width="match_parent"

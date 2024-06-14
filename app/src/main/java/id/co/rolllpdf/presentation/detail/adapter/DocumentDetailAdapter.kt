@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import id.co.rolllpdf.R
-import id.co.rolllpdf.core.DateTimeUtils
+import id.co.rolllpdf.core.DateTimeUtils.changeDateTimeFormat
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.databinding.RecyclerDetailDocumentsBinding
@@ -70,25 +70,21 @@ class DocumentDetailAdapter(
 
     inner class ItemViewHolder(private val binding: RecyclerDetailDocumentsBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bindView(data: DocumentDetailDto) {
-            Glide.with(context).load(data.filePath).into(binding.recyclerdetailImageviewThumbnail)
-            binding.recyclerdetailTextviewTitle.text =
-                context.getString(
-                    R.string.general_placeholder_number,
-                    adapterPosition.inc().toString()
-                )
-            binding.recyclerdetailTextviewDate.text =
-                DateTimeUtils.changeDateTimeFormat(data.dateTime)
-            binding.recyclerdetailImageviewChecked.isGone = data.isSelected.not()
-            binding.root.setOnClickListener {
-                if (editMode) {
-                    binding.recyclerdetailImageviewChecked.isGone = data.isSelected
-                }
-                onClickListener.invoke(adapterPosition, data)
+        fun bindView(data: DocumentDetailDto) = with(binding) {
+            Glide.with(context).load(data.filePath).into(recyclerdetailImageviewThumbnail)
+            recyclerdetailTextviewTitle.text = context.getString(
+                R.string.general_placeholder_number,
+                adapterPosition.inc().toString()
+            )
+            recyclerdetailTextviewDate.text = changeDateTimeFormat(data.dateTime)
+            recyclerdetailImageviewChecked.isGone = data.isSelected.not()
+            root.setOnClickListener {
+                if (editMode) recyclerdetailImageviewChecked.isGone = data.isSelected
+                onClickListener(adapterPosition, data)
             }
-            binding.root.setOnLongClickListener {
+            root.setOnLongClickListener {
                 if (editMode.not()) {
-                    binding.recyclerdetailImageviewChecked.isGone = false
+                    recyclerdetailImageviewChecked.isGone = false
                     onLongClickListener.invoke(adapterPosition, data)
                     editMode = true
                 }

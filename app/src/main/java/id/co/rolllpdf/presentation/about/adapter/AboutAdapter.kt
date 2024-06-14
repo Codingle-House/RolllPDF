@@ -1,6 +1,5 @@
 package id.co.rolllpdf.presentation.about.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -13,9 +12,8 @@ import id.co.rolllpdf.databinding.RecyclerItemAboutBinding
  * Created by pertadima on 07,March,2021
  */
 class AboutAdapter(
-    private val context: Context,
     private val diffCallback: DiffCallback,
-    private val onClickListener: (Int, VectorAuthorDto) -> Unit
+    private val onClickListener: (VectorAuthorDto) -> Unit
 ) : RecyclerView.Adapter<AboutAdapter.ItemViewHolder>() {
 
     private val dataSet: MutableList<VectorAuthorDto> = mutableListOf()
@@ -37,12 +35,6 @@ class AboutAdapter(
         calculateDiff(newDataSet)
     }
 
-    fun addData(newDatas: List<VectorAuthorDto>) {
-        val list = ArrayList(this.dataSet)
-        list.addAll(newDatas)
-        calculateDiff(list)
-    }
-
     private fun calculateDiff(newDataSet: List<VectorAuthorDto>) {
         diffCallback.setList(dataSet, newDataSet)
         val result = DiffUtil.calculateDiff(diffCallback)
@@ -55,11 +47,9 @@ class AboutAdapter(
 
     inner class ItemViewHolder(private val binding: RecyclerItemAboutBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bindView(data: VectorAuthorDto) {
-            binding.recycleraboutTextviewAuthor.text = data.author
-            binding.recycleraboutTextviewAuthor.setOnClickListener {
-                onClickListener.invoke(adapterPosition, data)
-            }
+        fun bindView(data: VectorAuthorDto) = with(binding) {
+            recycleraboutTextviewAuthor.text = data.author
+            recycleraboutTextviewAuthor.setOnClickListener { onClickListener(data) }
         }
     }
 }
