@@ -108,7 +108,7 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
         with(binding.imageprocessingToolbar) {
             title = if (previewMode) "" else getString(R.string.imageprocessing_title_page)
             setNavigationOnClickListener {
-                deleteFiles()
+                if (!previewMode) deleteFiles()
                 finish()
             }
         }
