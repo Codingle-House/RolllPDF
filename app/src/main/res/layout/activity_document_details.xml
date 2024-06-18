@@ -54,121 +54,127 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/documentdetails_nestedscroll"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/documentdetails_linearlayout_hint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:animateLayoutChanges="true"
-            android:orientation="vertical">
+            android:layout_marginHorizontal="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            app:cardCornerRadius="@dimen/_5sdp"
+            app:cardElevation="@dimen/_3sdp"
+            app:contentPadding="@dimen/_10sdp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/documentdetails_linearlayout_hint"
+            <id.co.rolllpdf.uikit.UiKitTextview
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_16sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                app:cardCornerRadius="@dimen/_5sdp"
-                app:cardElevation="@dimen/_3sdp"
-                app:contentPadding="@dimen/_10sdp">
+                android:drawableStart="@drawable/general_ic_info"
+                android:drawablePadding="@dimen/_10sdp"
+                android:gravity="center_vertical"
+                android:text="@string/main_text_actionhint"
+                app:rolll_text_code="h7_B" />
+        </com.google.android.material.card.MaterialCardView>
 
-                <id.co.rolllpdf.uikit.UiKitTextview
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/general_ic_info"
-                    android:drawablePadding="@dimen/_10sdp"
-                    android:gravity="center_vertical"
-                    android:text="@string/main_text_actionhint"
-                    app:rolll_text_code="h7_B" />
-            </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/documentdetails_linearlayout_action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/_5sdp"
+            app:cardElevation="@dimen/_3sdp">
 
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/documentdetails_linearlayout_action"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_16sdp"
-                android:layout_marginTop="@dimen/_16sdp"
-                android:visibility="gone"
-                app:cardCornerRadius="@dimen/_5sdp"
-                app:cardElevation="@dimen/_3sdp">
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <RelativeLayout
+                    android:id="@+id/documentdetails_relativelayout_copy"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:layout_weight="1"
+                    android:paddingVertical="@dimen/_10sdp">
 
-                    <RelativeLayout
-                        android:id="@+id/documentdetails_relativelayout_copy"
-                        android:layout_width="0dp"
+                    <id.co.rolllpdf.uikit.UiKitTextview
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:paddingVertical="@dimen/_10sdp">
+                        android:layout_centerInParent="true"
+                        android:drawableStart="@drawable/general_ic_copy"
+                        android:drawablePadding="@dimen/_10sdp"
+                        android:gravity="center"
+                        android:text="@string/general_text_duplicate" />
+                </RelativeLayout>
 
-                        <id.co.rolllpdf.uikit.UiKitTextview
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:drawableStart="@drawable/general_ic_copy"
-                            android:drawablePadding="@dimen/_10sdp"
-                            android:gravity="center"
-                            android:text="@string/general_text_duplicate" />
-                    </RelativeLayout>
+                <View
+                    android:layout_width="@dimen/_1sdp"
+                    android:layout_height="match_parent"
+                    android:background="@color/app_line_color" />
 
-                    <View
-                        android:layout_width="@dimen/_1sdp"
-                        android:layout_height="match_parent"
-                        android:background="@color/app_line_color" />
+                <RelativeLayout
+                    android:id="@+id/documentdetails_relativelayout_delete"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="@dimen/_10sdp">
 
-                    <RelativeLayout
-                        android:id="@+id/documentdetails_relativelayout_delete"
-                        android:layout_width="0dp"
+                    <id.co.rolllpdf.uikit.UiKitTextview
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:paddingVertical="@dimen/_10sdp">
+                        android:layout_centerInParent="true"
+                        android:drawableStart="@drawable/general_ic_delete"
+                        android:drawablePadding="@dimen/_10sdp"
+                        android:text="@string/general_text_delete" />
+                </RelativeLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                        <id.co.rolllpdf.uikit.UiKitTextview
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:drawableStart="@drawable/general_ic_delete"
-                            android:drawablePadding="@dimen/_10sdp"
-                            android:text="@string/general_text_delete" />
-                    </RelativeLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/documentdetails_nestedscroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_16sdp">
 
-            <ViewFlipper
-                android:id="@+id/documentdetails_flipper_data"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_16sdp">
+                android:animateLayoutChanges="true"
+                android:orientation="vertical">
 
-                <include
-                    layout="@layout/view_main_empty"
+                <ViewFlipper
+                    android:id="@+id/documentdetails_flipper_data"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_80sdp" />
+                    android:layout_height="wrap_content">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/documentdetails_recyclerview_document"
+                    <include
+                        layout="@layout/view_main_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_80sdp" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/documentdetails_recyclerview_document"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:paddingHorizontal="@dimen/_16sdp" />
+                </ViewFlipper>
+
+                <View
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    android:paddingHorizontal="@dimen/_16sdp" />
-            </ViewFlipper>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_60sdp" />
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+                    android:layout_height="@dimen/_60sdp" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/documentdetails_fab_add"
