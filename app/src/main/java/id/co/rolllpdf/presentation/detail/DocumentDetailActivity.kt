@@ -417,6 +417,7 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
                         getBitmap(this, Uri.fromFile(File(data.filePath)))
                     } catch (ex: Exception) {
                         showToast(R.string.pdf_error_generate)
+                        loadingPdf.dismiss()
                         return
                     }
                     val pageInfo =
