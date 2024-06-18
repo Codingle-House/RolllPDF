@@ -1,7 +1,31 @@
 package com.example.photofilter
 
 import android.opengl.GLES20
-import java.nio.ByteBuffer
+import android.opengl.GLES20.GL_BLEND
+import android.opengl.GLES20.GL_COLOR_BUFFER_BIT
+import android.opengl.GLES20.GL_FLOAT
+import android.opengl.GLES20.GL_FRAMEBUFFER
+import android.opengl.GLES20.GL_TEXTURE0
+import android.opengl.GLES20.GL_TEXTURE_2D
+import android.opengl.GLES20.GL_TRIANGLE_STRIP
+import android.opengl.GLES20.glActiveTexture
+import android.opengl.GLES20.glBindFramebuffer
+import android.opengl.GLES20.glBindTexture
+import android.opengl.GLES20.glClear
+import android.opengl.GLES20.glClearColor
+import android.opengl.GLES20.glDeleteProgram
+import android.opengl.GLES20.glDisable
+import android.opengl.GLES20.glDrawArrays
+import android.opengl.GLES20.glEnableVertexAttribArray
+import android.opengl.GLES20.glGetAttribLocation
+import android.opengl.GLES20.glGetUniformLocation
+import android.opengl.GLES20.glUniform1i
+import android.opengl.GLES20.glUseProgram
+import android.opengl.GLES20.glVertexAttribPointer
+import android.opengl.GLES20.glViewport
+import com.example.photofilter.GLToolbox.checkGlError
+import com.example.photofilter.GLToolbox.createProgram
+import java.nio.ByteBuffer.allocateDirect
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
@@ -23,36 +47,25 @@ class TextureRenderer {
 
     fun init() {
         // Create program
-        mProgram = GLToolbox.createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
+        mProgram = createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
 
         // Bind attributes and uniforms
-        mTexSamplerHandle = GLES20.glGetUniformLocation(
-            mProgram,
-            "tex_sampler"
-        )
-        mTexCoordHandle = GLES20.glGetAttribLocation(mProgram, "a_texcoord")
-        mPosCoordHandle = GLES20.glGetAttribLocation(mProgram, "a_position")
+        mTexSamplerHandle = glGetUniformLocation(mProgram, "tex_sampler")
+        mTexCoordHandle = glGetAttribLocation(mProgram, "a_texcoord")
+        mPosCoordHandle = glGetAttribLocation(mProgram, "a_position")
 
         // Setup coordinate buffers
-        mTexVertices = ByteBuffer.allocateDirect(
-            TEX_VERTICES.size * FLOAT_SIZE_BYTES
-        )
+        mTexVertices = allocateDirect(TEX_VERTICES.size * FLOAT_SIZE_BYTES)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
-        mTexVertices!!.put(TEX_VERTICES)
-            .position(0)
-        mPosVertices = ByteBuffer.allocateDirect(
-            POS_VERTICES.size * FLOAT_SIZE_BYTES
-        )
+        mTexVertices?.put(TEX_VERTICES)?.position(0)
+        mPosVertices = allocateDirect(POS_VERTICES.size * FLOAT_SIZE_BYTES)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
-        mPosVertices!!.put(POS_VERTICES)
-            .position(0)
+        mPosVertices?.put(POS_VERTICES)?.position(0)
     }
 
-    fun tearDown() {
-        GLES20.glDeleteProgram(mProgram)
-    }
+    fun tearDown() = glDeleteProgram(mProgram)
 
     fun updateTextureSize(
         texWidth: Int,
@@ -74,43 +87,37 @@ class TextureRenderer {
 
     fun renderTexture(texId: Int) {
         // Bind default FBO
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
+        glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
         // Use our shader program
-        GLES20.glUseProgram(mProgram)
-        GLToolbox.checkGlError("glUseProgram")
+        glUseProgram(mProgram)
+        checkGlError("glUseProgram")
 
         // Set viewport
-        GLES20.glViewport(0, 0, mViewWidth, mViewHeight)
-        GLToolbox.checkGlError("glViewport")
+        glViewport(0, 0, mViewWidth, mViewHeight)
+        checkGlError("glViewport")
 
         // Disable blending
-        GLES20.glDisable(GLES20.GL_BLEND)
+        glDisable(GL_BLEND)
 
         // Set the vertex attributes
-        GLES20.glVertexAttribPointer(
-            mTexCoordHandle, 2, GLES20.GL_FLOAT, false,
-            0, mTexVertices
-        )
-        GLES20.glEnableVertexAttribArray(mTexCoordHandle)
-        GLES20.glVertexAttribPointer(
-            mPosCoordHandle, 2, GLES20.GL_FLOAT, false,
-            0, mPosVertices
-        )
-        GLES20.glEnableVertexAttribArray(mPosCoordHandle)
-        GLToolbox.checkGlError("vertex attribute setup")
+        glVertexAttribPointer(mTexCoordHandle, 2, GL_FLOAT, false, 0, mTexVertices)
+        glEnableVertexAttribArray(mTexCoordHandle)
+        glVertexAttribPointer(mPosCoordHandle, 2, GL_FLOAT, false, 0, mPosVertices)
+        glEnableVertexAttribArray(mPosCoordHandle)
+        checkGlError("vertex attribute setup")
 
         // Set the input texture
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-        GLToolbox.checkGlError("glActiveTexture")
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texId)
-        GLToolbox.checkGlError("glBindTexture")
-        GLES20.glUniform1i(mTexSamplerHandle, 0)
+        glActiveTexture(GL_TEXTURE0)
+        checkGlError("glActiveTexture")
+        glBindTexture(GL_TEXTURE_2D, texId)
+        checkGlError("glBindTexture")
+        glUniform1i(mTexSamplerHandle, 0)
 
         // Draw
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        glClear(GL_COLOR_BUFFER_BIT)
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
     }
 
     private fun computeOutputVertices() {
@@ -134,8 +141,7 @@ class TextureRenderer {
                 y1 = relativeAspectRatio
             }
             val coords = floatArrayOf(x0, y0, x1, y0, x0, y1, x1, y1)
-            mPosVertices!!.put(coords)
-                .position(0)
+            mPosVertices?.put(coords)?.position(0)
         }
     }
 

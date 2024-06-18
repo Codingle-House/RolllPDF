@@ -1,6 +1,34 @@
 package com.example.photofilter
 
 import android.opengl.GLES20
+import android.opengl.GLES20.GL_CLAMP_TO_EDGE
+import android.opengl.GLES20.GL_COMPILE_STATUS
+import android.opengl.GLES20.GL_FRAGMENT_SHADER
+import android.opengl.GLES20.GL_LINEAR
+import android.opengl.GLES20.GL_LINK_STATUS
+import android.opengl.GLES20.GL_NO_ERROR
+import android.opengl.GLES20.GL_TEXTURE_2D
+import android.opengl.GLES20.GL_TEXTURE_MAG_FILTER
+import android.opengl.GLES20.GL_TEXTURE_MIN_FILTER
+import android.opengl.GLES20.GL_TEXTURE_WRAP_S
+import android.opengl.GLES20.GL_TEXTURE_WRAP_T
+import android.opengl.GLES20.GL_TRUE
+import android.opengl.GLES20.GL_VERTEX_SHADER
+import android.opengl.GLES20.glAttachShader
+import android.opengl.GLES20.glCompileShader
+import android.opengl.GLES20.glCreateProgram
+import android.opengl.GLES20.glCreateShader
+import android.opengl.GLES20.glDeleteProgram
+import android.opengl.GLES20.glDeleteShader
+import android.opengl.GLES20.glGetError
+import android.opengl.GLES20.glGetProgramInfoLog
+import android.opengl.GLES20.glGetProgramiv
+import android.opengl.GLES20.glGetShaderInfoLog
+import android.opengl.GLES20.glLinkProgram
+import android.opengl.GLES20.glShaderSource
+import android.opengl.GLES20.glTexParameteri
+import id.co.rolllpdf.core.Constant.ONE
+import id.co.rolllpdf.core.Constant.ZERO
 
 object GLToolbox {
 
@@ -8,15 +36,15 @@ object GLToolbox {
         shaderType: Int,
         source: String
     ): Int {
-        val shader = GLES20.glCreateShader(shaderType)
-        if (shader != 0) {
-            GLES20.glShaderSource(shader, source)
-            GLES20.glCompileShader(shader)
-            val compiled = IntArray(1)
-            GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compiled, 0)
-            if (compiled[0] == 0) {
-                val info = GLES20.glGetShaderInfoLog(shader)
-                GLES20.glDeleteShader(shader)
+        val shader = glCreateShader(shaderType)
+        if (shader != ZERO) {
+            glShaderSource(shader, source)
+            glCompileShader(shader)
+            val compiled = IntArray(ONE)
+            GLES20.glGetShaderiv(shader, GL_COMPILE_STATUS, compiled, 0)
+            if (compiled.first() == ZERO) {
+                val info = glGetShaderInfoLog(shader)
+                glDeleteShader(shader)
                 throw RuntimeException("Could not compile shader $shaderType:$info")
             }
         }
@@ -27,30 +55,27 @@ object GLToolbox {
         vertexSource: String,
         fragmentSource: String
     ): Int {
-        val vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexSource)
+        val vertexShader = loadShader(GL_VERTEX_SHADER, vertexSource)
         if (vertexShader == 0) {
             return 0
         }
-        val pixelShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentSource)
+        val pixelShader = loadShader(GL_FRAGMENT_SHADER, fragmentSource)
         if (pixelShader == 0) {
             return 0
         }
 
-        val program = GLES20.glCreateProgram()
+        val program = glCreateProgram()
         if (program != 0) {
-            GLES20.glAttachShader(program, vertexShader)
+            glAttachShader(program, vertexShader)
             checkGlError("glAttachShader")
-            GLES20.glAttachShader(program, pixelShader)
+            glAttachShader(program, pixelShader)
             checkGlError("glAttachShader")
-            GLES20.glLinkProgram(program)
+            glLinkProgram(program)
             val linkStatus = IntArray(1)
-            GLES20.glGetProgramiv(
-                program, GLES20.GL_LINK_STATUS, linkStatus,
-                0
-            )
-            if (linkStatus[0] != GLES20.GL_TRUE) {
-                val info = GLES20.glGetProgramInfoLog(program)
-                GLES20.glDeleteProgram(program)
+            glGetProgramiv(program, GL_LINK_STATUS, linkStatus, 0)
+            if (linkStatus[0] != GL_TRUE) {
+                val info = glGetProgramInfoLog(program)
+                glDeleteProgram(program)
                 throw RuntimeException("Could not link program: $info")
             }
         }
@@ -58,29 +83,17 @@ object GLToolbox {
     }
 
     fun checkGlError(op: String) {
-        val error = GLES20.glGetError()
-        if (error != GLES20.GL_NO_ERROR) {
+        val error = glGetError()
+        if (error != GL_NO_ERROR) {
             throw RuntimeException("$op: glError $error")
         }
     }
 
     @JvmStatic fun initTexParams() {
-        GLES20.glTexParameteri(
-            GLES20.GL_TEXTURE_2D,
-            GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR
-        )
-        GLES20.glTexParameteri(
-            GLES20.GL_TEXTURE_2D,
-            GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR
-        )
-        GLES20.glTexParameteri(
-            GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-            GLES20.GL_CLAMP_TO_EDGE
-        )
-        GLES20.glTexParameteri(
-            GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-            GLES20.GL_CLAMP_TO_EDGE
-        )
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
     }
 
 }
