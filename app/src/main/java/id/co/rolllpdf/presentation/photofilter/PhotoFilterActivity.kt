@@ -6,21 +6,33 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ColorSpace
+import android.graphics.ColorSpace.Named.SRGB
 import android.graphics.ImageDecoder
+import android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.P
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
-import com.mukesh.imageproccessing.OnProcessingCompletionListener
-import com.mukesh.imageproccessing.PhotoFilter
-import com.mukesh.imageproccessing.filters.AutoFix
-import com.mukesh.imageproccessing.filters.Documentary
-import com.mukesh.imageproccessing.filters.Grayscale
-import com.mukesh.imageproccessing.filters.None
+import com.example.photofilter.OnProcessingCompletionListener
+import com.example.photofilter.PhotoFilter
+import com.example.photofilter.filters.AutoFix
+import com.example.photofilter.filters.Documentary
+import com.example.photofilter.filters.Grayscale
+import com.example.photofilter.filters.None
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
-import id.co.rolllpdf.data.constant.IntentArguments
+import id.co.rolllpdf.core.BitmapUtil.getBitmap
+import id.co.rolllpdf.core.showToast
+import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_IMAGES
+import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_POSITION
 import id.co.rolllpdf.databinding.ActivityPhotoFilterBinding
+import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity.PhotoFilterAction.BW
+import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity.PhotoFilterAction.GRAYSCALE
+import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity.PhotoFilterAction.MAGIC
+import id.co.rolllpdf.presentation.photofilter.PhotoFilterActivity.PhotoFilterAction.ORIGINAL
 import id.co.rolllpdf.util.image.convertBitmapToFile
 import id.co.rolllpdf.util.image.createFile
 import id.co.rolllpdf.util.image.getOutputFileDirectory
@@ -36,11 +48,11 @@ class PhotoFilterActivity : BaseActivity<ActivityPhotoFilterBinding>(),
         get() = ActivityPhotoFilterBinding::inflate
 
     private val imagePath by lazy {
-        intent?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
+        intent?.getStringExtra(PROCESSING_IMAGES).orEmpty()
     }
 
     private val selectedPosition by lazy {
-        intent?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0)
+        intent?.getIntExtra(PROCESSING_POSITION, 0)
     }
 
     private var photoFilter: PhotoFilter? = null
@@ -62,78 +74,33 @@ class PhotoFilterActivity : BaseActivity<ActivityPhotoFilterBinding>(),
 
     private fun setupView() {
         photoFilter = PhotoFilter(binding.photofilterSurfaceEffect, this)
-        getImageBitmap()?.let { photoFilter?.applyEffect(it, None()) }
-
-        binding.photofilterTextviewDone.setOnClickListener {
-            onFilterDone()
-        }
+        getImageBitmap()?.let { photoFilter?.applyEffect(it) }
+        binding.photofilterTextviewDone.setOnClickListener { onFilterDone() }
     }
 
-    private fun setupActionListener() {
-        binding.photofilerLinearOriginal.setOnClickListener {
-            changeImageFilter(PhotoFilterAction.ORIGINAL)
-        }
-
-        binding.photofilerLinearMagic.setOnClickListener {
-            changeImageFilter(PhotoFilterAction.MAGIC)
-        }
-
-        binding.photofilerLinearBw.setOnClickListener {
-            changeImageFilter(PhotoFilterAction.BW)
-        }
-
-        binding.photofilerLinearGrayscale.setOnClickListener {
-            changeImageFilter(PhotoFilterAction.GRAYSCALE)
-        }
+    private fun setupActionListener() = with(binding) {
+        photofilerLinearOriginal.setOnClickListener { changeImageFilter(ORIGINAL) }
+        photofilerLinearMagic.setOnClickListener { changeImageFilter(MAGIC) }
+        photofilerLinearBw.setOnClickListener { changeImageFilter(BW) }
+        photofilerLinearGrayscale.setOnClickListener { changeImageFilter(GRAYSCALE) }
     }
 
 
     private fun changeImageFilter(filter: Int) {
         when (filter) {
-            PhotoFilterAction.ORIGINAL -> getImageBitmap()?.let {
-                photoFilter?.applyEffect(it, None())
-            }
-
-            PhotoFilterAction.MAGIC -> getImageBitmap()?.let {
-                photoFilter?.applyEffect(it, AutoFix())
-            }
-
-            PhotoFilterAction.BW -> getImageBitmap()?.let {
-                photoFilter?.applyEffect(it, Documentary())
-            }
-
-            else -> getImageBitmap()?.let {
-                photoFilter?.applyEffect(it, Grayscale())
-            }
+            ORIGINAL -> getImageBitmap()?.let { photoFilter?.applyEffect(it, None()) }
+            MAGIC -> getImageBitmap()?.let { photoFilter?.applyEffect(it, AutoFix()) }
+            BW -> getImageBitmap()?.let { photoFilter?.applyEffect(it, Documentary()) }
+            else -> getImageBitmap()?.let { photoFilter?.applyEffect(it, Grayscale()) }
         }
     }
 
     private fun getImageBitmap() = try {
         getBitmap(this, Uri.fromFile(File(imagePath)))
     } catch (ex: Exception) {
-        val uri = getImageUri(imagePath.substringAfterLast("/"))
-        getBitmap(this, uri)
+        showToast(R.string.error_failed_bitmap)
+        null
     }
-
-    private fun getBitmap(context: Context, imageUri: Uri): Bitmap? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            ImageDecoder.decodeBitmap(
-                ImageDecoder.createSource(
-                    context.contentResolver,
-                    imageUri
-                )
-            )
-        } else {
-            context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
-                BitmapFactory.decodeStream(inputStream)
-            }
-        }
-    }
-
-    private fun getImageUri(path: String) = ContentUris.withAppendedId(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        path.toLong()
-    )
 
     object PhotoFilterAction {
         const val ORIGINAL = 0
@@ -154,8 +121,8 @@ class PhotoFilterActivity : BaseActivity<ActivityPhotoFilterBinding>(),
         }
         val savedUri = Uri.fromFile(photoFile)
         val resultIntent = Intent().apply {
-            putExtra(IntentArguments.PROCESSING_IMAGES, savedUri.path)
-            putExtra(IntentArguments.PROCESSING_POSITION, selectedPosition)
+            putExtra(PROCESSING_IMAGES, savedUri.path)
+            putExtra(PROCESSING_POSITION, selectedPosition)
         }
         setResult(Activity.RESULT_OK, resultIntent)
         finish()

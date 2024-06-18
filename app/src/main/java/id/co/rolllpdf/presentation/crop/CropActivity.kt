@@ -2,21 +2,18 @@ package id.co.rolllpdf.presentation.crop
 
 import android.app.Activity
 import android.content.ContentUris
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.P
 import android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 import android.view.LayoutInflater
 import id.co.photocropper.CropListener
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.BitmapUtil.getBitmap
 import id.co.rolllpdf.core.Constant.DELIMITER_SLASH
 import id.co.rolllpdf.core.Constant.ZERO
+import id.co.rolllpdf.core.showToast
 import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_IMAGES
 import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_POSITION
 import id.co.rolllpdf.databinding.ActivityCropBinding
@@ -55,30 +52,13 @@ class CropActivity : BaseActivity<ActivityCropBinding>(), CropListener {
             val imageBitmap = getBitmap(this@CropActivity, Uri.fromFile(File(imagePath)))
             imagecroppingImageviewCrop.setImageBitmap(imageBitmap)
         } catch (ex: Exception) {
-            val uri = getImageUri(imagePath.substringAfterLast(DELIMITER_SLASH))
-            val imageBitmap = getBitmap(this@CropActivity, uri)
-            binding.imagecroppingImageviewCrop.setImageBitmap(imageBitmap)
+            showToast(R.string.error_failed_bitmap)
         }
 
         imagecroppingTextviewCrop.setOnClickListener {
             imagecroppingImageviewCrop.crop(this@CropActivity, true)
         }
     }
-
-    private fun getBitmap(context: Context, imageUri: Uri): Bitmap? {
-        return if (SDK_INT >= P) {
-            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, imageUri))
-        } else {
-            context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
-                BitmapFactory.decodeStream(inputStream)
-            }
-        }
-    }
-
-    private fun getImageUri(path: String) = ContentUris.withAppendedId(
-        EXTERNAL_CONTENT_URI,
-        path.toLong()
-    )
 
     override fun onFinish(bitmap: Bitmap?) {
         val outputDirectory = getOutputFileDirectory()

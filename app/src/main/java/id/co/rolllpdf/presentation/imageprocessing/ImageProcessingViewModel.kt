@@ -7,10 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import id.co.rolllpdf.core.DateTimeUtils
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.data.local.dto.DocumentDto
-import id.co.rolllpdf.data.local.preference.UserPreferenceManager
 import id.co.rolllpdf.domain.repository.AppRepository
 import id.co.rolllpdf.util.livedata.SingleLiveEvent
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,19 +17,11 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ImageProcessingViewModel @Inject constructor(
-    private val appRepository: AppRepository,
-    private val userPreferenceManager: UserPreferenceManager
+    private val appRepository: AppRepository
 ) : ViewModel() {
 
     private val insertDone = SingleLiveEvent<Boolean>()
     fun observeInsertDone(): LiveData<Boolean> = insertDone
-
-    private val purchaseStatus = SingleLiveEvent<Boolean>()
-    fun observePurchaseStatus(): LiveData<Boolean> = purchaseStatus
-
-    init {
-        getPurchaseStatus()
-    }
 
     fun doInsertDocument(
         documentId: Long,
@@ -58,12 +48,6 @@ class ImageProcessingViewModel @Inject constructor(
             }
         }
         insertDone.postValue(true)
-    }
-
-    private fun getPurchaseStatus() = viewModelScope.launch {
-        userPreferenceManager.getPurchaseStatus().collect {
-            purchaseStatus.postValue(it)
-        }
     }
 
     companion object {

@@ -4,18 +4,17 @@ import android.Manifest.permission.ACCESS_MEDIA_LOCATION
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.app.ProgressDialog
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
+import android.graphics.Color.BLUE
 import android.graphics.ImageDecoder
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
-import android.graphics.pdf.PdfDocument.PageInfo
+import android.graphics.pdf.PdfDocument.PageInfo.Builder
 import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
@@ -24,7 +23,6 @@ import android.os.Environment
 import android.os.Environment.DIRECTORY_DOCUMENTS
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.core.view.isGone
@@ -32,6 +30,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.Constant.FLOAT_ZERO
 import id.co.rolllpdf.core.Constant.LONG_ZERO
 import id.co.rolllpdf.core.Constant.TEN
 import id.co.rolllpdf.core.Constant.THREE
@@ -55,6 +54,7 @@ import id.co.rolllpdf.presentation.detail.DocumentDetailActivity.State.EMPTY
 import id.co.rolllpdf.presentation.detail.adapter.DocumentDetailAdapter
 import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
 import id.co.rolllpdf.presentation.dialog.EditDocumentDialog
+import id.co.rolllpdf.presentation.dialog.LoadingDialog
 import id.co.rolllpdf.presentation.imageprocessing.ImageProcessingActivity
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
@@ -101,6 +101,10 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
             ::handleOnAdapterClickListener,
             ::handleOnAdapterLongClickListener
         )
+    }
+
+    private val loadingPdf by lazy {
+        LoadingDialog(this@DocumentDetailActivity, getString(R.string.pdf_loading_pdf))
     }
 
     private var actionState: Int = DEFAULT
@@ -402,8 +406,7 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
     override fun onRationaleDenied(requestCode: Int) = Unit
 
     private fun createPDFWithMultipleImage() {
-        val dialog = ProgressDialog.show(this, "", getString(R.string.pdf_loading_pdf));
-        dialog.show()
+        loadingPdf.show()
         val file = getOutputFile()
         if (file != null) {
             try {
@@ -413,20 +416,19 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
                     val bitmap = try {
                         getBitmap(this, Uri.fromFile(File(data.filePath)))
                     } catch (ex: Exception) {
-                        val uri = getImageUri(data.filePath.substringAfterLast("/"))
-                        getBitmap(this, uri)
+                        showToast(R.string.pdf_error_generate)
+                        return
                     }
                     val pageInfo =
-                        PageInfo.Builder(bitmap?.width.orZero(), bitmap?.height.orZero(), pos + 1)
-                            .create()
+                        Builder(bitmap?.width.orZero(), bitmap?.height.orZero(), pos.inc()).create()
                     val page = pdfDocument.startPage(pageInfo)
                     val canvas: Canvas = page.canvas
                     val paint = Paint()
-                    paint.color = Color.BLUE
+                    paint.color = BLUE
                     canvas.drawPaint(paint)
                     bitmap?.let {
-                        val copyBitmap = it.copy(Bitmap.Config.ARGB_8888, true)
-                        canvas.drawBitmap(copyBitmap, 0f, 0f, null)
+                        val copyBitmap = it.copy(ARGB_8888, true)
+                        canvas.drawBitmap(copyBitmap, FLOAT_ZERO, FLOAT_ZERO, null)
                         pdfDocument.finishPage(page)
                         copyBitmap.recycle()
                     }
@@ -434,16 +436,14 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
                 pdfDocument.writeTo(fileOutputStream)
                 pdfDocument.close()
                 Handler(Looper.getMainLooper()).postDelayed({
-                    dialog.dismiss()
+                    loadingPdf.dismiss()
                     showToast(getString(R.string.pdf_text_saved, file.path))
                 }, TOAST_DELAY)
             } catch (e: IOException) {
                 e.printStackTrace()
-                dialog.dismiss()
+                loadingPdf.dismiss()
             }
-        } else {
-            dialog.dismiss()
-        }
+        } else loadingPdf.dismiss()
     }
 
     private fun getOutputFile(): File? {
@@ -494,11 +494,6 @@ class DocumentDetailActivity : BaseActivity<ActivityDocumentDetailsBinding>(), P
 
         }
     }
-
-    private fun getImageUri(path: String) = ContentUris.withAppendedId(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        path.toLong()
-    )
 
     override fun finish() {
         super.finish()
