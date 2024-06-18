@@ -5,4 +5,6 @@ project(':uikit').projectDir = new File('libs/uikit')
 include ':core'
 project(':core').projectDir = new File('libs/core')
 include ':app'
+include ':photofilter'
+project(':photofilter').projectDir = new File('libs/photofilter')
 rootProject.name = "RolllPDF"

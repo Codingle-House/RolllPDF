@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/general_bg_dialog"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/_30sdp">
+
+    <ImageView
+        android:id="@+id/loading_imageview_mascot"
+        android:layout_width="@dimen/_60sdp"
+        android:layout_height="@dimen/_60sdp"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/general_ic_logo" />
+
+    <id.co.rolllpdf.uikit.UiKitTextview
+        android:id="@+id/loading_textview_title"
+        android:layout_width="@dimen/_80sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:lines="1"
+        android:maxLines="1"
+        app:rolll_text_code="h7_S" />
+</LinearLayout>

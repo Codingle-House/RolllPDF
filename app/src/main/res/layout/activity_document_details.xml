@@ -66,11 +66,6 @@
             android:animateLayoutChanges="true"
             android:orientation="vertical">
 
-            <View
-                android:id="@+id/documentdetails_view_space"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_40sdp" />
-
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/documentdetails_linearlayout_hint"
                 android:layout_width="match_parent"

@@ -19,6 +19,9 @@ import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.orFalse
 import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.constant.IntentArguments
+import id.co.rolllpdf.data.constant.IntentArguments.DOCUMENT_ID
+import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_IMAGES
+import id.co.rolllpdf.data.constant.IntentArguments.PROCESSING_POSITION
 import id.co.rolllpdf.databinding.ActivityImageProcessingBinding
 import id.co.rolllpdf.presentation.crop.CropActivity
 import id.co.rolllpdf.presentation.imageprocessing.adapter.ImageProcessingAdapter
@@ -54,7 +57,7 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
     }
 
     private val documentId by lazy {
-        val id = intent?.getLongExtra(IntentArguments.DOCUMENT_ID, 0).orZero()
+        val id = intent?.getLongExtra(DOCUMENT_ID, 0).orZero()
         if (id != 0L) id else Calendar.getInstance().timeInMillis
     }
 
@@ -114,11 +117,11 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
         }
     }
 
-    private fun setupViewListener() {
-        binding.imageprocessingRelativeCrop.setOnClickListener {
-            val intent = Intent(this, CropActivity::class.java).apply {
-                putExtra(IntentArguments.PROCESSING_IMAGES, listOfFile[selectedPosition])
-                putExtra(IntentArguments.PROCESSING_POSITION, selectedPosition)
+    private fun setupViewListener() = with(binding) {
+        imageprocessingRelativeCrop.setOnClickListener {
+            val intent = Intent(this@ImageProcessingActivity, CropActivity::class.java).apply {
+                putExtra(PROCESSING_IMAGES, listOfFile[selectedPosition])
+                putExtra(PROCESSING_POSITION, selectedPosition)
             }
             startCropForResult.launch(intent)
             overridePendingTransition(
@@ -127,11 +130,12 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
             )
         }
 
-        binding.imageprocessingRelativeFilter.setOnClickListener {
-            val intent = Intent(this, PhotoFilterActivity::class.java).apply {
-                putExtra(IntentArguments.PROCESSING_IMAGES, listOfFile[selectedPosition])
-                putExtra(IntentArguments.PROCESSING_POSITION, selectedPosition)
-            }
+        imageprocessingRelativeFilter.setOnClickListener {
+            val intent =
+                Intent(this@ImageProcessingActivity, PhotoFilterActivity::class.java).apply {
+                    putExtra(PROCESSING_IMAGES, listOfFile[selectedPosition])
+                    putExtra(PROCESSING_POSITION, selectedPosition)
+                }
             startFilterForResult.launch(intent)
             overridePendingTransition(
                 R.anim.transition_anim_slide_up,
@@ -179,13 +183,13 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
 
     private fun replaceImage(result: ActivityResult) {
         if (result.resultCode == Activity.RESULT_OK) {
-            val imagePath = result.data?.getStringExtra(IntentArguments.PROCESSING_IMAGES).orEmpty()
-            val pos = result.data?.getIntExtra(IntentArguments.PROCESSING_POSITION, 0).orZero()
+            val imagePath = result.data?.getStringExtra(PROCESSING_IMAGES).orEmpty()
+            val pos = result.data?.getIntExtra(PROCESSING_POSITION, 0).orZero()
             try {
                 val deletedImage = listOfFile[pos]
                 File(deletedImage).delete()
             } catch (ex: Exception) {
-                Log.e("TAG", ex.localizedMessage)
+                Log.e("TAG", "replaceImage ${ex.localizedMessage}")
             }
             listOfFile[pos] = imagePath
             imageProcessingAdapter.setData(listOfFile)
@@ -194,9 +198,7 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
     }
 
     private fun deleteFiles() {
-        listOfFile.forEach {
-            File(it).delete()
-        }
+        listOfFile.forEach { File(it).delete() }
     }
 
     override fun onBackPressed() {
