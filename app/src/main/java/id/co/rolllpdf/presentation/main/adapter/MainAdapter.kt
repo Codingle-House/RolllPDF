@@ -7,7 +7,7 @@ import androidx.core.view.isGone
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import id.co.rolllpdf.core.DateTimeUtils
+import id.co.rolllpdf.core.DateTimeUtils.changeDateTimeFormat
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.orZero
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
@@ -27,8 +27,8 @@ class MainAdapter(
     private var editMode: Boolean = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val itemView = RecyclerMainDocumentsBinding
-            .inflate(LayoutInflater.from(parent.context), parent, false)
+        val itemView =
+            RecyclerMainDocumentsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ItemViewHolder(itemView)
     }
 
@@ -43,12 +43,6 @@ class MainAdapter(
 
     fun setData(newDataSet: List<DocumentRelationDto>) {
         calculateDiff(newDataSet)
-    }
-
-    fun addData(newDatas: List<DocumentRelationDto>) {
-        val list = ArrayList(this.dataSet)
-        list.addAll(newDatas)
-        calculateDiff(list)
     }
 
     fun setEditMode(editMode: Boolean) {
@@ -67,23 +61,20 @@ class MainAdapter(
 
     inner class ItemViewHolder(private val binding: RecyclerMainDocumentsBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bindView(data: DocumentRelationDto) {
+        fun bindView(data: DocumentRelationDto) = with(binding) {
             Glide.with(context).load(data.details.firstOrNull()?.filePath.orEmpty())
-                .into(binding.recyclermainImageviewThumbnail)
-            binding.recyclermainTextviewCount.text = data.details.size.orZero().toString()
-            binding.recyclermainTextviewTitle.text = data.document.title
-            binding.recyclermainTextviewDate.text =
-                DateTimeUtils.changeDateTimeFormat(data.document.dateTime)
-            binding.recyclermainImageviewChecked.isGone = data.document.isSelected.not()
-            binding.root.setOnClickListener {
-                if (editMode) {
-                    binding.recyclermainImageviewChecked.isGone = data.document.isSelected
-                }
+                .into(recyclermainImageviewThumbnail)
+            recyclermainTextviewCount.text = data.details.size.orZero().toString()
+            recyclermainTextviewTitle.text = data.document.title
+            recyclermainTextviewDate.text = changeDateTimeFormat(data.document.dateTime)
+            recyclermainImageviewChecked.isGone = data.document.isSelected.not()
+            root.setOnClickListener {
+                if (editMode) recyclermainImageviewChecked.isGone = data.document.isSelected
                 onClickListener.invoke(adapterPosition, data)
             }
-            binding.root.setOnLongClickListener {
+            root.setOnLongClickListener {
                 if (editMode.not()) {
-                    binding.recyclermainImageviewChecked.isGone = false
+                    recyclermainImageviewChecked.isGone = false
                     onLongClickListener.invoke(adapterPosition, data)
                     editMode = true
                 }

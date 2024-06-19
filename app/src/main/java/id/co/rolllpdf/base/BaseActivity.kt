@@ -1,10 +1,12 @@
 package id.co.rolllpdf.base
 
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.M
+import android.os.Build.VERSION_CODES.R
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
-import android.view.WindowInsetsController
+import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
@@ -33,39 +35,31 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     abstract fun onViewModelObserver()
 
     protected fun changeStatusBarColor(@ColorRes color: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.statusBarColor = getColorCompat(color)
-        }
+        window.statusBarColor = getColorCompat(color)
     }
 
     protected fun changeStatusBarTextColor(isLightStatusBar: Boolean = false) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (SDK_INT >= R) {
             when {
-                isLightStatusBar -> {
-                    window.insetsController?.setSystemBarsAppearance(
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                    )
-                }
+                isLightStatusBar -> window.insetsController?.setSystemBarsAppearance(
+                    APPEARANCE_LIGHT_STATUS_BARS,
+                    APPEARANCE_LIGHT_STATUS_BARS
+                )
 
-                else -> {
-                    window.insetsController?.setSystemBarsAppearance(
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS.inv(),
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS.inv()
-                    )
-                }
+                else -> window.insetsController?.setSystemBarsAppearance(
+                    APPEARANCE_LIGHT_STATUS_BARS.inv(),
+                    APPEARANCE_LIGHT_STATUS_BARS.inv()
+                )
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        } else if (SDK_INT >= M) {
             when {
                 isLightStatusBar -> {
-                    window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-
+                    window.decorView.systemUiVisibility = SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 }
 
-                else -> {
-                    val decorView = window.decorView
-                    decorView.systemUiVisibility =
-                        decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
+                else -> window.decorView.apply {
+                    systemUiVisibility =
+                        systemUiVisibility and SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
                 }
             }
         }

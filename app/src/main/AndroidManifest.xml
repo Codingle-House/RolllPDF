@@ -64,10 +64,6 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".presentation.pro.ProActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".presentation.about.AboutUsActivity"
             android:screenOrientation="portrait" />
 

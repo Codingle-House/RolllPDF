@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import id.co.rolllpdf.core.Constant.ZERO
 import id.co.rolllpdf.core.DateTimeUtils
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.data.local.preference.UserPreferenceManager
@@ -70,17 +71,13 @@ class MainViewModel @Inject constructor(
         files.forEach { docs -> appRepository.deleteDocument(docs.document.id) }
         deletedFilePath.forEach {
             val fileCount = appRepository.getDocumentFileCount(it)
-            if (fileCount == 0) {
-                File(it).delete()
-            }
+            if (fileCount == ZERO) File(it).delete()
         }
         getDocuments()
     }
 
     fun getDuplicateCount() = viewModelScope.launch {
-        userPreferenceManager.getDuplicateCount().collect {
-            duplicateCount.postValue(it)
-        }
+        userPreferenceManager.getDuplicateCount().collect { duplicateCount.postValue(it) }
     }
 
     fun updateDuplicateCount(count: Int) = viewModelScope.launch {

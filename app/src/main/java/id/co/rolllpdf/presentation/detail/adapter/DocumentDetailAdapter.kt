@@ -38,20 +38,12 @@ class DocumentDetailAdapter(
         holder.bindView(dataSet[holder.adapterPosition])
     }
 
-    override fun getItemId(position: Int): Long {
-        return dataSet[position].id
-    }
+    override fun getItemId(position: Int) = dataSet[position].id
 
     override fun getItemCount(): Int = dataSet.size
 
     fun setData(newDataSet: List<DocumentDetailDto>) {
         calculateDiff(newDataSet)
-    }
-
-    fun addData(newDatas: List<DocumentDetailDto>) {
-        val list = ArrayList(this.dataSet)
-        list.addAll(newDatas)
-        calculateDiff(list)
     }
 
     fun setEditMode(editMode: Boolean) {

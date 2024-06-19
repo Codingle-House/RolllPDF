@@ -12,7 +12,6 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "tbl_document")
 data class DocumentEntity(
     @PrimaryKey(autoGenerate = false)
-    @NonNull
     @ColumnInfo(name = "id")
     val id: Long = 0,
     @ColumnInfo(name = "title")

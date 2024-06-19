@@ -18,9 +18,9 @@ class CropImageView @JvmOverloads constructor(
         CropImageViewBinding.inflate(LayoutInflater.from(context), this)
     }
 
-    fun setImageBitmap(bitmap: Bitmap?) {
-        binding.cropImageviewPreview.setImageBitmap(bitmap)
-        binding.cropOverlayPreview.setBitmap(bitmap)
+    fun setImageBitmap(bitmap: Bitmap?) = with(binding) {
+        cropImageviewPreview.setImageBitmap(bitmap)
+        cropOverlayPreview.setBitmap(bitmap)
     }
 
     fun crop(listener: CropListener?, needStretch: Boolean) {

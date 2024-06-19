@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import id.co.rolllpdf.core.Constant.ZERO
 import id.co.rolllpdf.core.DateTimeUtils
 import id.co.rolllpdf.data.local.dto.DocumentDetailDto
 import id.co.rolllpdf.data.local.preference.UserPreferenceManager
@@ -48,10 +49,7 @@ class DocumentDetailViewModel @Inject constructor(
             val randomNumber: Int = Random().nextInt(MAX_RANDOM)
             val newDocumentId = docs.id + randomNumber
             with(appRepository) {
-                val documentDetailDto = docs.copy(
-                    dateTime = dateTime, id = newDocumentId
-                )
-                insertDocumentDetail(documentDetailDto)
+                insertDocumentDetail(docs.copy(dateTime = dateTime, id = newDocumentId))
             }
         }
 
@@ -66,9 +64,7 @@ class DocumentDetailViewModel @Inject constructor(
         files.forEach { docs -> appRepository.deleteDocumentDetail(docs.id) }
         deletedFilePath.forEach {
             val fileCount = appRepository.getDocumentFileCount(it)
-            if (fileCount == 0) {
-                File(it).delete()
-            }
+            if (fileCount == ZERO) File(it).delete()
         }
         getDocuments(id)
     }
@@ -78,9 +74,7 @@ class DocumentDetailViewModel @Inject constructor(
     }
 
     fun getDuplicateCount() = viewModelScope.launch {
-        userPreferenceManager.getDuplicateCount().collect {
-            duplicateCount.postValue(it)
-        }
+        userPreferenceManager.getDuplicateCount().collect { duplicateCount.postValue(it) }
     }
 
     fun updateDuplicateCount(count: Int) = viewModelScope.launch {
@@ -90,9 +84,7 @@ class DocumentDetailViewModel @Inject constructor(
 
 
     fun getPDFGeneratedCount() = viewModelScope.launch {
-        userPreferenceManager.getPdfCount().collect {
-            pdfCount.postValue(it)
-        }
+        userPreferenceManager.getPdfCount().collect { pdfCount.postValue(it) }
     }
 
     fun updatePdfGeneratedCount(count: Int) = viewModelScope.launch {

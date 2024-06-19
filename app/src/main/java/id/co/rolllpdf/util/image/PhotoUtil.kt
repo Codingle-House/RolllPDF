@@ -4,7 +4,7 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat.JPEG
 import id.co.rolllpdf.R
-import id.co.rolllpdf.core.Constant.FIFTHY
+import id.co.rolllpdf.core.Constant.FIFTY
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -23,7 +23,7 @@ fun createFile(baseFolder: File, format: String, extension: String) = File(
 fun convertBitmapToFile(destinationFile: File, bitmap: Bitmap) {
     destinationFile.createNewFile()
     val bos = ByteArrayOutputStream()
-    bitmap.compress(JPEG, FIFTHY, bos)
+    bitmap.compress(JPEG, FIFTY, bos)
     val bitmapData = bos.toByteArray()
     val fos = FileOutputStream(destinationFile)
     with(fos) {

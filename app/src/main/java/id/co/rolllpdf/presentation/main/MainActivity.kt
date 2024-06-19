@@ -1,9 +1,14 @@
 package id.co.rolllpdf.presentation.main
 
-import android.Manifest
+import android.Manifest.permission.ACCESS_MEDIA_LOCATION
+import android.Manifest.permission.CAMERA
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.R.color.white
 import android.app.Service
 import android.content.Intent
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.Q
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -22,15 +27,18 @@ import id.co.rolllpdf.core.Constant.THREE
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.getDrawableCompat
 import id.co.rolllpdf.core.showToast
-import id.co.rolllpdf.data.constant.AppConstant.MAX_DUPLICATE_COUNT
-import id.co.rolllpdf.data.constant.IntentArguments
+import id.co.rolllpdf.data.constant.IntentArguments.DOCUMENT_ID
+import id.co.rolllpdf.data.constant.IntentArguments.DOCUMENT_TITLE
 import id.co.rolllpdf.data.local.dto.DocumentRelationDto
 import id.co.rolllpdf.databinding.ActivityMainBinding
 import id.co.rolllpdf.presentation.about.AboutUsActivity
 import id.co.rolllpdf.presentation.camera.CameraActivity
 import id.co.rolllpdf.presentation.detail.DocumentDetailActivity
 import id.co.rolllpdf.presentation.dialog.DeleteConfirmationDialog
+import id.co.rolllpdf.presentation.main.MainActivity.ActionState.DEFAULT
 import id.co.rolllpdf.presentation.main.MainActivity.ActionState.EDIT
+import id.co.rolllpdf.presentation.main.MainActivity.ActionState.SEARCH
+import id.co.rolllpdf.presentation.main.MainActivity.Permission.MEDIA
 import id.co.rolllpdf.presentation.main.adapter.MainAdapter
 import id.co.rolllpdf.util.decorator.SpaceItemDecoration
 import id.co.rolllpdf.util.overscroll.NestedScrollViewOverScrollDecorAdapter
@@ -47,6 +55,7 @@ import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorat
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import pub.devrel.easypermissions.EasyPermissions.somePermissionPermanentlyDenied
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -68,11 +77,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         )
     }
 
-    private var actionState: Int = ActionState.DEFAULT
+    private var actionState: Int = DEFAULT
     private val documentData: MutableList<DocumentRelationDto> = mutableListOf()
     private var firstLoad: Boolean = true
     private var duplicateCount: Int = 0
-    private var isPro: Boolean = false
 
     @FlowPreview
     @ExperimentalCoroutinesApi
@@ -95,16 +103,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
 
     @FlowPreview
     @ExperimentalCoroutinesApi
-    private fun setupToolbar() {
-        binding.mainToolbar.setNavigationOnClickListener {
+    private fun setupToolbar() = with(binding) {
+        mainToolbar.setNavigationOnClickListener {
             when (actionState) {
                 EDIT -> {
-                    toggleEditMode(ActionState.DEFAULT)
+                    toggleEditMode(DEFAULT)
                     mainViewModel.getDocuments()
                 }
 
-                ActionState.SEARCH -> {
-                    toggleSearchMode(ActionState.DEFAULT)
+                SEARCH -> {
+                    toggleSearchMode(DEFAULT)
                     mainViewModel.getDocuments()
                 }
 
@@ -112,7 +120,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
             }
         }
 
-        with(binding.mainImageviewChecked) {
+        with(mainImageviewChecked) {
             setOnClickListener {
                 val allSelected =
                     documentData.filter { it.document.isSelected }.size == documentData.size
@@ -129,17 +137,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
             }
         }
 
-        binding.mainImageviewSearch.setOnClickListener {
-            toggleSearchMode(ActionState.SEARCH)
-        }
-
-        binding.mainEdittextSearch.textChanges().debounce(DEBOUNCE_SEARCH).onEach {
+        mainImageviewSearch.setOnClickListener { toggleSearchMode(SEARCH) }
+        mainEdittextSearch.textChanges().debounce(DEBOUNCE_SEARCH).onEach {
             if (actionState != EDIT && !firstLoad) {
                 mainViewModel.getDocuments(it.toString())
             }
         }.launchIn(lifecycleScope)
 
-        binding.mainImageviewMore.setOnClickListener {
+        mainImageviewMore.setOnClickListener {
             val intent = Intent(this@MainActivity, AboutUsActivity::class.java)
             startActivity(intent)
             overridePendingTransition(
@@ -155,37 +160,29 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         )
     }
 
-    private fun editModeListener() {
-        binding.mainRelativelayoutCopy.setOnClickListener {
+    private fun editModeListener() = with(binding) {
+        mainRelativelayoutCopy.setOnClickListener {
             val duplicateDocument = documentData.filter { it.document.isSelected }
             if (duplicateDocument.isNotEmpty()) {
-                if (isPro || duplicateCount < MAX_DUPLICATE_COUNT) {
-                    with(mainViewModel) {
-                        doInsertDocument(duplicateDocument)
-                        updateDuplicateCount(duplicateCount.inc())
-                    }
-                    toggleEditMode(ActionState.DEFAULT)
-                } else {
-                    showToast(R.string.general_error_maxduplicate)
+                with(mainViewModel) {
+                    doInsertDocument(duplicateDocument)
+                    updateDuplicateCount(duplicateCount.inc())
                 }
-            } else {
-                showToast(R.string.general_error_selected)
-            }
+                toggleEditMode(DEFAULT)
+            } else showToast(R.string.general_error_selected)
         }
 
-        binding.mainRelativelayoutDelete.setOnClickListener {
+        mainRelativelayoutDelete.setOnClickListener {
             val duplicateDocument = documentData.filter { it.document.isSelected }
             if (duplicateDocument.isNotEmpty()) {
-                DeleteConfirmationDialog(this).apply {
+                DeleteConfirmationDialog(this@MainActivity).apply {
                     setListener {
                         mainViewModel.doDeleteDocuments(duplicateDocument)
-                        toggleEditMode(ActionState.DEFAULT)
+                        toggleEditMode(DEFAULT)
                     }
                     show()
                 }
-            } else {
-                showToast(R.string.general_error_selected)
-            }
+            } else showToast(R.string.general_error_selected)
         }
     }
 
@@ -207,53 +204,38 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         )
     }
 
-    private fun floatingActionButtonListener() {
-        binding.mainFabAdd.setOnClickListener {
-            checkStoragePermission {
-                goToCamera()
-            }
-        }
+    private fun floatingActionButtonListener() = binding.mainFabAdd.setOnClickListener {
+        checkStoragePermission { goToCamera() }
     }
 
-    @AfterPermissionGranted(Permission.MEDIA)
+    @AfterPermissionGranted(MEDIA)
     private fun checkStoragePermission(onHasPermission: () -> Unit) {
-        val perms = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            arrayOf(
-                Manifest.permission.ACCESS_MEDIA_LOCATION,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-            )
-        } else {
-            arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-            )
-        }
+        val perms = if (SDK_INT >= Q) {
+            arrayOf(ACCESS_MEDIA_LOCATION, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, CAMERA)
+        } else arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, CAMERA)
 
         if (EasyPermissions.hasPermissions(this, *perms)) {
             onHasPermission.invoke()
         } else {
             // Do not have permissions, request them now
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            if (SDK_INT >= Q) {
                 EasyPermissions.requestPermissions(
                     this,
                     "",
-                    Permission.MEDIA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.ACCESS_MEDIA_LOCATION,
+                    MEDIA,
+                    WRITE_EXTERNAL_STORAGE,
+                    READ_EXTERNAL_STORAGE,
+                    CAMERA,
+                    ACCESS_MEDIA_LOCATION,
                 )
             } else {
                 EasyPermissions.requestPermissions(
                     this,
                     "",
-                    Permission.MEDIA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA
+                    MEDIA,
+                    WRITE_EXTERNAL_STORAGE,
+                    READ_EXTERNAL_STORAGE,
+                    CAMERA
                 )
             }
         }
@@ -282,8 +264,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
     private fun handleOnAdapterClickListener(pos: Int, data: DocumentRelationDto) {
         if (actionState != EDIT) {
             val intent = Intent(this, DocumentDetailActivity::class.java).apply {
-                putExtra(IntentArguments.DOCUMENT_TITLE, data.document.title)
-                putExtra(IntentArguments.DOCUMENT_ID, data.document.id)
+                putExtra(DOCUMENT_TITLE, data.document.title)
+                putExtra(DOCUMENT_ID, data.document.id)
             }
             startActivity(intent)
             overridePendingTransition(
@@ -314,9 +296,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
     }
 
     private fun handleOnAdapterLongClickListener(pos: Int, data: DocumentRelationDto) {
-        if (actionState == ActionState.SEARCH) {
-            toggleSearchMode(ActionState.DEFAULT)
-        }
+        if (actionState == SEARCH) toggleSearchMode(DEFAULT)
 
         toggleEditMode(EDIT)
         val newDocument = data.document.copy(isSelected = data.document.isSelected.not())
@@ -330,12 +310,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         mainAdapter.setData(documentData)
     }
 
-    private fun toggleEditMode(state: Int) {
+    private fun toggleEditMode(state: Int) = with(binding) {
         actionState = state
-        if (actionState != EDIT) {
-            bulkUpdateDocumentSelected(false)
-        }
-        with(binding.mainToolbar) {
+        if (actionState != EDIT) bulkUpdateDocumentSelected(false)
+        with(mainToolbar) {
             navigationIcon = if (actionState == EDIT) {
                 getDrawableCompat(R.drawable.general_ic_chevron_left)
             } else null
@@ -346,35 +324,35 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
                 }.size.toString())
             } else getString(R.string.app_name)
         }
-        with(binding.mainImageviewChecked) {
+        with(mainImageviewChecked) {
             setBackgroundResource(R.drawable.general_ic_checkedall)
             setImageDrawable(null)
         }
-        binding.mainFabAdd.isGone = actionState == EDIT
-        binding.mainImageviewSearch.isGone = actionState == EDIT
-        binding.mainImageviewMore.isGone = actionState == EDIT
-        binding.mainLinearlayoutHint.isGone = actionState == EDIT
-        binding.mainLinearlayoutAction.isGone = (actionState == EDIT).not()
-        binding.mainImageviewChecked.isGone = (actionState == EDIT).not()
+        mainFabAdd.isGone = actionState == EDIT
+        mainImageviewSearch.isGone = actionState == EDIT
+        mainImageviewMore.isGone = actionState == EDIT
+        mainLinearlayoutHint.isGone = actionState == EDIT
+        mainLinearlayoutAction.isGone = (actionState == EDIT).not()
+        mainImageviewChecked.isGone = (actionState == EDIT).not()
     }
 
 
     private fun toggleSearchMode(state: Int) {
         actionState = state
         with(binding.mainToolbar) {
-            navigationIcon = if (actionState == ActionState.SEARCH) {
+            navigationIcon = if (actionState == SEARCH) {
                 getDrawableCompat(R.drawable.general_ic_chevron_left)
             } else null
 
-            title = if (actionState == ActionState.SEARCH) null else getString(R.string.app_name)
+            title = if (actionState == SEARCH) null else getString(R.string.app_name)
         }
 
         val inputMethodManager =
             getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
         with(binding.mainEdittextSearch) {
-            isGone = actionState != ActionState.SEARCH
+            isGone = actionState != SEARCH
             setText(EMPTY_STRING)
-            if (actionState == ActionState.SEARCH) {
+            if (actionState == SEARCH) {
                 requestFocus()
                 inputMethodManager.showSoftInput(this, 0)
             } else {
@@ -396,7 +374,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) = Unit
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+        if (somePermissionPermanentlyDenied(this, perms)) {
             AppSettingsDialog.Builder(this).build().show()
         }
     }
@@ -449,12 +427,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), EasyPermissions.Permis
         super.onBackPressed()
         when (actionState) {
             EDIT -> {
-                toggleEditMode(ActionState.DEFAULT)
+                toggleEditMode(DEFAULT)
                 mainViewModel.getDocuments()
             }
 
-            ActionState.SEARCH -> {
-                toggleSearchMode(ActionState.DEFAULT)
+            SEARCH -> {
+                toggleSearchMode(DEFAULT)
                 mainViewModel.getDocuments()
             }
 

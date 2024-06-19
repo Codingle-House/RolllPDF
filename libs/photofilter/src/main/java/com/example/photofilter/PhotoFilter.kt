@@ -14,14 +14,15 @@ import android.opengl.GLES20.glBindTexture
 import android.opengl.GLSurfaceView
 import android.opengl.GLSurfaceView.RENDERMODE_WHEN_DIRTY
 import android.opengl.GLUtils.texImage2D
-import android.util.Log
 import com.example.photofilter.GLToolbox.initTexParams
 import com.example.photofilter.filters.AutoFix
 import com.example.photofilter.filters.Documentary
 import com.example.photofilter.filters.Filter
 import com.example.photofilter.filters.Grayscale
 import com.example.photofilter.filters.None
+import id.co.rolllpdf.core.Constant.FOUR
 import id.co.rolllpdf.core.Constant.ONE
+import id.co.rolllpdf.core.Constant.SIXTEEN
 import id.co.rolllpdf.core.Constant.TWO
 import id.co.rolllpdf.core.Constant.ZERO
 import id.co.rolllpdf.core.orZero
@@ -98,15 +99,12 @@ class PhotoFilter(
     private fun loadTextures() {
         if (bitmap != null) {
             GLES20.glGenTextures(TWO, textures, ZERO)
-            checkGlError("glGenTextures")
             imageWidth = bitmap?.width.orZero()
             imageHeight = bitmap?.height.orZero()
             textureRenderer.updateTextureSize(imageWidth, imageHeight)
 
             glBindTexture(GL_TEXTURE_2D, textures.first())
-            checkGlError("glBindTexture")
             texImage2D(GL_TEXTURE_2D, ZERO, bitmap, ZERO)
-            checkGlError("texImage2D")
             initTexParams()
         }
     }
@@ -144,16 +142,24 @@ class PhotoFilter(
 
     private fun createBitmapFromGLSurface(gl: GL10): Bitmap {
         val screenshotSize = effectsView.width * effectsView.height
-        val bb = ByteBuffer.allocateDirect(screenshotSize * 4)
-        bb.order(ByteOrder.nativeOrder())
-        gl.glReadPixels(0, 0, effectsView.width, effectsView.height, GL_RGBA, GL_UNSIGNED_BYTE, bb)
+        val bb = ByteBuffer.allocateDirect(screenshotSize * FOUR).apply {
+            order(ByteOrder.nativeOrder())
+        }
+        gl.glReadPixels(
+            ZERO,
+            ZERO,
+            effectsView.width,
+            effectsView.height,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            bb
+        )
         val pixelsBuffer = IntArray(screenshotSize)
-        bb.asIntBuffer()
-            .get(pixelsBuffer)
+        bb.asIntBuffer().get(pixelsBuffer)
 
         for (i in 0 until screenshotSize) {
             pixelsBuffer[i] = ((pixelsBuffer[i] and -0xff0100)) or
-                    ((pixelsBuffer[i] and 0x000000ff) shl 16) or ((pixelsBuffer[i] and 0x00ff0000) shr 16)
+                    ((pixelsBuffer[i] and 0x000000ff) shl SIXTEEN) or ((pixelsBuffer[i] and 0x00ff0000) shr SIXTEEN)
         }
 
         return createBitmap(effectsView.width, effectsView.height, ARGB_8888).apply {
@@ -161,14 +167,6 @@ class PhotoFilter(
                 pixelsBuffer, screenshotSize - effectsView.width, -effectsView.width, ZERO, ZERO,
                 effectsView.width, effectsView.height
             )
-        }
-    }
-
-    private fun checkGlError(operation: String) {
-        var error: Int
-        while (GLES20.glGetError().also { error = it } != GLES20.GL_NO_ERROR) {
-            Log.e("PhotoFilter", "$operation: glError $error")
-            throw RuntimeException("$operation: glError $error")
         }
     }
 
