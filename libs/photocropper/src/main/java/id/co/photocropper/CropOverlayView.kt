@@ -1,25 +1,46 @@
 package id.co.photocropper
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Bitmap.Config.ARGB_8888
+import android.graphics.Bitmap.createBitmap
 import android.graphics.Canvas
-import android.graphics.Color
+import android.graphics.Color.WHITE
+import android.graphics.Color.parseColor
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.Paint.Style.FILL
 import android.graphics.Path
 import android.graphics.Point
-import android.graphics.PorterDuff
+import android.graphics.PorterDuff.Mode.SRC_IN
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
-import android.graphics.Region
+import android.graphics.Region.Op.DIFFERENCE
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_MOVE
+import android.view.MotionEvent.ACTION_UP
 import android.view.View
-import androidx.annotation.Nullable
+import id.co.photocropper.CropPosition.BOTTOM_LEFT
+import id.co.photocropper.CropPosition.BOTTOM_RIGHT
+import id.co.photocropper.CropPosition.TOP_LEFT
+import id.co.photocropper.CropPosition.TOP_RIGHT
+import id.co.rolllpdf.core.Constant.DOUBLE_TWO
+import id.co.rolllpdf.core.Constant.FLOAT_ONE
+import id.co.rolllpdf.core.Constant.FLOAT_THREE
+import id.co.rolllpdf.core.Constant.FLOAT_TWO
+import id.co.rolllpdf.core.Constant.FLOAT_ZERO
+import id.co.rolllpdf.core.Constant.ONE
+import id.co.rolllpdf.core.Constant.ONE_HUNDRED
+import id.co.rolllpdf.core.Constant.THREE
+import id.co.rolllpdf.core.Constant.TWO
+import id.co.rolllpdf.core.Constant.ZERO
 import id.co.rolllpdf.core.orZero
 import kotlin.math.abs
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * Created by pertadima on 27,February,2021
@@ -27,26 +48,26 @@ import kotlin.math.pow
 
 class CropOverlayView : View {
     private var defaultMargin = 100
-    private val minDistance = 100
+    private var minDistance = 100
     private val vertexSize = 30
-    private val gridSize = 3
+    private val gridSize = THREE
     private var bitmap: Bitmap? = null
     private var topLeft: Point? = null
     private var topRight: Point? = null
     private var bottomLeft: Point? = null
     private var bottomRight: Point? = null
-    private var touchDownX = 0f
-    private var touchDownY = 0f
+    private var touchDownX = FLOAT_ZERO
+    private var touchDownY = FLOAT_ZERO
     private var cropPosition: CropPosition? = null
-    private var currentWidth = 0
-    private var currentHeight = 0
-    private var minX = 0
-    private var maxX = 0
-    private var minY = 0
-    private var maxY = 0
+    private var currentWidth = ZERO
+    private var currentHeight = ZERO
+    private var minX = ZERO
+    private var maxX = ZERO
+    private var minY = ZERO
+    private var maxY = ZERO
 
     constructor(context: Context?) : super(context)
-    constructor(context: Context?, @Nullable attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
     fun setBitmap(bitmap: Bitmap?) {
         this.bitmap = bitmap
@@ -72,63 +93,57 @@ class CropOverlayView : View {
         if (bitmap == null) return
 
         // 1. calculate bitmap size in new canvas
-        val scaleX = bitmap?.width.orZero() * 1.0f / width
-        val scaleY = bitmap?.height.orZero() * 1.0f / height
+        val scaleX = bitmap?.width.orZero() * FLOAT_ONE / width
+        val scaleY = bitmap?.height.orZero() * FLOAT_ONE / height
         val maxScale = scaleX.coerceAtLeast(scaleY)
 
         // 2. determine minX , maxX if maxScale = scaleY | minY, maxY if maxScale = scaleX
-        var minX = 0
+        var minX = ZERO
         var maxX = width
-        var minY = 0
+        var minY = ZERO
         var maxY = height
         if (maxScale == scaleY) { // image very tall
             val bitmapInCanvasWidth = (bitmap?.width.orZero() / maxScale).toInt()
-            minX = (width - bitmapInCanvasWidth) / 2
+            minX = (width - bitmapInCanvasWidth) / TWO
             maxX = width - minX
         } else { // image very wide
             val bitmapInCanvasHeight = (bitmap?.height.orZero() / maxScale).toInt()
-            minY = (height - bitmapInCanvasHeight) / 2
+            minY = (height - bitmapInCanvasHeight) / TWO
             maxY = height - minY
         }
         this.minX = minX
         this.minY = minY
         this.maxX = maxX
         this.maxY = maxY
-        defaultMargin =
-            if (maxX - minX < defaultMargin || maxY - minY < defaultMargin) 0 // remove min
-            else 100
-        Log.e("stk", "maxX - minX=" + (maxX - minX))
-        Log.e("stk", "maxY - minY=" + (maxY - minY))
+        defaultMargin = if (maxX - minX < defaultMargin || maxY - minY < defaultMargin) ZERO
+        else ONE_HUNDRED
         topLeft = Point(minX + defaultMargin, minY + defaultMargin)
         topRight = Point(maxX - defaultMargin, minY + defaultMargin)
         bottomLeft = Point(minX + defaultMargin, maxY - defaultMargin)
         bottomRight = Point(maxX - defaultMargin, maxY - defaultMargin)
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-    }
-
     private fun drawBackground(canvas: Canvas) {
-        val paint = Paint()
-        paint.color = Color.parseColor("#66000000")
-        paint.style = Paint.Style.FILL
-        val path = Path()
-        path.moveTo(topLeft?.x.orZero().toFloat(), topLeft?.y.orZero().toFloat())
-        path.lineTo(topRight?.x.orZero().toFloat(), topRight?.y.orZero().toFloat())
-        path.lineTo(bottomRight?.x.orZero().toFloat(), bottomRight?.y.orZero().toFloat())
-        path.lineTo(bottomLeft?.x.orZero().toFloat(), bottomLeft?.y.orZero().toFloat())
-        path.close()
-        canvas.save()
-        canvas.clipPath(path, Region.Op.DIFFERENCE)
-        canvas.drawColor(Color.parseColor("#66000000"))
-        canvas.restore()
+        val path = Path().apply {
+            moveTo(topLeft?.x.orZero().toFloat(), topLeft?.y.orZero().toFloat())
+            lineTo(topRight?.x.orZero().toFloat(), topRight?.y.orZero().toFloat())
+            lineTo(bottomRight?.x.orZero().toFloat(), bottomRight?.y.orZero().toFloat())
+            lineTo(bottomLeft?.x.orZero().toFloat(), bottomLeft?.y.orZero().toFloat())
+            close()
+        }
+        canvas.apply {
+            save()
+            clipPath(path, DIFFERENCE)
+            drawColor(parseColor(CANVAS_COLOR))
+            restore()
+        }
     }
 
     private fun drawVertex(canvas: Canvas) {
-        val paint = Paint()
-        paint.color = Color.WHITE
-        paint.style = Paint.Style.FILL
+        val paint = Paint().apply {
+            color = WHITE
+            style = FILL
+        }
         canvas.drawCircle(
             topLeft?.x.orZero().toFloat(),
             topLeft?.y.orZero().toFloat(),
@@ -153,18 +168,14 @@ class CropOverlayView : View {
             vertexSize.toFloat(),
             paint
         )
-        Log.e(
-            "stk",
-            "vertextPoints=" +
-                    topLeft.toString() + " " + topRight.toString() + " " + bottomRight.toString() + " " + bottomLeft.toString()
-        )
     }
 
     private fun drawEdge(canvas: Canvas) {
-        val paint = Paint()
-        paint.color = Color.WHITE
-        paint.strokeWidth = 3f
-        paint.isAntiAlias = true
+        val paint = Paint().apply {
+            color = WHITE
+            strokeWidth = FLOAT_THREE
+            isAntiAlias = true
+        }
         canvas.drawLine(
             topLeft?.x.orZero().toFloat(),
             topLeft?.y.orZero().toFloat(),
@@ -196,22 +207,24 @@ class CropOverlayView : View {
     }
 
     private fun drawGrid(canvas: Canvas) {
-        val paint = Paint()
-        paint.color = Color.WHITE
-        paint.strokeWidth = 2f
-        paint.isAntiAlias = true
-        for (i in 1..gridSize) {
-            val topDistanceX = abs(topLeft?.x.orZero() - topRight?.x.orZero()) / (gridSize + 1) * i
+        val paint = Paint().apply {
+            color = WHITE
+            strokeWidth = FLOAT_TWO
+            isAntiAlias = true
+        }
+        for (i in ONE..gridSize) {
+            val topDistanceX =
+                abs(topLeft?.x.orZero() - topRight?.x.orZero()) / (gridSize.inc()) * i
             val topDistanceY =
-                abs((topLeft?.y.orZero() - topRight?.y.orZero()) / (gridSize + 1) * i)
+                abs((topLeft?.y.orZero() - topRight?.y.orZero()) / (gridSize.inc()) * i)
             val top = Point(
                 if (topLeft?.x.orZero() < topRight?.x.orZero()) topLeft?.x.orZero() + topDistanceX else topLeft?.x.orZero() - topDistanceX,
                 if (topLeft?.y.orZero() < topRight?.y.orZero()) topLeft?.y.orZero() + topDistanceY else topLeft?.y.orZero() - topDistanceY
             )
             val bottomDistanceX =
-                abs((bottomLeft?.x.orZero() - bottomRight?.x.orZero()) / (gridSize + 1) * i)
+                abs((bottomLeft?.x.orZero() - bottomRight?.x.orZero()) / (gridSize.inc()) * i)
             val bottomDistanceY =
-                abs((bottomLeft?.y.orZero() - bottomRight?.y.orZero()) / (gridSize + 1) * i)
+                abs((bottomLeft?.y.orZero() - bottomRight?.y.orZero()) / (gridSize.inc()) * i)
             val bottom = Point(
                 if (bottomLeft?.x.orZero() < bottomRight?.x.orZero()) bottomLeft?.x.orZero() + bottomDistanceX else bottomLeft?.x.orZero() - bottomDistanceX,
                 if (bottomLeft?.y.orZero() < bottomRight?.y.orZero()) bottomLeft?.y.orZero() + bottomDistanceY else bottomLeft?.y.orZero() - bottomDistanceY
@@ -224,17 +237,17 @@ class CropOverlayView : View {
                 paint
             )
             val leftDistanceX =
-                abs((topLeft?.x.orZero() - bottomLeft?.x.orZero()) / (gridSize + 1) * i)
+                abs((topLeft?.x.orZero() - bottomLeft?.x.orZero()) / (gridSize.inc()) * i)
             val leftDistanceY =
-                abs((topLeft?.y.orZero() - bottomLeft?.y.orZero()) / (gridSize + 1) * i)
+                abs((topLeft?.y.orZero() - bottomLeft?.y.orZero()) / (gridSize.inc()) * i)
             val left = Point(
                 if (topLeft?.x.orZero() < bottomLeft?.x.orZero()) topLeft?.x.orZero() + leftDistanceX else topLeft?.x.orZero() - leftDistanceX,
                 if (topLeft?.y.orZero() < bottomLeft?.y.orZero()) topLeft?.y.orZero() + leftDistanceY else topLeft?.y.orZero() - leftDistanceY
             )
             val rightDistanceX =
-                abs((topRight?.x.orZero() - bottomRight?.x.orZero()) / (gridSize + 1) * i)
+                abs((topRight?.x.orZero() - bottomRight?.x.orZero()) / (gridSize.inc()) * i)
             val rightDistanceY =
-                abs((topRight?.y.orZero() - bottomRight?.y.orZero()) / (gridSize + 1) * i)
+                abs((topRight?.y.orZero() - bottomRight?.y.orZero()) / (gridSize.inc()) * i)
             val right = Point(
                 if (topRight?.x.orZero() < bottomRight?.x.orZero()) topRight?.x.orZero() + rightDistanceX else topRight?.x.orZero() - rightDistanceX,
                 if (topRight?.y.orZero() < bottomRight?.y.orZero()) topRight?.y.orZero() + rightDistanceY else topRight?.y.orZero() - rightDistanceY
@@ -249,16 +262,17 @@ class CropOverlayView : View {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
-            MotionEvent.ACTION_UP -> parent.requestDisallowInterceptTouchEvent(false)
-            MotionEvent.ACTION_DOWN -> {
+            ACTION_UP -> parent.requestDisallowInterceptTouchEvent(false)
+            ACTION_DOWN -> {
                 parent.requestDisallowInterceptTouchEvent(false)
                 onActionDown(event)
                 return true
             }
 
-            MotionEvent.ACTION_MOVE -> {
+            ACTION_MOVE -> {
                 parent.requestDisallowInterceptTouchEvent(true)
                 onActionMove(event)
                 return true
@@ -274,52 +288,47 @@ class CropOverlayView : View {
             event.x.toInt(),
             event.y.toInt()
         )
-        var minDistance = distance(touchPoint, topLeft)
-        cropPosition = CropPosition.TOP_LEFT
+        minDistance = distance(touchPoint, topLeft)
+        cropPosition = TOP_LEFT
         if (minDistance > distance(touchPoint, topRight)) {
             minDistance = distance(touchPoint, topRight)
-            cropPosition = CropPosition.TOP_RIGHT
+            cropPosition = TOP_RIGHT
         }
         if (minDistance > distance(touchPoint, bottomLeft)) {
             minDistance = distance(touchPoint, bottomLeft)
-            cropPosition = CropPosition.BOTTOM_LEFT
+            cropPosition = BOTTOM_LEFT
         }
         if (minDistance > distance(touchPoint, bottomRight)) {
             minDistance = distance(touchPoint, bottomRight)
-            cropPosition = CropPosition.BOTTOM_RIGHT
+            cropPosition = BOTTOM_RIGHT
         }
     }
 
-    private fun distance(src: Point, dst: Point?): Int {
-        return Math.sqrt(
-            Math.pow(
-                (src.x - dst?.x.orZero()).toDouble(),
-                2.0
-            ) + (src.y - dst?.y.orZero()).toDouble().pow(2.0)
-        )
-            .toInt()
-    }
+    private fun distance(src: Point, dst: Point?) = sqrt(
+        (src.x - dst?.x.orZero()).toDouble().pow(2.0) + (src.y - dst?.y.orZero()).toDouble()
+            .pow(DOUBLE_TWO)
+    ).toInt()
 
     private fun onActionMove(event: MotionEvent) {
         val deltaX = (event.x - touchDownX).toInt()
         val deltaY = (event.y - touchDownY).toInt()
         when (cropPosition) {
-            CropPosition.TOP_LEFT -> {
+            TOP_LEFT -> {
                 adjustTopLeft(deltaX, deltaY)
                 invalidate()
             }
 
-            CropPosition.TOP_RIGHT -> {
+            TOP_RIGHT -> {
                 adjustTopRight(deltaX, deltaY)
                 invalidate()
             }
 
-            CropPosition.BOTTOM_LEFT -> {
+            BOTTOM_LEFT -> {
                 adjustBottomLeft(deltaX, deltaY)
                 invalidate()
             }
 
-            CropPosition.BOTTOM_RIGHT -> {
+            BOTTOM_RIGHT -> {
                 adjustBottomRight(deltaX, deltaY)
                 invalidate()
             }
@@ -379,7 +388,6 @@ class CropOverlayView : View {
         val maxScale = scaleX.coerceAtLeast(scaleY)
 
         // re-calculate coordinate in original bitmap
-        Log.e("stk", "maxScale=$maxScale")
         val bitmapTopLeft = Point(
             ((topLeft?.x.orZero() - minX) * maxScale).toInt(),
             ((topLeft?.y.orZero() - minY) * maxScale).toInt()
@@ -396,35 +404,28 @@ class CropOverlayView : View {
             ((bottomRight?.x.orZero() - minX) * maxScale).toInt(),
             ((bottomRight?.y.orZero() - minY) * maxScale).toInt()
         )
-        Log.e(
-            "stk", ("bitmapPoints="
-                    + bitmapTopLeft.toString() + " "
-                    + bitmapTopRight.toString() + " "
-                    + bitmapBottomRight.toString() + " "
-                    + bitmapBottomLeft.toString() + " ")
+        val output = createBitmap(
+            bitmap?.width.orZero().inc(),
+            bitmap?.height.orZero().inc(),
+            ARGB_8888
         )
-        val output =
-            Bitmap.createBitmap(
-                bitmap?.width.orZero() + 1,
-                bitmap?.height.orZero() + 1,
-                Bitmap.Config.ARGB_8888
-            )
         val canvas = Canvas(output)
         val paint = Paint()
         // 1. draw path
-        val path = Path()
-        path.moveTo(bitmapTopLeft.x.toFloat(), bitmapTopLeft.y.toFloat())
-        path.lineTo(bitmapTopRight.x.toFloat(), bitmapTopRight.y.toFloat())
-        path.lineTo(bitmapBottomRight.x.toFloat(), bitmapBottomRight.y.toFloat())
-        path.lineTo(bitmapBottomLeft.x.toFloat(), bitmapBottomLeft.y.toFloat())
-        path.close()
+        val path = Path().apply {
+            moveTo(bitmapTopLeft.x.toFloat(), bitmapTopLeft.y.toFloat())
+            lineTo(bitmapTopRight.x.toFloat(), bitmapTopRight.y.toFloat())
+            lineTo(bitmapBottomRight.x.toFloat(), bitmapBottomRight.y.toFloat())
+            lineTo(bitmapBottomLeft.x.toFloat(), bitmapBottomLeft.y.toFloat())
+            close()
+        }
         canvas.drawPath(path, paint)
 
         // 2. draw original bitmap
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        paint.xfermode = PorterDuffXfermode(SRC_IN)
         bitmap?.let {
-            val copyBitmap = it.copy(Bitmap.Config.ARGB_8888, true)
-            canvas.drawBitmap(copyBitmap, 0f, 0f, paint)
+            val copyBitmap = it.copy(ARGB_8888, true)
+            canvas.drawBitmap(copyBitmap, FLOAT_ZERO, FLOAT_ZERO, paint)
         }
 
         // 3. cut
@@ -434,7 +435,7 @@ class CropOverlayView : View {
             bitmapBottomRight.x.coerceAtLeast(bitmapTopRight.x),
             bitmapBottomRight.y.coerceAtLeast(bitmapBottomLeft.y)
         )
-        val cut = Bitmap.createBitmap(
+        val cut = createBitmap(
             output,
             cropRect.left,
             cropRect.top,
@@ -445,42 +446,32 @@ class CropOverlayView : View {
             cropListener.onFinish(cut)
         } else {
             // 4. re-calculate coordinate in cropRect
-            val cutTopLeft = Point()
-            val cutTopRight = Point()
-            val cutBottomLeft = Point()
-            val cutBottomRight = Point()
-            cutTopLeft.x =
-                if (bitmapTopLeft.x > bitmapBottomLeft.x) bitmapTopLeft.x - bitmapBottomLeft.x else 0
-            cutTopLeft.y =
-                if (bitmapTopLeft.y > bitmapTopRight.y) bitmapTopLeft.y - bitmapTopRight.y else 0
-            cutTopRight.x =
-                if (bitmapTopRight.x > bitmapBottomRight.x) cropRect.width() else cropRect.width() - Math.abs(
-                    bitmapBottomRight.x - bitmapTopRight.x
-                )
-            cutTopRight.y =
-                if (bitmapTopLeft.y > bitmapTopRight.y) 0 else Math.abs(bitmapTopLeft.y - bitmapTopRight.y)
-            cutBottomLeft.x =
-                if (bitmapTopLeft.x > bitmapBottomLeft.x) 0 else Math.abs(bitmapTopLeft.x - bitmapBottomLeft.x)
-            cutBottomLeft.y =
-                if (bitmapBottomLeft.y > bitmapBottomRight.y) cropRect.height() else cropRect.height() - Math.abs(
-                    bitmapBottomRight.y - bitmapBottomLeft.y
-                )
-            cutBottomRight.x =
-                if (bitmapTopRight.x > bitmapBottomRight.x) cropRect.width() - Math.abs(
+            val cutTopLeft = Point().apply {
+                x = if (bitmapTopLeft.x > bitmapBottomLeft.x) bitmapTopLeft.x - bitmapBottomLeft.x
+                else ZERO
+                y = if (bitmapTopLeft.y > bitmapTopRight.y) bitmapTopLeft.y - bitmapTopRight.y
+                else ZERO
+            }
+            val cutTopRight = Point().apply {
+                x = if (bitmapTopRight.x > bitmapBottomRight.x) cropRect.width()
+                else cropRect.width() - abs(bitmapBottomRight.x - bitmapTopRight.x)
+                y = if (bitmapTopLeft.y > bitmapTopRight.y) ZERO
+                else abs(bitmapTopLeft.y - bitmapTopRight.y)
+            }
+            val cutBottomLeft = Point().apply {
+                x = if (bitmapTopLeft.x > bitmapBottomLeft.x) ZERO
+                else abs(bitmapTopLeft.x - bitmapBottomLeft.x)
+                y = if (bitmapBottomLeft.y > bitmapBottomRight.y) cropRect.height()
+                else cropRect.height() - abs(bitmapBottomRight.y - bitmapBottomLeft.y)
+            }
+            val cutBottomRight = Point().apply {
+                x = if (bitmapTopRight.x > bitmapBottomRight.x) cropRect.width() - abs(
                     bitmapBottomRight.x - bitmapTopRight.x
                 ) else cropRect.width()
-            cutBottomRight.y =
-                if (bitmapBottomLeft.y > bitmapBottomRight.y) cropRect.height() - Math.abs(
+                y = if (bitmapBottomLeft.y > bitmapBottomRight.y) cropRect.height() - abs(
                     bitmapBottomRight.y - bitmapBottomLeft.y
                 ) else cropRect.height()
-            Log.e("stk", cut.width.toString() + "x" + cut.height)
-            Log.e(
-                "stk", ("cutPoints="
-                        + cutTopLeft.toString() + " "
-                        + cutTopRight.toString() + " "
-                        + cutBottomRight.toString() + " "
-                        + cutBottomLeft.toString() + " ")
-            )
+            }
             val width = cut.width.toFloat()
             val height = cut.height.toFloat()
             val src = floatArrayOf(
@@ -493,37 +484,51 @@ class CropOverlayView : View {
                 cutBottomLeft.x.toFloat(),
                 cutBottomLeft.y.toFloat()
             )
-            val dst = floatArrayOf(0f, 0f, width, 0f, width, height, 0f, height)
-            val matrix = Matrix()
-            matrix.setPolyToPoly(src, 0, dst, 0, 4)
-            val stretch = Bitmap.createBitmap(cut.width, cut.height, Bitmap.Config.ARGB_8888)
-            val stretchCanvas = Canvas(stretch)
-            //            stretchCanvas.drawBitmap(cut, matrix, null);
-            stretchCanvas.concat(matrix)
-            stretchCanvas.drawBitmapMesh(
-                cut,
-                WIDTH_BLOCK,
-                HEIGHT_BLOCK,
-                generateVertices(cut.width, cut.height),
-                0,
-                null,
-                0,
-                null
+            val dst = floatArrayOf(
+                FLOAT_ZERO,
+                FLOAT_ZERO,
+                width,
+                FLOAT_ZERO,
+                width,
+                height,
+                FLOAT_ZERO,
+                height
             )
+            val matrix = Matrix().apply {
+                matrix.setPolyToPoly(src, ZERO, dst, ZERO, 4)
+            }
+            val stretch = createBitmap(cut.width, cut.height, ARGB_8888)
+            Canvas(stretch).apply {
+                concat(matrix)
+                drawBitmapMesh(
+                    cut,
+                    WIDTH_BLOCK,
+                    HEIGHT_BLOCK,
+                    generateVertices(cut.width, cut.height),
+                    0,
+                    null,
+                    0,
+                    null
+                )
+            }
             cropListener.onFinish(stretch)
         }
     }
 
-    private val WIDTH_BLOCK = 40
-    private val HEIGHT_BLOCK = 40
     private fun generateVertices(widthBitmap: Int, heightBitmap: Int): FloatArray {
-        val vertices = FloatArray((WIDTH_BLOCK + 1) * (HEIGHT_BLOCK + 1) * 2)
+        val vertices = FloatArray((WIDTH_BLOCK.inc()) * (HEIGHT_BLOCK.inc()) * TWO)
         val widthBlock = widthBitmap.toFloat() / WIDTH_BLOCK
         val heightBlock = heightBitmap.toFloat() / HEIGHT_BLOCK
-        for (i in 0..HEIGHT_BLOCK) for (j in 0..WIDTH_BLOCK) {
-            vertices[i * ((HEIGHT_BLOCK + 1) * 2) + (j * 2)] = j * widthBlock
-            vertices[(i * ((HEIGHT_BLOCK + 1) * 2)) + (j * 2) + 1] = i * heightBlock
+        for (i in ZERO..HEIGHT_BLOCK) for (j in ZERO..WIDTH_BLOCK) {
+            vertices[i * ((HEIGHT_BLOCK.inc()) * TWO) + (j * TWO)] = j * widthBlock
+            vertices[(i * ((HEIGHT_BLOCK.inc()) * TWO)) + (j * TWO) + ONE] = i * heightBlock
         }
         return vertices
+    }
+
+    companion object {
+        private const val WIDTH_BLOCK = 40
+        private const val HEIGHT_BLOCK = 40
+        private const val CANVAS_COLOR = "#66000000"
     }
 }

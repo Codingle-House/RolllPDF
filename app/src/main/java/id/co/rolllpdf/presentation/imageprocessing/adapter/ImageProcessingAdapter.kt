@@ -38,16 +38,6 @@ class ImageProcessingAdapter(
         calculateDiff(newDataSet)
     }
 
-    fun addData(newDatas: List<String>) {
-        val list = ArrayList(this.dataSet)
-        list.addAll(newDatas)
-        calculateDiff(list)
-    }
-
-    fun setListener(onSelected: (pos: Int, item: GalleryPictureDto) -> Unit) {
-        this.onSelected = onSelected
-    }
-
     private fun calculateDiff(newDataSet: List<String>) {
         diffCallback.setList(dataSet, newDataSet)
         val result = DiffUtil.calculateDiff(diffCallback)

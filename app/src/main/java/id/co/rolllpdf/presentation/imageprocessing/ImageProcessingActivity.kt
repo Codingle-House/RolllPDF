@@ -1,6 +1,7 @@
 package id.co.rolllpdf.presentation.imageprocessing
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,12 +10,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import androidx.recyclerview.widget.SnapHelper
 import dagger.hilt.android.AndroidEntryPoint
 import id.co.rolllpdf.R
 import id.co.rolllpdf.base.BaseActivity
+import id.co.rolllpdf.core.Constant.LONG_ZERO
 import id.co.rolllpdf.core.DiffCallback
 import id.co.rolllpdf.core.orFalse
 import id.co.rolllpdf.core.orZero
@@ -57,8 +62,8 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
     }
 
     private val documentId by lazy {
-        val id = intent?.getLongExtra(DOCUMENT_ID, 0).orZero()
-        if (id != 0L) id else Calendar.getInstance().timeInMillis
+        val id = intent?.getLongExtra(DOCUMENT_ID, LONG_ZERO).orZero()
+        if (id != LONG_ZERO) id else Calendar.getInstance().timeInMillis
     }
 
     private val previewMode by lazy {
@@ -86,16 +91,14 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
         setupPreviewMode()
     }
 
-    private fun setupPreviewMode() {
-        binding.imageprocessingTextviewSave.isGone = previewMode
-        binding.imageprocessingLinearContainer.isGone = previewMode
-        binding.imageprocessingTextviewPage.isGone = previewMode
+    private fun setupPreviewMode() = with(binding) {
+        imageprocessingTextviewSave.isGone = previewMode
+        imageprocessingLinearContainer.isGone = previewMode
+        imageprocessingTextviewPage.isGone = previewMode
     }
 
     override fun onViewModelObserver() {
-        with(imageProcessingViewModel) {
-            observeInsertDone().onResult { if (it) finish() }
-        }
+        with(imageProcessingViewModel) { observeInsertDone().onResult { if (it) finish() } }
     }
 
     private fun initData() {
@@ -104,15 +107,15 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
             getString(R.string.general_placeholder_page, 1.toString(), listOfFile.size.toString())
     }
 
-    private fun setupToolbar() {
-        with(binding.imageprocessingToolbar) {
+    private fun setupToolbar() = with(binding) {
+        with(imageprocessingToolbar) {
             title = if (previewMode) "" else getString(R.string.imageprocessing_title_page)
             setNavigationOnClickListener {
                 if (!previewMode) deleteFiles()
                 finish()
             }
         }
-        binding.imageprocessingTextviewSave.setOnClickListener {
+        imageprocessingTextviewSave.setOnClickListener {
             imageProcessingViewModel.doInsertDocument(documentId, listOfFile)
         }
     }
@@ -149,21 +152,19 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
             val snapHelper: SnapHelper = PagerSnapHelper()
             val linearLayoutManager = LinearLayoutManager(
                 this@ImageProcessingActivity,
-                LinearLayoutManager.HORIZONTAL,
+                HORIZONTAL,
                 false
             )
-            adapter = imageProcessingAdapter.apply {
-                setData(listOfFile)
-            }
+            adapter = imageProcessingAdapter.apply { setData(listOfFile) }
             snapHelper.attachToRecyclerView(this)
             layoutManager = linearLayoutManager
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
-                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    if (newState == SCROLL_STATE_DRAGGING) {
                         //Dragging
                         binding.imageprocessingTextviewPage.isGone = true
-                    } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    } else if (newState == SCROLL_STATE_IDLE) {
                         binding.imageprocessingTextviewPage.isGone = false
                         selectedPosition = linearLayoutManager.findFirstVisibleItemPosition()
                         binding.imageprocessingTextviewPage.text =
@@ -182,7 +183,7 @@ class ImageProcessingActivity : BaseActivity<ActivityImageProcessingBinding>() {
     }
 
     private fun replaceImage(result: ActivityResult) {
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val imagePath = result.data?.getStringExtra(PROCESSING_IMAGES).orEmpty()
             val pos = result.data?.getIntExtra(PROCESSING_POSITION, 0).orZero()
             try {

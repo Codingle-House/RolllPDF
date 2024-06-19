@@ -7,6 +7,8 @@ import android.graphics.drawable.ColorDrawable
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.M
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -250,7 +252,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
 
                         // Implicit broadcasts will be ignored for devices running API level >= 24
                         // so if you only target API level 24+ you can remove this statement
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                        if (SDK_INT < Build.VERSION_CODES.N) {
                             sendBroadcast(
                                 Intent(android.hardware.Camera.ACTION_NEW_PICTURE, savedUri)
                             )
@@ -272,7 +274,7 @@ class CameraActivity : BaseActivity<ActivityCameraBinding>() {
                 })
 
             // We can only change the foreground Drawable using API level 23+ API
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (SDK_INT >= M) {
 
                 // Display flash animation to indicate that photo was captured
                 binding.root.postDelayed({

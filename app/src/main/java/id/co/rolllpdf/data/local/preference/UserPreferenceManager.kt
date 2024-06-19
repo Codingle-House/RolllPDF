@@ -13,8 +13,6 @@ class UserPreferenceManager(private val context: Context) {
         serializer = UserSerializer,
     )
 
-    fun getPurchaseStatus() = context.dataStore.data.map { it.isPro }
-
     suspend fun updatePurchaseStatus(purchaseStatus: Boolean) =
         context.dataStore.updateData { user ->
             user.toBuilder().apply {

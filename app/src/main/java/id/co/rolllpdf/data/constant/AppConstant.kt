@@ -5,5 +5,4 @@ package id.co.rolllpdf.data.constant
  */
 object AppConstant {
     const val MAX_DUPLICATE_COUNT = 10
-    const val MAX_PDF_COUNT = 5
 }

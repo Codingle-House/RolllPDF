@@ -22,7 +22,6 @@ import androidx.room.PrimaryKey
 )
 data class DocumentDetailEntity(
     @PrimaryKey(autoGenerate = true)
-    @NonNull
     @ColumnInfo(name = "id")
     val id: Long = 0,
     @ColumnInfo(name = "date_time")

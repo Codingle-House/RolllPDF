@@ -64,10 +64,7 @@ class AboutUsActivity : BaseActivity<ActivityAboutUsBinding>() {
     }
 
     private fun openUrl(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(url)
-        }
-        startActivity(intent)
+        startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
     }
 
     override fun finish() {
